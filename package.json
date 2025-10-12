@@ -1,0 +1,11 @@
+{
+  "name": "airbnb-clone",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "dev:backend": "cd apps/backend && npm run dev",
+    "dev:agent": "cd apps/agent-service && source venv/bin/activate && python main.py",
+    "install:all": "cd apps/backend && npm install && cd ../frontend && npm install"
+  }
+}
