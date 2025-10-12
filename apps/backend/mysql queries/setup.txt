@@ -1,0 +1,232 @@
+-- ==========================================
+-- Airbnb Clone - MySQL Database Schema
+-- ==========================================
+
+DROP DATABASE IF EXISTS airbnb_db;
+CREATE DATABASE airbnb_db;
+USE airbnb_db;
+
+-- ==========================================
+-- 1. USERS TABLE (Both Travelers & Owners)
+-- ==========================================
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,  -- bcrypt hashed
+    role ENUM('traveler', 'owner') NOT NULL,
+    
+    -- Profile Information
+    phone_number VARCHAR(20),
+    about_me TEXT,
+    city VARCHAR(100),
+    state VARCHAR(2),  -- Abbreviated (CA, NY, TX, etc.)
+    country VARCHAR(100),
+    languages VARCHAR(255),  -- Comma-separated: "English, Spanish"
+    gender ENUM('male', 'female', 'other', 'prefer_not_to_say'),
+    profile_picture VARCHAR(255),  -- File path: /uploads/profile_123.jpg
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_email (email),
+    INDEX idx_role (role)
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- 2. PROPERTIES TABLE
+-- ==========================================
+CREATE TABLE properties (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    owner_id INT NOT NULL,
+    
+    -- Basic Information
+    property_name VARCHAR(255) NOT NULL,
+    property_type ENUM('apartment', 'house', 'condo', 'villa', 'cabin', 'cottage', 'loft', 'other') NOT NULL,
+    description TEXT,
+    
+    -- Location
+    address VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(2),
+    country VARCHAR(100) NOT NULL,
+    zipcode VARCHAR(20),
+    
+    -- Property Details
+    bedrooms INT NOT NULL,
+    bathrooms DECIMAL(3,1) NOT NULL,  -- 2.5 for 2 full + 1 half bath
+    max_guests INT NOT NULL,
+    
+    -- Pricing
+    price_per_night DECIMAL(10, 2) NOT NULL,
+    cleaning_fee DECIMAL(10, 2) DEFAULT 0,
+    service_fee DECIMAL(10, 2) DEFAULT 0,
+    
+    -- Amenities (JSON array)
+    -- Example: ["wifi", "parking", "pool", "kitchen", "air_conditioning", "heating", "tv", "washer", "dryer"]
+    amenities JSON,
+    
+    -- Images (JSON array of file paths)
+    -- Example: ["/uploads/property_1_img1.jpg", "/uploads/property_1_img2.jpg"]
+    images JSON,
+    
+    -- Availability
+    available BOOLEAN DEFAULT TRUE,
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_owner_id (owner_id),
+    INDEX idx_city (city),
+    INDEX idx_country (country),
+    INDEX idx_price (price_per_night),
+    INDEX idx_available (available)
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- 3. BOOKINGS TABLE
+-- ==========================================
+CREATE TABLE bookings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    traveler_id INT NOT NULL,
+    property_id INT NOT NULL,
+    owner_id INT NOT NULL,  -- Denormalized for easier queries
+    
+    -- Booking Details
+    check_in DATE NOT NULL,
+    check_out DATE NOT NULL,
+    number_of_guests INT NOT NULL,
+    
+    -- Pricing
+    total_price DECIMAL(10, 2) NOT NULL,
+    
+    -- Status (as per lab requirements)
+    status ENUM('PENDING', 'ACCEPTED', 'CANCELLED') DEFAULT 'PENDING',
+    
+    -- Party Type (for AI Agent feature)
+    party_type ENUM('solo', 'couple', 'family', 'group', 'business') DEFAULT 'couple',
+    
+    -- Cancellation Info
+    cancelled_by ENUM('traveler', 'owner') NULL,
+    cancelled_at TIMESTAMP NULL,
+    cancellation_reason TEXT,
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (traveler_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+    
+    INDEX idx_traveler_id (traveler_id),
+    INDEX idx_property_id (property_id),
+    INDEX idx_owner_id (owner_id),
+    INDEX idx_status (status),
+    INDEX idx_dates (check_in, check_out),
+    
+    -- Ensure checkout is after checkin
+    CONSTRAINT chk_dates CHECK (check_out > check_in)
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- 4. FAVORITES TABLE
+-- ==========================================
+CREATE TABLE favorites (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    property_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    
+    -- Prevent duplicate favorites
+    UNIQUE KEY unique_favorite (user_id, property_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_property_id (property_id)
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- 5. SESSIONS TABLE (for express-session)
+-- ==========================================
+CREATE TABLE sessions (
+    session_id VARCHAR(128) PRIMARY KEY,
+    expires BIGINT UNSIGNED NOT NULL,
+    data TEXT,
+    INDEX idx_expires (expires)
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- SAMPLE DATA (for testing)
+-- ==========================================
+
+-- Insert test users
+-- Password: 'password123' (you'll hash this with bcrypt in code)
+INSERT INTO users (name, email, password, role, city, state, country, phone_number) VALUES
+('John Traveler', 'traveler@test.com', '$2a$10$YourHashedPasswordHere', 'traveler', 'San Francisco', 'CA', 'United States', '555-0101'),
+('Jane Owner', 'owner@test.com', '$2a$10$YourHashedPasswordHere', 'owner', 'Los Angeles', 'CA', 'United States', '555-0102'),
+('Bob Smith', 'bob@test.com', '$2a$10$YourHashedPasswordHere', 'owner', 'New York', 'NY', 'United States', '555-0103');
+
+-- Insert sample properties
+INSERT INTO properties (owner_id, property_name, property_type, description, address, city, state, country, zipcode, bedrooms, bathrooms, max_guests, price_per_night, cleaning_fee, amenities, images, available) VALUES
+(2, 'Cozy Beach House', 'house', 'Beautiful beachfront property with stunning ocean views', '123 Ocean Drive', 'Santa Monica', 'CA', 'United States', '90401', 3, 2.0, 6, 250.00, 50.00, '["wifi", "parking", "pool", "kitchen", "air_conditioning", "beach_access"]', '["/uploads/beach_house_1.jpg", "/uploads/beach_house_2.jpg"]', TRUE),
+(2, 'Mountain Cabin Retreat', 'cabin', 'Peaceful cabin in the mountains, perfect for nature lovers', '456 Mountain Road', 'Lake Tahoe', 'CA', 'United States', '96150', 2, 1.0, 4, 180.00, 40.00, '["wifi", "parking", "fireplace", "kitchen", "heating"]', '["/uploads/cabin_1.jpg", "/uploads/cabin_2.jpg"]', TRUE),
+(3, 'Downtown Luxury Loft', 'loft', 'Modern loft in the heart of the city with amazing skyline views', '789 Broadway', 'New York', 'NY', 'United States', '10003', 1, 1.5, 2, 320.00, 60.00, '["wifi", "parking", "gym", "kitchen", "air_conditioning", "elevator"]', '["/uploads/loft_1.jpg"]', TRUE);
+
+-- Insert sample bookings
+INSERT INTO bookings (traveler_id, property_id, owner_id, check_in, check_out, number_of_guests, total_price, status, party_type) VALUES
+(1, 1, 2, '2025-11-01', '2025-11-05', 4, 1200.00, 'ACCEPTED', 'family'),
+(1, 2, 2, '2025-12-15', '2025-12-20', 2, 940.00, 'PENDING', 'couple');
+
+-- Insert sample favorites
+INSERT INTO favorites (user_id, property_id) VALUES
+(1, 1),
+(1, 3);
+
+-- ==========================================
+-- VERIFICATION QUERIES
+-- ==========================================
+
+-- Check all tables created
+SHOW TABLES;
+
+-- Check users
+SELECT id, name, email, role FROM users;
+
+-- Check properties
+SELECT id, property_name, city, price_per_night, owner_id FROM properties;
+
+-- Check bookings
+SELECT id, traveler_id, property_id, check_in, check_out, status FROM bookings;
+
+-- ==========================================
+-- USEFUL QUERIES FOR YOUR APP
+-- ==========================================
+
+-- Search properties by city
+-- SELECT * FROM properties WHERE city LIKE '%Santa Monica%' AND available = TRUE;
+
+-- Get user's bookings (traveler view)
+-- SELECT b.*, p.property_name, p.city FROM bookings b 
+-- JOIN properties p ON b.property_id = p.id 
+-- WHERE b.traveler_id = 1;
+
+-- Get owner's booking requests
+-- SELECT b.*, u.name as traveler_name, p.property_name FROM bookings b
+-- JOIN users u ON b.traveler_id = u.id
+-- JOIN properties p ON b.property_id = p.id
+-- WHERE b.owner_id = 2 AND b.status = 'PENDING';
+
+-- Check for booking conflicts (prevent double booking)
+-- SELECT * FROM bookings 
+-- WHERE property_id = 1 
+-- AND status = 'ACCEPTED'
+-- AND (
+--   (check_in <= '2025-11-01' AND check_out >= '2025-11-01') OR
+--   (check_in <= '2025-11-05' AND check_out >= '2025-11-05') OR
+--   (check_in >= '2025-11-01' AND check_out <= '2025-11-05')
+-- );
