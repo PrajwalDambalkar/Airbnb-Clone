@@ -1,4 +1,3 @@
-//  Copy content from "src/services/api.ts" artifact
 // src/services/api.ts
 import axios from 'axios';
 
