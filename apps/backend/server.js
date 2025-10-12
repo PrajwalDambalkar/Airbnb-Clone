@@ -25,8 +25,8 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session configuration with MySQL
 app.use(session({
@@ -73,8 +73,8 @@ app.get('/api/health', async (req, res) => {
 });
 
 // TODO: Import routes here (we'll add them next)
-// import authRoutes from './routes/auth.js';
-// app.use('/api/auth', authRoutes);
+import authRoutes from './routes/auth.js';
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

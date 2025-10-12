@@ -19,7 +19,7 @@ const pool = mysql.createPool({
 });
 
 // Get promise-based connection
-const promisePool = pool.promise();
+const promisePool = pool.promise(); // Use promisePool for async/await queries
 
 // Test connection
 const testConnection = async () => {
