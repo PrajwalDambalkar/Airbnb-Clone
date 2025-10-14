@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
-import Login from './pages/Login';
+import SignIn from './pages/SignIn';
 
 // Temporary Home component (we'll build the real dashboard later)
 function Home() {
@@ -106,7 +106,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<SignIn />} />
           <Route
             path="/"
             element={
