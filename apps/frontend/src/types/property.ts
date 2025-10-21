@@ -18,6 +18,7 @@ export interface Property {
     amenities: string[];
     images: string[];
     available: number;
+    rating?: number;
     created_at: string;
     updated_at: string;
 }

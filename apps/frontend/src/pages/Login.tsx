@@ -4,10 +4,12 @@ import type { FormEvent } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDarkMode } from '../App';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { isDark } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -34,33 +36,33 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col justify-center min-h-screen py-12 bg-gray-50 sm:px-6 lg:px-8">
+    <div className={`flex flex-col justify-center min-h-screen py-12 ${isDark ? 'bg-gray-950' : 'bg-gray-50'} sm:px-6 lg:px-8`}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo/Title */}
         <h2 className="text-center text-4xl font-bold text-[#FF385C] mb-2">
           airbnb
         </h2>
-        <h3 className="text-2xl font-semibold text-center text-gray-900">
+        <h3 className={`text-2xl font-semibold text-center ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
           Welcome back
         </h3>
-        <p className="mt-2 text-sm text-center text-gray-600">
+        <p className={`mt-2 text-sm text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
           Log in to your account
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="px-4 py-8 bg-white border border-gray-200 shadow-lg sm:rounded-lg sm:px-10">
+        <div className={`px-4 py-8 shadow-lg sm:rounded-lg sm:px-10 border ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Error Message */}
             {error && (
-              <div className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50">
+              <div className={`px-4 py-3 border rounded-lg ${isDark ? 'text-red-400 border-red-900 bg-red-950' : 'text-red-700 border-red-200 bg-red-50'}`}>
                 {error}
               </div>
             )}
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                 Email address
               </label>
               <input
@@ -70,14 +72,14 @@ export default function Login() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent"
+                className={`mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
                 placeholder="you@example.com"
               />
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                 Password
               </label>
               <div className="relative mt-1">
@@ -88,14 +90,14 @@ export default function Login() {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent"
+                  className={`block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
                   placeholder="••••••••"
                   minLength={6}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  className={`absolute inset-y-0 right-0 flex items-center pr-3 ${isDark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +111,7 @@ export default function Login() {
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className={`mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                 Must be at least 6 characters
               </p>
             </div>
@@ -134,20 +136,20 @@ export default function Login() {
             </button>
 
             {/* Quick Login Helpers (for testing) */}
-            <div className="p-3 mt-4 border border-gray-200 rounded-lg bg-gray-50">
-              <p className="mb-2 text-xs text-gray-600">Quick test login:</p>
+            <div className={`p-3 mt-4 border rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+              <p className={`mb-2 text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Quick test login:</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setFormData({ email: 'traveler@test.com', password: 'password123' })}
-                  className="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded hover:bg-blue-200"
+                  className={`px-2 py-1 text-xs rounded transition-colors ${isDark ? 'text-blue-400 bg-blue-950 hover:bg-blue-900' : 'text-blue-700 bg-blue-100 hover:bg-blue-200'}`}
                 >
                   Traveler Account
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ email: 'owner@test.com', password: 'password123' })}
-                  className="px-2 py-1 text-xs text-green-700 bg-green-100 rounded hover:bg-green-200"
+                  className={`px-2 py-1 text-xs rounded transition-colors ${isDark ? 'text-green-400 bg-green-950 hover:bg-green-900' : 'text-green-700 bg-green-100 hover:bg-green-200'}`}
                 >
                   Owner Account
                 </button>
@@ -157,10 +159,10 @@ export default function Login() {
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className={`w-full border-t ${isDark ? 'border-gray-700' : 'border-gray-300'}`}></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 text-gray-500 bg-white">
+                <span className={`px-2 ${isDark ? 'text-gray-400 bg-gray-900' : 'text-gray-500 bg-white'}`}>
                   Don't have an account?
                 </span>
               </div>
@@ -169,7 +171,7 @@ export default function Login() {
             {/* Signup Link */}
             <Link
               to="/signup"
-              className="w-full flex justify-center py-3 px-4 border-2 border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF385C] transition-all"
+              className={`w-full flex justify-center py-3 px-4 border-2 rounded-lg shadow-sm text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF385C] ${isDark ? 'text-gray-300 bg-gray-800 border-gray-700 hover:bg-gray-700 focus:ring-offset-gray-900' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'}`}
             >
               Sign up
             </Link>
