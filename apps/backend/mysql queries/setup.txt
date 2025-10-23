@@ -173,9 +173,26 @@ INSERT INTO users (name, email, password, role, city, state, country, phone_numb
 
 -- Insert sample properties
 INSERT INTO properties (owner_id, property_name, property_type, description, address, city, state, country, zipcode, bedrooms, bathrooms, max_guests, price_per_night, cleaning_fee, amenities, images, available) VALUES
-(2, 'Cozy Beach House', 'house', 'Beautiful beachfront property with stunning ocean views', '123 Ocean Drive', 'Santa Monica', 'CA', 'United States', '90401', 3, 2.0, 6, 250.00, 50.00, '["wifi", "parking", "pool", "kitchen", "air_conditioning", "beach_access"]', '["/uploads/beach_house_1.jpg", "/uploads/beach_house_2.jpg"]', TRUE),
-(2, 'Mountain Cabin Retreat', 'cabin', 'Peaceful cabin in the mountains, perfect for nature lovers', '456 Mountain Road', 'Lake Tahoe', 'CA', 'United States', '96150', 2, 1.0, 4, 180.00, 40.00, '["wifi", "parking", "fireplace", "kitchen", "heating"]', '["/uploads/cabin_1.jpg", "/uploads/cabin_2.jpg"]', TRUE),
-(3, 'Downtown Luxury Loft', 'loft', 'Modern loft in the heart of the city with amazing skyline views', '789 Broadway', 'New York', 'NY', 'United States', '10003', 1, 1.5, 2, 320.00, 60.00, '["wifi", "parking", "gym", "kitchen", "air_conditioning", "elevator"]', '["/uploads/loft_1.jpg"]', TRUE);
+-- Los Angeles Properties
+(2, 'Guesthouse in Los Angeles', 'house', 'Spacious beachfront guesthouse with modern amenities and ocean views', '123 Ocean Drive', 'Los Angeles', 'CA', 'United States', '90401', 4, 3.0, 8, 377.00, 50.00, '["wifi", "parking", "pool", "kitchen", "air_conditioning", "beach_access", "hot_tub"]', '["/uploads/property_1.jpg", "/uploads/property_2.jpg"]', TRUE),
+(2, 'Room in Los Angeles', 'apartment', 'Cozy private room in a modern apartment with great city views', '456 Sunset Blvd', 'Los Angeles', 'CA', 'United States', '90028', 1, 1.0, 2, 115.00, 25.00, '["wifi", "parking", "kitchen", "air_conditioning", "tv"]', '["/uploads/property_3.jpg"]', TRUE),
+(3, 'Home in Norwalk', 'house', 'Charming family home with spacious backyard and modern interiors', '789 Main Street', 'Los Angeles', 'CA', 'United States', '90650', 3, 2.5, 6, 257.00, 40.00, '["wifi", "parking", "kitchen", "air_conditioning", "washer", "dryer", "backyard"]', '["/uploads/property_4.jpg", "/uploads/property_5.jpg"]', TRUE),
+
+-- San Diego Properties
+(2, 'Home in San Diego', 'house', 'Beautiful coastal home with panoramic ocean views and private patio', '321 Pacific Coast Hwy', 'San Diego', 'CA', 'United States', '92101', 3, 2.5, 7, 388.00, 55.00, '["wifi", "parking", "pool", "kitchen", "air_conditioning", "ocean_view", "bbq_grill"]', '["/uploads/property_6.jpg", "/uploads/property_7.jpg"]', TRUE),
+(3, 'Beachfront Villa in La Jolla', 'villa', 'Luxury beachfront villa with private beach access and infinity pool', '555 Coast Boulevard', 'San Diego', 'CA', 'United States', '92037', 5, 4.0, 10, 650.00, 100.00, '["wifi", "parking", "pool", "kitchen", "air_conditioning", "beach_access", "hot_tub", "gym", "ocean_view"]', '["/uploads/property_8.jpg", "/uploads/property_9.jpg"]', TRUE),
+(2, 'Downtown Condo in Gaslamp', 'condo', 'Modern condo in the heart of Gaslamp Quarter with rooftop access', '888 Fifth Avenue', 'San Diego', 'CA', 'United States', '92101', 2, 2.0, 4, 275.00, 45.00, '["wifi", "parking", "kitchen", "air_conditioning", "elevator", "rooftop_access", "gym"]', '["/uploads/property_10.jpg"]', TRUE),
+
+-- Long Beach Properties
+(2, 'Home in Long Beach', 'house', 'Charming beach house with pink vintage decor and cozy atmosphere', '234 Beach Avenue', 'Los Angeles', 'CA', 'United States', '90803', 2, 1.5, 4, 205.00, 35.00, '["wifi", "parking", "kitchen", "air_conditioning", "beach_access"]', '["/uploads/property_11.jpg"]', TRUE),
+
+-- Mountain/Lake Tahoe Properties
+(2, 'Mountain Cabin Retreat', 'cabin', 'Peaceful cabin in the mountains, perfect for nature lovers and skiing', '456 Mountain Road', 'Lake Tahoe', 'CA', 'United States', '96150', 2, 1.0, 4, 180.00, 40.00, '["wifi", "parking", "fireplace", "kitchen", "heating", "ski_storage"]', '["/uploads/cabin_1.jpg", "/uploads/cabin_2.jpg"]', TRUE),
+(3, 'Lakefront Cottage', 'cottage', 'Rustic lakefront cottage with private dock and stunning mountain views', '777 Lakeshore Drive', 'Lake Tahoe', 'CA', 'United States', '96145', 3, 2.0, 6, 295.00, 50.00, '["wifi", "parking", "fireplace", "kitchen", "heating", "lake_access", "boat_dock"]', '["/uploads/property_12.jpg"]', TRUE),
+
+-- New York Properties
+(3, 'Downtown Luxury Loft', 'loft', 'Modern loft in the heart of the city with amazing skyline views', '789 Broadway', 'New York', 'NY', 'United States', '10003', 1, 1.5, 2, 320.00, 60.00, '["wifi", "parking", "gym", "kitchen", "air_conditioning", "elevator", "city_view"]', '["/uploads/loft_1.jpg"]', TRUE),
+(2, 'Brooklyn Brownstone', 'house', 'Historic brownstone with modern updates in trendy Brooklyn neighborhood', '456 Park Slope', 'New York', 'NY', 'United States', '11215', 4, 3.0, 8, 425.00, 75.00, '["wifi", "parking", "kitchen", "air_conditioning", "washer", "dryer", "backyard"]', '["/uploads/property_13.jpg"]', TRUE);
 
 -- Insert sample bookings
 INSERT INTO bookings (traveler_id, property_id, owner_id, check_in, check_out, number_of_guests, total_price, status, party_type) VALUES
