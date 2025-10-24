@@ -4,6 +4,19 @@ import * as bookingController from '../controllers/bookingController.js';
 
 const router = express.Router();
 
+// Debug middleware to log session
+router.use((req, res, next) => {
+  console.log('🔍 Booking Route - Session Check:', {
+    sessionID: req.sessionID,
+    hasSession: !!req.session,
+    hasUser: !!req.session?.user,
+    userId: req.session?.userId,
+    userRole: req.session?.userRole,
+    user: req.session?.user
+  });
+  next();
+});
+
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.user) {

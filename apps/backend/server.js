@@ -51,7 +51,25 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Airbnb Clone API is running!',
     database: 'MySQL',
-    session: req.session.id ? 'Active' : 'Inactive'
+    session: req.session.id ? 'Active' : 'Inactive',
+    sessionData: {
+      id: req.sessionID,
+      hasUser: !!req.session.user,
+      userId: req.session.userId
+    }
+  });
+});
+
+// Debug session endpoint
+app.get('/api/debug/session', (req, res) => {
+  res.json({
+    sessionID: req.sessionID,
+    session: {
+      cookie: req.session.cookie,
+      user: req.session.user,
+      userId: req.session.userId,
+      userRole: req.session.userRole
+    }
   });
 });
 
