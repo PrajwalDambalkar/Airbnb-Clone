@@ -75,8 +75,10 @@ app.get('/api/health', async (req, res) => {
 // TODO: Import routes here (we'll add them next)
 import authRoutes from './routes/auth.js';
 import propertyRoutes from './routes/propertyRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

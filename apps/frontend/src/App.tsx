@@ -8,7 +8,8 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import PropertyDetail from './pages/PropertyDetail';
-import { Moon, Sun, Heart } from 'lucide-react';
+import Bookings from './pages/Bookings';
+import { Moon, Sun, Heart, Calendar } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
@@ -79,6 +80,10 @@ function Header() {
             <Heart size={16} className="text-[#FF385C]" />
             <span className="font-medium">Favourites</span>
             <span className="ml-1 inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
+          </Link>
+          <Link to="/bookings" title="My Bookings" className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
+            <Calendar size={16} className="text-[#FF385C]" />
+            <span className="font-medium">Bookings</span>
           </Link>
           <button
             onClick={toggleDarkMode}
@@ -167,6 +172,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Favorites />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bookings"
+                element={
+                  <ProtectedRoute>
+                    <Bookings />
                   </ProtectedRoute>
                 }
               />
