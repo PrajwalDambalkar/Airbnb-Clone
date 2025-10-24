@@ -104,3 +104,58 @@ export const getPropertyById = async (req, res) => {
         });
     }
 };
+
+// GET properties for logged-in owner
+export const getMyProperties = async (req, res) => {
+    try {
+        // Check if user is logged in
+        if (!req.session.userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authenticated'
+            });
+        }
+
+        // Check if user is an owner
+        if (req.session.userRole !== 'owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only owners can access their properties'
+            });
+        }
+
+        // Fetch properties owned by this user
+        const [properties] = await pool.query(
+            'SELECT * FROM properties WHERE owner_id = ? ORDER BY created_at DESC',
+            [req.session.userId]
+        );
+
+        // Parse JSON fields
+        const parsed = properties.map(p => {
+            const copy = { ...p };
+            try {
+                if (copy.images && typeof copy.images === 'string') {
+                    copy.images = JSON.parse(copy.images);
+                }
+            } catch (err) {}
+            try {
+                if (copy.amenities && typeof copy.amenities === 'string') {
+                    copy.amenities = JSON.parse(copy.amenities);
+                }
+            } catch (err) {}
+            return copy;
+        });
+
+        res.json({
+            success: true,
+            count: parsed.length,
+            data: parsed
+        });
+    } catch (error) {
+        console.error('Error fetching owner properties:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching your properties'
+        });
+    }
+};

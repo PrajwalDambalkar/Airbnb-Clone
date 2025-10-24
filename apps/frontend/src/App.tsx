@@ -5,9 +5,11 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import PropertyDetail from './pages/PropertyDetail';
+import OwnerDashboard from './pages/OwnerDashboard';
 import { Moon, Sun, Heart } from 'lucide-react';
 
 // Dark Mode Context
@@ -162,22 +164,35 @@ function App() {
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-              <Route
-                path="/favorites"
-                element={
-                  <ProtectedRoute>
-                    <Favorites />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/property/:id"
-                element={
-                  <ProtectedRoute>
-                    <PropertyDetail />
-                  </ProtectedRoute>
-                }
-              />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            
+            {/* Owner Routes */}
+            <Route
+              path="/owner/dashboard"
+              element={
+                <ProtectedRoute>
+                  <OwnerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Traveler/Public Routes */}
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <Favorites />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/:id"
+              element={
+                <ProtectedRoute>
+                  <PropertyDetail />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/"
               element={

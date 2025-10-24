@@ -7,4 +7,7 @@ const router = express.Router();
 router.get('/', propertyController.getAllProperties);
 router.get('/:id', propertyController.getPropertyById);
 
+// Owner-only routes (must be logged in as owner)
+router.get('/my/properties', propertyController.getMyProperties);
+
 export default router;
