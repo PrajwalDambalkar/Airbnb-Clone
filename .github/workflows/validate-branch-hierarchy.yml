@@ -40,16 +40,16 @@ jobs:
             echo "✅ Valid: dev → main"
 
           elif [ "$TARGET" = "dev" ]; then
-            # Only prajwal or pukhraj can merge to dev
-            if [ "$SOURCE" != "prajwal" ] && [ "$SOURCE" != "pukhraj" ]; then
-              echo "❌ ERROR: PRs to 'dev' must come from 'prajwal' or 'pukhraj' branches only"
+            # Only prajwal or Pukhraj can merge to dev
+            if [ "$SOURCE" != "prajwal" ] && [ "$SOURCE" != "Pukhraj" ]; then
+              echo "❌ ERROR: PRs to 'dev' must come from 'prajwal' or 'Pukhraj' branches only"
               echo "   Current source: $SOURCE"
               exit 1
             fi
             echo "✅ Valid: $SOURCE → dev"
 
-          elif [ "$TARGET" = "prajwal" ] || [ "$TARGET" = "pukhraj" ]; then
-            # Only feature/* branches can merge to prajwal/pukhraj
+          elif [ "$TARGET" = "prajwal" ] || [ "$TARGET" = "Pukhraj" ]; then
+            # Only feature/* branches can merge to prajwal/Pukhraj
             if [[ ! "$SOURCE" =~ ^feature/ ]]; then
               echo "❌ ERROR: PRs to '$TARGET' must come from 'feature/*' branches only"
               echo "   Current source: $SOURCE"
@@ -74,6 +74,6 @@ jobs:
           echo "**Target Branch:** \`${{ github.base_ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Workflow Rules:**" >> $GITHUB_STEP_SUMMARY
-          echo "- \`feature/*\` → \`prajwal\` or \`pukhraj\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`prajwal\` or \`pukhraj\` → \`dev\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`feature/*\` → \`prajwal\` or \`Pukhraj\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`prajwal\` or \`Pukhraj\` → \`dev\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`dev\` → \`main\`" >> $GITHUB_STEP_SUMMARY
