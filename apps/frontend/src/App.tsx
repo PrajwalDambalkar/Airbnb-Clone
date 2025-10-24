@@ -95,6 +95,10 @@ function Header() {
             <span className="font-medium">Favourites</span>
             <span className="ml-1 inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
           </Link>
+          <Link to="/bookings" title="My Bookings" className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
+            <Calendar size={16} className="text-[#FF385C]" />
+            <span className="font-medium">Bookings</span>
+          </Link>
           <button
             onClick={toggleDarkMode}
             className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
