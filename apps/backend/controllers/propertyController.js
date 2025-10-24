@@ -35,10 +35,28 @@ export const getAllProperties = async (req, res) => {
 
         const [properties] = await pool.query(query, params);
 
+        // Parse JSON fields (images, amenities) returned as strings from MySQL
+        const parsed = properties.map(p => {
+            const copy = { ...p };
+            try {
+                if (copy.images && typeof copy.images === 'string') {
+                    copy.images = JSON.parse(copy.images);
+                }
+            } catch (err) {
+                // leave as-is if parsing fails
+            }
+            try {
+                if (copy.amenities && typeof copy.amenities === 'string') {
+                    copy.amenities = JSON.parse(copy.amenities);
+                }
+            } catch (err) {}
+            return copy;
+        });
+
         res.json({
             success: true,
-            count: properties.length,
-            data: properties
+            count: parsed.length,
+            data: parsed
         });
     } catch (error) {
         console.error('Error fetching properties:', error);
@@ -66,9 +84,17 @@ export const getPropertyById = async (req, res) => {
             });
         }
 
+        const prop = { ...properties[0] };
+        try {
+            if (prop.images && typeof prop.images === 'string') prop.images = JSON.parse(prop.images);
+        } catch (e) {}
+        try {
+            if (prop.amenities && typeof prop.amenities === 'string') prop.amenities = JSON.parse(prop.amenities);
+        } catch (e) {}
+
         res.json({
             success: true,
-            data: properties[0]
+            data: prop
         });
     } catch (error) {
         console.error('Error fetching property:', error);
