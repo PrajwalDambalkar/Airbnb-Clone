@@ -4,25 +4,7 @@ import { useState, createContext, useContext, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import { Moon, Sun } from 'lucide-react';
-
-// Dark Mode Context
-interface DarkModeContextType {
-  isDark: boolean;
-  toggleDarkMode: () => void;
-}
-
-const DarkModeContext = createContext<DarkModeContextType | undefined>(undefined);
-
-export const useDarkMode = () => {
-  const context = useContext(DarkModeContext);
-  if (!context) {
-    throw new Error('useDarkMode must be used within DarkModeProvider');
-  }
-  return context;
-};
+import SignIn from './pages/SignIn';
 
 // Header Component
 function Header() {
@@ -123,25 +105,23 @@ function DarkModeProvider({ children }: { children: ReactNode }) {
 
 function App() {
   return (
-    <DarkModeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </DarkModeProvider>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
