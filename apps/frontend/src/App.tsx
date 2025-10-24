@@ -10,7 +10,8 @@ import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
-import { Moon, Sun, Heart } from 'lucide-react';
+import AddProperty from './pages/AddProperty';
+import { Moon, Sun, Heart, Home as HomeIcon } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
@@ -77,6 +78,18 @@ function Header() {
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-pink-900 text-pink-200' : 'bg-pink-100 text-[#FF385C]'}`}>
             {user.role === 'traveler' ? '✈️ Traveler' : '🏠 Owner'}
           </span>
+          
+          {/* Owner-specific button */}
+          {user.role === 'owner' && (
+            <Link 
+              to="/owner/dashboard" 
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDark ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]' : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'}`}
+            >
+              <HomeIcon size={16} />
+              <span>Manage Properties</span>
+            </Link>
+          )}
+          
           <Link to="/favorites" title="Favourites" className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
             <Heart size={16} className="text-[#FF385C]" />
             <span className="font-medium">Favourites</span>
@@ -105,6 +118,8 @@ function Header() {
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const { isDark } = useDarkMode();
+  const location = window.location.pathname;
+  const isOwnerRoute = location.startsWith('/owner');
 
   if (loading) {
     return (
@@ -123,7 +138,8 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <Header />
+      {/* Only show global header for traveler routes, owner routes have their own header */}
+      {!isOwnerRoute && <Header />}
       {children}
     </>
   );
@@ -172,6 +188,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <OwnerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/owner/properties/new"
+              element={
+                <ProtectedRoute>
+                  <AddProperty />
                 </ProtectedRoute>
               }
             />

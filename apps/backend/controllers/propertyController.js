@@ -159,3 +159,88 @@ export const getMyProperties = async (req, res) => {
         });
     }
 };
+
+// CREATE new property
+export const createProperty = async (req, res) => {
+    try {
+        console.log('=== CREATE PROPERTY REQUEST ===');
+        console.log('Session:', { userId: req.session.userId, role: req.session.userRole });
+        console.log('Body:', req.body);
+        console.log('Files:', req.files);
+
+        if (!req.session.userId || req.session.userRole !== 'owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only owners can create properties'
+            });
+        }
+
+        const {
+            property_name, property_type, description,
+            address, city, state, zip_code, country,
+            price_per_night, bedrooms, bathrooms, max_guests,
+            amenities, available
+        } = req.body;
+
+        // Validate required fields
+        if (!property_name || !property_type || !address || !city || !state || !country || !price_per_night) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        // Get uploaded image paths
+        const images = req.files ? req.files.map(file => `/uploads/properties/${file.filename}`) : [];
+
+        // Parse amenities if it's a JSON string (from FormData)
+        let parsedAmenities = amenities;
+        if (typeof amenities === 'string') {
+            try {
+                parsedAmenities = JSON.parse(amenities);
+            } catch (err) {
+                console.error('Error parsing amenities:', err);
+                parsedAmenities = [];
+            }
+        }
+
+        console.log('Inserting property with:', {
+            owner_id: req.session.userId,
+            property_name,
+            images: images.length,
+            amenities: parsedAmenities
+        });
+
+        const [result] = await pool.query(
+            `INSERT INTO properties (
+                owner_id, property_name, property_type, description,
+                address, city, state, zipcode, country,
+                price_per_night, bedrooms, bathrooms, max_guests,
+                images, amenities, available
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                req.session.userId, property_name, property_type, description,
+                address, city, state, zip_code, country,
+                price_per_night, bedrooms, bathrooms, max_guests,
+                JSON.stringify(images), JSON.stringify(parsedAmenities), available !== false ? 1 : 0
+            ]
+        );
+
+        console.log('Property created successfully with ID:', result.insertId);
+
+        res.status(201).json({
+            success: true,
+            message: 'Property created successfully',
+            propertyId: result.insertId
+        });
+    } catch (error) {
+        console.error('Error creating property:', error);
+        console.error('Error details:', error.message);
+        console.error('Stack:', error.stack);
+        res.status(500).json({
+            success: false,
+            message: 'Error creating property',
+            error: error.message
+        });
+    }
+};

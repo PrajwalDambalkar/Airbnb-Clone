@@ -1,13 +1,15 @@
 import express from 'express';
 import * as propertyController from '../controllers/propertyController.js';
+import { upload } from '../config/multer.js';
 
 const router = express.Router();
+
+// Owner-only routes (must be logged in as owner) - MUST BE BEFORE /:id
+router.get('/my/properties', propertyController.getMyProperties);
+router.post('/', upload.array('images', 10), propertyController.createProperty);
 
 // Public routes (anyone can view)
 router.get('/', propertyController.getAllProperties);
 router.get('/:id', propertyController.getPropertyById);
-
-// Owner-only routes (must be logged in as owner)
-router.get('/my/properties', propertyController.getMyProperties);
 
 export default router;

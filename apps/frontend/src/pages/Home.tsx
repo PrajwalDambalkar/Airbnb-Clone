@@ -4,6 +4,8 @@ import { Heart } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
+import { getFirstImage } from '../utils/imageUtils';
+import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -26,11 +28,13 @@ export default function Home() {
         } catch (e) {
             return new Set();
         }
+    
     });
     const laCarouselRef = useRef<HTMLDivElement>(null);
+    const { user } = useAuth();
     const sdCarouselRef = useRef<HTMLDivElement>(null);
     const destinationDropdownRef = useRef<HTMLDivElement>(null);
-
+    
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     };
@@ -231,6 +235,17 @@ export default function Home() {
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gradient-to-b from-gray-50 to-white'} transition-colors`}>
+            {/* Welcome Section */}
+            <section className="px-4 pt-6 sm:pt-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div className="mb-8">
+                    <h1 className={`text-2xl sm:text-4xl font-bold break-words leading-tight ${isDark ? 'text-white' : 'text-gray-900'} text-center sm:text-left`}>
+                        Welcome back, {user?.name || 'Guest'}! <span role="img" aria-label="wave">👋</span>
+                    </h1>
+                    <p className={`mt-2 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'} text-center sm:text-left`}>
+                        Find your next stay or manage your properties from here.
+                    </p>
+                </div>
+            </section>
             {/* Premium Search Bar */}
             <div className={`${isDark ? 'bg-gradient-to-b from-gray-900 to-gray-950' : 'bg-white'} py-12 relative shadow-sm z-[1000]`}>
                 <div className="px-4 mx-auto max-w-5xl relative z-[1001]">
@@ -264,7 +279,7 @@ export default function Home() {
                                                         onClick={() => handleDestinationSelect(dest.name)}
                                                         className={`w-full flex items-center gap-4 p-3 rounded-lg transition-colors text-left ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
                                                     >
-                                                        <div className="text-3xl flex-shrink-0">{dest.icon}</div>
+                                                        <div className="flex-shrink-0 text-3xl">{dest.icon}</div>
                                                         <div>
                                                             <div className={`font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{dest.name}</div>
                                                             <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{dest.description}</div>
@@ -336,10 +351,10 @@ export default function Home() {
                                         <div className="flex gap-8 mb-6">
                                             {/* Month 1 */}
                                             <div className="flex-1">
-                                                <div className="text-lg font-semibold mb-4">
+                                                <div className="mb-4 text-lg font-semibold">
                                                     {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                                                 </div>
-                                                <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium text-gray-600 mb-2">
+                                                <div className="grid grid-cols-7 gap-2 mb-2 text-xs font-medium text-center text-gray-600">
                                                     <div>S</div>
                                                     <div>M</div>
                                                     <div>T</div>
@@ -379,10 +394,10 @@ export default function Home() {
 
                                             {/* Month 2 */}
                                             <div className="flex-1">
-                                                <div className="text-lg font-semibold mb-4">
+                                                <div className="mb-4 text-lg font-semibold">
                                                     {new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
                                                 </div>
-                                                <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium text-gray-600 mb-2">
+                                                <div className="grid grid-cols-7 gap-2 mb-2 text-xs font-medium text-center text-gray-600">
                                                     <div>S</div>
                                                     <div>M</div>
                                                     <div>T</div>
@@ -424,14 +439,14 @@ export default function Home() {
                                             <button
                                                 type="button"
                                                 onClick={handleNextMonth}
-                                                className="text-xl font-semibold self-center"
+                                                className="self-center text-xl font-semibold"
                                             >
                                                 ›
                                             </button>
                                         </div>
 
                                         {/* Quick Select Buttons */}
-                                        <div className="flex gap-3 flex-wrap">
+                                        <div className="flex flex-wrap gap-3">
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -450,7 +465,7 @@ export default function Home() {
                                                 type="button"
                                                 onClick={() => handleFlexibleDates(1)}
                                                 disabled={!checkInDate}
-                                                className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="px-6 py-2 text-gray-700 transition-colors border border-gray-300 rounded-full hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 + 1 day
                                             </button>
@@ -458,7 +473,7 @@ export default function Home() {
                                                 type="button"
                                                 onClick={() => handleFlexibleDates(2)}
                                                 disabled={!checkInDate}
-                                                className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="px-6 py-2 text-gray-700 transition-colors border border-gray-300 rounded-full hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 + 2 days
                                             </button>
@@ -466,7 +481,7 @@ export default function Home() {
                                                 type="button"
                                                 onClick={() => handleFlexibleDates(3)}
                                                 disabled={!checkInDate}
-                                                className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="px-6 py-2 text-gray-700 transition-colors border border-gray-300 rounded-full hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 + 3 days
                                             </button>
@@ -474,7 +489,7 @@ export default function Home() {
                                                 type="button"
                                                 onClick={() => handleFlexibleDates(7)}
                                                 disabled={!checkInDate}
-                                                className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="px-6 py-2 text-gray-700 transition-colors border border-gray-300 rounded-full hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 + 7 days
                                             </button>
@@ -482,7 +497,7 @@ export default function Home() {
                                                 type="button"
                                                 onClick={() => handleFlexibleDates(14)}
                                                 disabled={!checkInDate}
-                                                className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="px-6 py-2 text-gray-700 transition-colors border border-gray-300 rounded-full hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 + 14 days
                                             </button>
@@ -523,10 +538,10 @@ export default function Home() {
 
                     {/* Reset Button */}
                     {(checkInDate || checkOutDate || guests || destination) && (
-                        <div className="text-center mt-4">
+                        <div className="mt-4 text-center">
                             <button
                                 onClick={handleReset}
-                                className="text-sm text-gray-600 hover:text-gray-900 underline"
+                                className="text-sm text-gray-600 underline hover:text-gray-900"
                             >
                                 Clear filters
                             </button>
@@ -562,28 +577,38 @@ export default function Home() {
                             </div>
                         </div>
 
-                        <div ref={laCarouselRef} className="flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 scroll-smooth">
+                        <div ref={laCarouselRef} className="flex gap-6 px-4 pb-4 -mx-4 overflow-x-auto scroll-smooth">
                             {properties.map((property) => (
                                 <Link
                                     key={property.id}
                                     to={`/property/${property.id}`}
                                     className="flex-none group"
                                 >
-                                    <div className="w-[300px] transition-all duration-300 hover:scale-105">
-                                        <div className="relative aspect-[4/3] mb-4 overflow-hidden">
+                                    <div className={`overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-lg w-[300px] ${isDark ? 'bg-gray-800' : 'bg-white'}`}> 
+                                        {/* Property Image */}
+                                        <div className="relative h-48 overflow-hidden">
                                             <img
-                                                src={Array.isArray(property.images) && property.images.length > 0 
-                                                    ? property.images[0] 
-                                                    : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                                                src={getFirstImage(property.images)}
                                                 alt={property.property_name}
-                                                className="object-cover w-full h-full rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:brightness-110"
+                                                className="object-cover w-full h-full"
                                                 onError={(e) => {
-                                                    console.error('❌ Image failed:', property.images?.[0], 'for', property.property_name);
-                                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (!target.dataset.errorHandled) {
+                                                        target.dataset.errorHandled = 'true';
+                                                        target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                                                    }
                                                 }}
                                             />
-                                            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-md">
-                                                ⭐ Guest favorite
+                                            <div className="absolute top-2 right-2">
+                                                <span
+                                                    className={`px-2 py-1 text-xs font-medium rounded ${
+                                                        property.available
+                                                            ? isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'
+                                                            : isDark ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800'
+                                                    }`}
+                                                >
+                                                    {property.available ? 'Available' : 'Unavailable'}
+                                                </span>
                                             </div>
                                             <button 
                                                 type="button"
@@ -592,7 +617,7 @@ export default function Home() {
                                                     e.stopPropagation();
                                                     toggleFavorite(property.id);
                                                 }}
-                                                className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+                                                className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
                                                     favorites.has(property.id) 
                                                         ? 'bg-red-500/80 shadow-lg' 
                                                         : 'bg-white/70 hover:bg-white'
@@ -603,26 +628,24 @@ export default function Home() {
                                                 />
                                             </button>
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <h3 className={`font-bold text-lg truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                                        {/* Property Details */}
+                                        <div className="p-4">
+                                            <h3 className={`text-lg font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}> 
                                                 {property.property_name}
                                             </h3>
-                                            <div className={`flex items-center gap-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <div className={`flex items-center gap-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}> 
                                                 <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
                                                 <span className={`ml-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 200) + 50} reviews)</span>
                                             </div>
-                                            <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}> 
                                                 {property.city}, {property.state}
-                                            </div>
-                                            <div className="flex items-baseline gap-1 pt-2">
-                                                <span className={`text-lg font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                                                    ${property.price_per_night}
-                                                </span>
-                                                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                    /night
-                                                </span>
-                                            </div>
+                                            </p>
+                                            <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}> 
+                                                {property.bedrooms} bed • {property.bathrooms} bath • {property.max_guests} guests
+                                            </p>
+                                            <p className={`mt-3 text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}> 
+                                                ${property.price_per_night}
+                                            </p>
                                         </div>
                                     </div>
                                 </Link>
@@ -656,7 +679,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        <div ref={sdCarouselRef} className="flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 scroll-smooth">
+                        <div ref={sdCarouselRef} className="flex gap-6 px-4 pb-4 -mx-4 overflow-x-auto scroll-smooth">
                             {properties.filter(p => p.city.toLowerCase() === 'san diego').map((property) => (
                                 <Link
                                     key={property.id}
@@ -666,17 +689,15 @@ export default function Home() {
                                     <div className="w-[300px] transition-all duration-300 hover:scale-105">
                                         <div className="relative aspect-[4/3] mb-4 overflow-hidden">
                                             <img
-                                                src={Array.isArray(property.images) && property.images.length > 0 
-                                                    ? property.images[0] 
-                                                    : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                                                src={getFirstImage(property.images)}
                                                 alt={property.property_name}
-                                                className="object-cover w-full h-full rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:brightness-110"
+                                                className="object-cover w-full h-full transition-all duration-300 shadow-lg rounded-2xl group-hover:shadow-2xl group-hover:brightness-110"
                                                 onError={(e) => {
                                                     console.error('❌ SD Image failed:', property.images?.[0]);
                                                     e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
                                                 }}
                                             />
-                                            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-md">
+                                            <div className="absolute px-3 py-1 text-xs font-bold text-gray-900 rounded-full shadow-md top-3 left-3 bg-white/90 backdrop-blur-md">
                                                 ⭐ Guest favorite
                                             </div>
                                             <button 
@@ -745,8 +766,8 @@ export default function Home() {
                                 Stay in Tokyo
                             </h2>
                             <div className="flex gap-2">
-                                <button className="p-2 rounded-full border hover:bg-gray-100">←</button>
-                                <button className="p-2 rounded-full border hover:bg-gray-100">→</button>
+                                <button className="p-2 border rounded-full hover:bg-gray-100">←</button>
+                                <button className="p-2 border rounded-full hover:bg-gray-100">→</button>
                             </div>
                         </div>
 
@@ -756,66 +777,66 @@ export default function Home() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-gray-100 border-t mt-20">
-                <div className="px-4 mx-auto max-w-7xl py-12">
+            <footer className="mt-20 bg-gray-100 border-t">
+                <div className="px-4 py-12 mx-auto max-w-7xl">
                     {/* Footer Links Grid */}
                     <div className="grid grid-cols-1 gap-8 mb-8 md:grid-cols-4">
                         {/* Support */}
                         <div>
-                            <h3 className="font-semibold text-gray-900 mb-4">Support</h3>
+                            <h3 className="mb-4 font-semibold text-gray-900">Support</h3>
                             <ul className="space-y-3">
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Help Center</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Get help with a safety issue</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">AirCover</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Anti-discrimination</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Disability support</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Cancellation options</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Report neighborhood concern</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Help Center</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Get help with a safety issue</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">AirCover</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Anti-discrimination</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Disability support</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Cancellation options</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Report neighborhood concern</a></li>
                             </ul>
                         </div>
 
                         {/* Hosting */}
                         <div>
-                            <h3 className="font-semibold text-gray-900 mb-4">Hosting</h3>
+                            <h3 className="mb-4 font-semibold text-gray-900">Hosting</h3>
                             <ul className="space-y-3">
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Airbnb your home</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Airbnb your experience</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Airbnb your service</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">AirCover for Hosts</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Hosting resources</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Community forum</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Hosting responsibly</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Airbnb-friendly apartments</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Join a free Hosting class</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Find a co-host</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Airbnb your home</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Airbnb your experience</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Airbnb your service</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">AirCover for Hosts</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Hosting resources</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Community forum</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Hosting responsibly</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Airbnb-friendly apartments</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Join a free Hosting class</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Find a co-host</a></li>
                             </ul>
                         </div>
 
                         {/* Airbnb */}
                         <div>
-                            <h3 className="font-semibold text-gray-900 mb-4">Airbnb</h3>
+                            <h3 className="mb-4 font-semibold text-gray-900">Airbnb</h3>
                             <ul className="space-y-3">
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">2025 Summer Release</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Newsroom</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Careers</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Investors</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Gift cards</a></li>
-                                <li><a href="#" className="text-gray-700 hover:text-gray-900 text-sm">Airbnb.org emergency stays</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">2025 Summer Release</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Newsroom</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Careers</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Investors</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Gift cards</a></li>
+                                <li><a href="#" className="text-sm text-gray-700 hover:text-gray-900">Airbnb.org emergency stays</a></li>
                             </ul>
                         </div>
                     </div>
 
                     {/* Footer Bottom */}
-                    <div className="border-t pt-8 flex flex-col items-center justify-between gap-6 md:flex-row">
-                        <div className="text-sm text-gray-600 text-center md:text-left">
+                    <div className="flex flex-col items-center justify-between gap-6 pt-8 border-t md:flex-row">
+                        <div className="text-sm text-center text-gray-600 md:text-left">
                             © 2025 Airbnb, Inc. · 
-                            <a href="#" className="hover:underline mx-1">Terms</a>
-                            <a href="#" className="hover:underline mx-1">Sitemap</a>
-                            <a href="#" className="hover:underline mx-1">Privacy</a>
-                            <a href="#" className="hover:underline mx-1">Your Privacy Choices</a>
+                            <a href="#" className="mx-1 hover:underline">Terms</a>
+                            <a href="#" className="mx-1 hover:underline">Sitemap</a>
+                            <a href="#" className="mx-1 hover:underline">Privacy</a>
+                            <a href="#" className="mx-1 hover:underline">Your Privacy Choices</a>
                         </div>
                         <div className="flex items-center gap-6">
-                            <button className="text-sm text-gray-700 hover:text-gray-900 flex items-center gap-2">
+                            <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900">
                                 🌐 English (US)
                             </button>
                             <button className="text-sm text-gray-700 hover:text-gray-900">$ USD</button>

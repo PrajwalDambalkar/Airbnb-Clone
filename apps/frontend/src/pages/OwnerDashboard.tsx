@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
 import api from '../services/api';
 import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2 } from 'lucide-react';
+import { getFirstImage } from '../utils/imageUtils';
 
 interface Property {
   id: number;
@@ -32,16 +33,6 @@ export default function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    // Redirect if not owner
-    if (user && user.role !== 'owner') {
-      navigate('/');
-      return;
-    }
-
-    fetchMyProperties();
-  }, [user, navigate]);
-
   const fetchMyProperties = async () => {
     try {
       setLoading(true);
@@ -55,6 +46,17 @@ export default function OwnerDashboard() {
     }
   };
 
+  useEffect(() => {
+    // Redirect if not owner
+    if (user && user.role !== 'owner') {
+      navigate('/');
+      return;
+    }
+
+    fetchMyProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -64,23 +66,6 @@ export default function OwnerDashboard() {
     }
   };
 
-  const getFirstImage = (images: string[] | string): string => {
-    if (Array.isArray(images) && images.length > 0) {
-      return images[0];
-    }
-    if (typeof images === 'string') {
-      try {
-        const parsed = JSON.parse(images);
-        return Array.isArray(parsed) && parsed.length > 0 
-          ? parsed[0] 
-          : '/placeholder-property.jpg';
-      } catch {
-        return '/placeholder-property.jpg';
-      }
-    }
-    return '/placeholder-property.jpg';
-  };
-
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header/Navigation */}
@@ -88,17 +73,17 @@ export default function OwnerDashboard() {
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center">
-              <Link to="/owner/dashboard" className="text-2xl font-bold text-[#FF385C]">
+            <div className="flex items-center space-x-2">
+              <Link to="/owner/dashboard" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
                 airbnb
               </Link>
-              <span className={`ml-3 px-2 py-1 text-xs font-medium rounded ${isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'}`}>
+              <span className={`hidden sm:inline-block px-2 py-1 text-xs font-medium rounded ${isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'}`}>
                 Owner Portal
               </span>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex items-center space-x-6">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
               <Link
                 to="/owner/dashboard"
                 className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
@@ -121,10 +106,27 @@ export default function OwnerDashboard() {
                 <span>Bookings</span>
               </Link>
               
+              {/* Divider */}
+              <div className={`h-6 w-px ${isDark ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+              
+              {/* Browse Properties Link - styled like Manage Properties */}
+              <Link
+                to="/"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isDark ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]' : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'
+                }`}
+              >
+                <Eye className="w-4 h-4" />
+                <span>Browse Properties</span>
+              </Link>
+              
               {/* User Menu */}
               <div className="flex items-center space-x-3">
                 <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   {user?.name}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-pink-900 text-pink-200' : 'bg-pink-100 text-[#FF385C]'}`}>
+                  🏠 Owner
                 </span>
                 <button
                   onClick={handleLogout}
@@ -134,6 +136,29 @@ export default function OwnerDashboard() {
                 </button>
               </div>
             </nav>
+
+            {/* Mobile Navigation */}
+            <div className="flex md:hidden items-center space-x-2">
+              <Link
+                to="/"
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]' : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'}`}
+                title="Browse Properties"
+              >
+                <Eye className="w-5 h-5" />
+              </Link>
+              <Link
+                to="/owner/properties/new"
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+              >
+                <Plus className="w-5 h-5" />
+              </Link>
+              <button
+                onClick={handleLogout}
+                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isDark ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -277,7 +302,12 @@ export default function OwnerDashboard() {
                       alt={property.property_name}
                       className="object-cover w-full h-full"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/placeholder-property.jpg';
+                        const target = e.target as HTMLImageElement;
+                        // Prevent infinite loop by checking if already using fallback
+                        if (!target.dataset.errorHandled) {
+                          target.dataset.errorHandled = 'true';
+                          target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                        }
                       }}
                     />
                     <div className="absolute top-2 right-2">
