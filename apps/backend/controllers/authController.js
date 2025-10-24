@@ -60,10 +60,19 @@ export const signup = async (req, res) => {
     // Create session
     req.session.userId = newUser[0].id;
     req.session.userRole = newUser[0].role;
+    req.session.user = newUser[0]; // Add this for consistency
 
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: newUser[0]
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Failed to save session' });
+      }
+      
+      res.status(201).json({
+        message: 'User registered successfully',
+        user: newUser[0]
+      });
     });
 
   } catch (error) {
@@ -112,13 +121,23 @@ export const login = async (req, res) => {
     // Create session
     req.session.userId = user.id;
     req.session.userRole = user.role;
-
+    
     // Remove password from response
     delete user.password;
+    
+    req.session.user = user; // Add this for consistency
 
-    res.json({
-      message: 'Login successful',
-      user
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Failed to save session' });
+      }
+      
+      res.json({
+        message: 'Login successful',
+        user
+      });
     });
 
   } catch (error) {
@@ -161,6 +180,9 @@ export const getCurrentUser = async (req, res) => {
         error: 'User not found' 
       });
     }
+
+    // Ensure session.user is set for consistency
+    req.session.user = users[0];
 
     res.json({ user: users[0] });
 
