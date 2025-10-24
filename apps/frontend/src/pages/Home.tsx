@@ -18,9 +18,18 @@ export default function Home() {
     const [dateMode, setDateMode] = useState<'Dates' | 'Months' | 'Flexible'>('Dates');
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
-    const [favorites, setFavorites] = useState<Set<number>>(new Set());
+    const [favorites, setFavorites] = useState<Set<number>>(() => {
+        try {
+            const raw = localStorage.getItem('favorites');
+            const arr: number[] = raw ? JSON.parse(raw) : [];
+            return new Set(arr);
+        } catch (e) {
+            return new Set();
+        }
+    });
     const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);
+    const destinationDropdownRef = useRef<HTMLDivElement>(null);
 
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -108,10 +117,30 @@ export default function Home() {
         fetchProperties();
     }, []);
 
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (destinationDropdownRef.current && !destinationDropdownRef.current.contains(event.target as Node)) {
+                setShowDestinations(false);
+            }
+        };
+
+        if (showDestinations) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDestinations]);
+
     const fetchProperties = async () => {
         try {
             setLoading(true);
             const response = await propertyService.getAllProperties();
+            console.log('🔍 API Response:', response);
+            console.log('🖼️ First property images:', response.data?.[0]?.images);
+            console.log('🖼️ Images type:', typeof response.data?.[0]?.images);
             setProperties(response.data || []);
             setAllProperties(response.data || []);
         } catch (error) {
@@ -185,6 +214,17 @@ export default function Home() {
             } else {
                 newFavorites.add(propertyId);
             }
+
+            // persist to localStorage as array of ids
+            try {
+                const arr = Array.from(newFavorites.values());
+                localStorage.setItem('favorites', JSON.stringify(arr));
+                // notify other listeners in the app
+                window.dispatchEvent(new Event('favoritesUpdated'));
+            } catch (e) {
+                console.error('Failed to persist favorites', e);
+            }
+
             return newFavorites;
         });
     };
@@ -197,7 +237,7 @@ export default function Home() {
                     <form onSubmit={handleSearch}>
                         <div className={`flex items-center gap-0 ${isDark ? 'bg-gray-800/60 border-gray-700' : 'bg-white border-gray-200'} rounded-full shadow-2xl border hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative z-[1002]`}>
                             {/* Where - Location */}
-                            <div className={`flex-1 px-6 py-4 border-r ${isDark ? 'border-gray-700' : 'border-gray-200'} relative`}>
+                            <div ref={destinationDropdownRef} className={`flex-1 px-6 py-4 border-r ${isDark ? 'border-gray-700' : 'border-gray-200'} relative`}>
                                 <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Where</div>
                                 <input
                                     type="text"
@@ -532,9 +572,15 @@ export default function Home() {
                                     <div className="w-[300px] transition-all duration-300 hover:scale-105">
                                         <div className="relative aspect-[4/3] mb-4 overflow-hidden">
                                             <img
-                                                src={property.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                                                src={Array.isArray(property.images) && property.images.length > 0 
+                                                    ? property.images[0] 
+                                                    : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
                                                 alt={property.property_name}
                                                 className="object-cover w-full h-full rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:brightness-110"
+                                                onError={(e) => {
+                                                    console.error('❌ Image failed:', property.images?.[0], 'for', property.property_name);
+                                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
+                                                }}
                                             />
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-md">
                                                 ⭐ Guest favorite
@@ -620,9 +666,15 @@ export default function Home() {
                                     <div className="w-[300px] transition-all duration-300 hover:scale-105">
                                         <div className="relative aspect-[4/3] mb-4 overflow-hidden">
                                             <img
-                                                src={property.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                                                src={Array.isArray(property.images) && property.images.length > 0 
+                                                    ? property.images[0] 
+                                                    : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
                                                 alt={property.property_name}
                                                 className="object-cover w-full h-full rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:brightness-110"
+                                                onError={(e) => {
+                                                    console.error('❌ SD Image failed:', property.images?.[0]);
+                                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
+                                                }}
                                             />
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-md">
                                                 ⭐ Guest favorite
