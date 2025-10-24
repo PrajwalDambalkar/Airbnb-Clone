@@ -1,5 +1,5 @@
 // src/pages/Login.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useDarkMode } from '../App';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const { isDark } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -20,6 +20,17 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Redirect based on role after login
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'owner') {
+        navigate('/owner/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -27,10 +38,9 @@ export default function Login() {
 
     try {
       await login(formData);
-      navigate('/'); // Redirect to home after login
+      // Redirect will happen in useEffect above
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
-    } finally {
       setLoading(false);
     }
   };
@@ -79,9 +89,17 @@ export default function Login() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-[#FF385C] hover:text-[#E31C5F] font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative mt-1">
                 <input
                   id="password"
@@ -148,7 +166,7 @@ export default function Login() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFormData({ email: 'owner@test.com', password: 'password123' })}
+                  onClick={() => setFormData({ email: 'owner@test.com', password: 'Password123' })}
                   className={`px-2 py-1 text-xs rounded transition-colors ${isDark ? 'text-green-400 bg-green-950 hover:bg-green-900' : 'text-green-700 bg-green-100 hover:bg-green-200'}`}
                 >
                   Owner Account

@@ -21,8 +21,10 @@ const sessionStore = new MySQLStoreSession({
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
-  credentials: true
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -51,7 +53,25 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Airbnb Clone API is running!',
     database: 'MySQL',
-    session: req.session.id ? 'Active' : 'Inactive'
+    session: req.session.id ? 'Active' : 'Inactive',
+    sessionData: {
+      id: req.sessionID,
+      hasUser: !!req.session.user,
+      userId: req.session.userId
+    }
+  });
+});
+
+// Debug session endpoint
+app.get('/api/debug/session', (req, res) => {
+  res.json({
+    sessionID: req.sessionID,
+    session: {
+      cookie: req.session.cookie,
+      user: req.session.user,
+      userId: req.session.userId,
+      userRole: req.session.userRole
+    }
   });
 });
 
@@ -75,8 +95,10 @@ app.get('/api/health', async (req, res) => {
 // TODO: Import routes here (we'll add them next)
 import authRoutes from './routes/auth.js';
 import propertyRoutes from './routes/propertyRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

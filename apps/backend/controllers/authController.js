@@ -60,10 +60,19 @@ export const signup = async (req, res) => {
     // Create session
     req.session.userId = newUser[0].id;
     req.session.userRole = newUser[0].role;
+    req.session.user = newUser[0]; // Add this for consistency
 
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: newUser[0]
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Failed to save session' });
+      }
+      
+      res.status(201).json({
+        message: 'User registered successfully',
+        user: newUser[0]
+      });
     });
 
   } catch (error) {
@@ -112,13 +121,23 @@ export const login = async (req, res) => {
     // Create session
     req.session.userId = user.id;
     req.session.userRole = user.role;
-
+    
     // Remove password from response
     delete user.password;
+    
+    req.session.user = user; // Add this for consistency
 
-    res.json({
-      message: 'Login successful',
-      user
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Failed to save session' });
+      }
+      
+      res.json({
+        message: 'Login successful',
+        user
+      });
     });
 
   } catch (error) {
@@ -162,10 +181,103 @@ export const getCurrentUser = async (req, res) => {
       });
     }
 
+    // Ensure session.user is set for consistency
+    req.session.user = users[0];
+
     res.json({ user: users[0] });
 
   } catch (error) {
     console.error('Get current user error:', error);
+    res.status(500).json({ 
+      error: 'Server error' 
+    });
+  }
+};
+
+// FORGOT PASSWORD - Verify email and allow password reset
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || email.trim() === '') {
+      return res.status(400).json({ 
+        error: 'Email is required' 
+      });
+    }
+
+    // Check if user exists
+    const [users] = await promisePool.query(
+      'SELECT id, name, email FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (users.length === 0) {
+      // For security, don't reveal if email exists or not
+      return res.json({ 
+        message: 'If this email exists, you can now reset your password',
+        emailExists: false
+      });
+    }
+
+    // Email exists - allow password reset
+    res.json({ 
+      message: 'Email verified. You can now reset your password.',
+      emailExists: true,
+      userId: users[0].id
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ 
+      error: 'Server error' 
+    });
+  }
+};
+
+// RESET PASSWORD - Update password for user
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ 
+        error: 'Email and new password are required' 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        error: 'Password must be at least 6 characters' 
+      });
+    }
+
+    // Check if user exists
+    const [users] = await promisePool.query(
+      'SELECT id FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ 
+        error: 'User not found' 
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await promisePool.query(
+      'UPDATE users SET password = ?, updated_at = NOW() WHERE email = ?',
+      [hashedPassword, email]
+    );
+
+    res.json({ 
+      message: 'Password reset successfully. You can now login with your new password.' 
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
     res.status(500).json({ 
       error: 'Server error' 
     });

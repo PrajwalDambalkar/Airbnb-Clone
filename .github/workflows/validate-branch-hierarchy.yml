@@ -1,0 +1,79 @@
+name: Validate Branch Hierarchy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  validate-branch:
+    runs-on: ubuntu-latest
+    name: Validate PR Branch Hierarchy
+
+    steps:
+      - name: Check branch hierarchy rules
+        run: |
+          echo "Source branch: ${{ github.head_ref }}"
+          echo "Target branch: ${{ github.base_ref }}"
+
+          SOURCE="${{ github.head_ref }}"
+          TARGET="${{ github.base_ref }}"
+
+          # Function to check if source matches pattern
+          check_pattern() {
+            local source=$1
+            local pattern=$2
+            if [[ $source == $pattern ]]; then
+              return 0
+            else
+              return 1
+            fi
+          }
+
+          # Validation rules
+          if [ "$TARGET" = "main" ]; then
+            # Only dev can merge to main
+            if [ "$SOURCE" != "dev" ]; then
+              echo "❌ ERROR: PRs to 'main' must come from 'dev' branch only"
+              echo "   Current source: $SOURCE"
+              exit 1
+            fi
+            echo "✅ Valid: dev → main"
+
+          elif [ "$TARGET" = "dev" ]; then
+            # Only prajwal or Pukhraj can merge to dev
+            if [ "$SOURCE" != "prajwal" ] && [ "$SOURCE" != "Pukhraj" ]; then
+              echo "❌ ERROR: PRs to 'dev' must come from 'prajwal' or 'Pukhraj' branches only"
+              echo "   Current source: $SOURCE"
+              exit 1
+            fi
+            echo "✅ Valid: $SOURCE → dev"
+
+          elif [ "$TARGET" = "prajwal" ] || [ "$TARGET" = "Pukhraj" ]; then
+            # Only feature/* branches can merge to prajwal/Pukhraj
+            if [[ ! "$SOURCE" =~ ^feature/ ]]; then
+              echo "❌ ERROR: PRs to '$TARGET' must come from 'feature/*' branches only"
+              echo "   Current source: $SOURCE"
+              echo "   Expected pattern: feature/*"
+              exit 1
+            fi
+            echo "✅ Valid: $SOURCE → $TARGET"
+
+          else
+            echo "ℹ️  No hierarchy rules for target branch: $TARGET"
+          fi
+
+          echo ""
+          echo "Branch hierarchy validation passed! ✅"
+
+      - name: Display workflow summary
+        if: always()
+        run: |
+          echo "### Branch Hierarchy Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Source Branch:** \`${{ github.head_ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Branch:** \`${{ github.base_ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Rules:**" >> $GITHUB_STEP_SUMMARY
+          echo "- \`feature/*\` → \`prajwal\` or \`Pukhraj\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`prajwal\` or \`Pukhraj\` → \`dev\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dev\` → \`main\`" >> $GITHUB_STEP_SUMMARY
