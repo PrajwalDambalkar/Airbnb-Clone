@@ -5,6 +5,7 @@ import { propertyService } from '../services/propertyService';
 import bookingService from '../services/bookingService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function PropertyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -230,7 +231,7 @@ export default function PropertyDetail() {
             {/* Main Image */}
             <div className="md:col-span-2 md:row-span-2">
               <img
-                src={images[selectedImage] || images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                src={getImageUrl(images[selectedImage] || images[0])}
                 alt={property.property_name}
                 className="w-full h-[500px] object-cover rounded-2xl"
               />
@@ -249,7 +250,7 @@ export default function PropertyDetail() {
                   }`}
                 >
                   <img
-                    src={img}
+                    src={getImageUrl(img)}
                     alt={`${property.property_name} ${idx + 1}`}
                     className="w-24 h-24 object-cover"
                   />
