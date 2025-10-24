@@ -4,7 +4,7 @@ import { useState, createContext, useContext, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
-import SignIn from './pages/SignIn';
+import Login from './pages/Login';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import PropertyDetail from './pages/PropertyDetail';
@@ -161,7 +161,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<SignIn />} />
+            <Route path="/login" element={<Login />} />
             <Route
               path="/favorites"
               element={
