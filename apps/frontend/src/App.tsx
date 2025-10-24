@@ -1,12 +1,13 @@
 // src/App.tsx
 import type { ReactNode } from 'react';
 import { useState, createContext, useContext, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import { Moon, Sun } from 'lucide-react';
+import Favorites from './pages/Favorites';
+import { Moon, Sun, Heart } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
@@ -28,6 +29,32 @@ export const useDarkMode = () => {
 function Header() {
   const { user, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
+  const [favCount, setFavCount] = useState<number>(0);
+
+  // Load favourites count from localStorage
+  useEffect(() => {
+    const loadFavs = () => {
+      try {
+        const raw = localStorage.getItem('favorites');
+        const arr = raw ? JSON.parse(raw) : [];
+        setFavCount(Array.isArray(arr) ? arr.length : 0);
+      } catch (e) {
+        setFavCount(0);
+      }
+    };
+
+    loadFavs();
+
+    // Listen for cross-tab or app-level updates
+    const handler = () => loadFavs();
+    window.addEventListener('storage', handler);
+    window.addEventListener('favoritesUpdated', handler as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener('favoritesUpdated', handler as EventListener);
+    };
+  }, []);
 
   if (!user) return null;
 
@@ -47,6 +74,11 @@ function Header() {
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-pink-900 text-pink-200' : 'bg-pink-100 text-[#FF385C]'}`}>
             {user.role === 'traveler' ? '✈️ Traveler' : '🏠 Owner'}
           </span>
+          <Link to="/favorites" title="Favourites" className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
+            <Heart size={16} className="text-[#FF385C]" />
+            <span className="font-medium">Favourites</span>
+            <span className="ml-1 inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
+          </Link>
           <button
             onClick={toggleDarkMode}
             className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
@@ -129,6 +161,14 @@ function App() {
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+              <Route
+                path="/favorites"
+                element={
+                  <ProtectedRoute>
+                    <Favorites />
+                  </ProtectedRoute>
+                }
+              />
             <Route
               path="/"
               element={

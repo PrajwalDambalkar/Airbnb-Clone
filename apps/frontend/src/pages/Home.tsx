@@ -18,9 +18,18 @@ export default function Home() {
     const [dateMode, setDateMode] = useState<'Dates' | 'Months' | 'Flexible'>('Dates');
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
-    const [favorites, setFavorites] = useState<Set<number>>(new Set());
+    const [favorites, setFavorites] = useState<Set<number>>(() => {
+        try {
+            const raw = localStorage.getItem('favorites');
+            const arr: number[] = raw ? JSON.parse(raw) : [];
+            return new Set(arr);
+        } catch (e) {
+            return new Set();
+        }
+    });
     const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);
+    const destinationDropdownRef = useRef<HTMLDivElement>(null);
 
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -108,6 +117,23 @@ export default function Home() {
         fetchProperties();
     }, []);
 
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (destinationDropdownRef.current && !destinationDropdownRef.current.contains(event.target as Node)) {
+                setShowDestinations(false);
+            }
+        };
+
+        if (showDestinations) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDestinations]);
+
     const fetchProperties = async () => {
         try {
             setLoading(true);
@@ -185,6 +211,17 @@ export default function Home() {
             } else {
                 newFavorites.add(propertyId);
             }
+
+            // persist to localStorage as array of ids
+            try {
+                const arr = Array.from(newFavorites.values());
+                localStorage.setItem('favorites', JSON.stringify(arr));
+                // notify other listeners in the app
+                window.dispatchEvent(new Event('favoritesUpdated'));
+            } catch (e) {
+                console.error('Failed to persist favorites', e);
+            }
+
             return newFavorites;
         });
     };
@@ -197,7 +234,7 @@ export default function Home() {
                     <form onSubmit={handleSearch}>
                         <div className={`flex items-center gap-0 ${isDark ? 'bg-gray-800/60 border-gray-700' : 'bg-white border-gray-200'} rounded-full shadow-2xl border hover:shadow-3xl transition-all duration-300 backdrop-blur-sm relative z-[1002]`}>
                             {/* Where - Location */}
-                            <div className={`flex-1 px-6 py-4 border-r ${isDark ? 'border-gray-700' : 'border-gray-200'} relative`}>
+                            <div ref={destinationDropdownRef} className={`flex-1 px-6 py-4 border-r ${isDark ? 'border-gray-700' : 'border-gray-200'} relative`}>
                                 <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Where</div>
                                 <input
                                     type="text"
