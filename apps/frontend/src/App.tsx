@@ -167,30 +167,22 @@ function App() {
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-              <Route
-                path="/favorites"
-                element={
-                  <ProtectedRoute>
-                    <Favorites />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/bookings"
-                element={
-                  <ProtectedRoute>
-                    <Bookings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/property/:id"
-                element={
-                  <ProtectedRoute>
-                    <PropertyDetail />
-                  </ProtectedRoute>
-                }
-              />
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <Favorites />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/:id"
+              element={
+                <ProtectedRoute>
+                  <PropertyDetail />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/"
               element={
