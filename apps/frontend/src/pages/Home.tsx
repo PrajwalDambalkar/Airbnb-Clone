@@ -138,6 +138,9 @@ export default function Home() {
         try {
             setLoading(true);
             const response = await propertyService.getAllProperties();
+            console.log('🔍 API Response:', response);
+            console.log('🖼️ First property images:', response.data?.[0]?.images);
+            console.log('🖼️ Images type:', typeof response.data?.[0]?.images);
             setProperties(response.data || []);
             setAllProperties(response.data || []);
         } catch (error) {
@@ -569,9 +572,15 @@ export default function Home() {
                                     <div className="w-[300px] transition-all duration-300 hover:scale-105">
                                         <div className="relative aspect-[4/3] mb-4 overflow-hidden">
                                             <img
-                                                src={property.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                                                src={Array.isArray(property.images) && property.images.length > 0 
+                                                    ? property.images[0] 
+                                                    : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
                                                 alt={property.property_name}
                                                 className="object-cover w-full h-full rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:brightness-110"
+                                                onError={(e) => {
+                                                    console.error('❌ Image failed:', property.images?.[0], 'for', property.property_name);
+                                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
+                                                }}
                                             />
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-md">
                                                 ⭐ Guest favorite
@@ -657,9 +666,15 @@ export default function Home() {
                                     <div className="w-[300px] transition-all duration-300 hover:scale-105">
                                         <div className="relative aspect-[4/3] mb-4 overflow-hidden">
                                             <img
-                                                src={property.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
+                                                src={Array.isArray(property.images) && property.images.length > 0 
+                                                    ? property.images[0] 
+                                                    : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3'}
                                                 alt={property.property_name}
                                                 className="object-cover w-full h-full rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:brightness-110"
+                                                onError={(e) => {
+                                                    console.error('❌ SD Image failed:', property.images?.[0]);
+                                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
+                                                }}
                                             />
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-md">
                                                 ⭐ Guest favorite

@@ -7,6 +7,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
+import PropertyDetail from './pages/PropertyDetail';
 import { Moon, Sun, Heart } from 'lucide-react';
 
 // Dark Mode Context
@@ -166,6 +167,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Favorites />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/property/:id"
+                element={
+                  <ProtectedRoute>
+                    <PropertyDetail />
                   </ProtectedRoute>
                 }
               />
