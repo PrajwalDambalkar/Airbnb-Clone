@@ -244,3 +244,173 @@ export const createProperty = async (req, res) => {
         });
     }
 };
+
+// UPDATE existing property
+export const updateProperty = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if user is logged in
+        if (!req.session.userId || req.session.userRole !== 'owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only owners can update properties'
+            });
+        }
+
+        // First, verify this property belongs to the logged-in owner
+        const [existing] = await pool.query(
+            'SELECT owner_id FROM properties WHERE id = ?',
+            [id]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Property not found'
+            });
+        }
+
+        if (existing[0].owner_id !== req.session.userId) {
+            return res.status(403).json({
+                success: false,
+                message: 'You can only update your own properties'
+            });
+        }
+
+        const {
+            property_name, property_type, description,
+            address, city, state, zip_code, country,
+            price_per_night, bedrooms, bathrooms, max_guests,
+            amenities, available
+        } = req.body;
+
+        // Build update query dynamically for provided fields
+        const updates = [];
+        const params = [];
+
+        if (property_name !== undefined) { updates.push('property_name = ?'); params.push(property_name); }
+        if (property_type !== undefined) { updates.push('property_type = ?'); params.push(property_type); }
+        if (description !== undefined) { updates.push('description = ?'); params.push(description); }
+        if (address !== undefined) { updates.push('address = ?'); params.push(address); }
+        if (city !== undefined) { updates.push('city = ?'); params.push(city); }
+        if (state !== undefined) { updates.push('state = ?'); params.push(state); }
+        if (zip_code !== undefined) { updates.push('zipcode = ?'); params.push(zip_code); }
+        if (country !== undefined) { updates.push('country = ?'); params.push(country); }
+        if (price_per_night !== undefined) { updates.push('price_per_night = ?'); params.push(price_per_night); }
+        if (bedrooms !== undefined) { updates.push('bedrooms = ?'); params.push(bedrooms); }
+        if (bathrooms !== undefined) { updates.push('bathrooms = ?'); params.push(bathrooms); }
+        if (max_guests !== undefined) { updates.push('max_guests = ?'); params.push(max_guests); }
+        if (available !== undefined) { updates.push('available = ?'); params.push(available !== false ? 1 : 0); }
+
+        // Handle amenities
+        if (amenities !== undefined) {
+            let parsedAmenities = amenities;
+            if (typeof amenities === 'string') {
+                try {
+                    parsedAmenities = JSON.parse(amenities);
+                } catch (err) {
+                    parsedAmenities = [];
+                }
+            }
+            updates.push('amenities = ?');
+            params.push(JSON.stringify(parsedAmenities));
+        }
+
+        // Handle new image uploads (append to existing images)
+        if (req.files && req.files.length > 0) {
+            const newImages = req.files.map(file => `/uploads/properties/${file.filename}`);
+
+            // Get existing images
+            const [propData] = await pool.query('SELECT images FROM properties WHERE id = ?', [id]);
+            let existingImages = [];
+            try {
+                if (propData[0].images && typeof propData[0].images === 'string') {
+                    existingImages = JSON.parse(propData[0].images);
+                }
+            } catch (e) {}
+
+            const allImages = [...existingImages, ...newImages];
+            updates.push('images = ?');
+            params.push(JSON.stringify(allImages));
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No fields to update'
+            });
+        }
+
+        // Add updated_at timestamp
+        updates.push('updated_at = NOW()');
+
+        // Add the property ID as the last parameter
+        params.push(id);
+
+        const query = `UPDATE properties SET ${updates.join(', ')} WHERE id = ?`;
+        await pool.query(query, params);
+
+        res.json({
+            success: true,
+            message: 'Property updated successfully'
+        });
+    } catch (error) {
+        console.error('Error updating property:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating property',
+            error: error.message
+        });
+    }
+};
+
+// DELETE property
+export const deleteProperty = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if user is logged in
+        if (!req.session.userId || req.session.userRole !== 'owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only owners can delete properties'
+            });
+        }
+
+        // First, verify this property belongs to the logged-in owner
+        const [existing] = await pool.query(
+            'SELECT owner_id FROM properties WHERE id = ?',
+            [id]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Property not found'
+            });
+        }
+
+        if (existing[0].owner_id !== req.session.userId) {
+            return res.status(403).json({
+                success: false,
+                message: 'You can only delete your own properties'
+            });
+        }
+
+        // Delete the property
+        await pool.query('DELETE FROM properties WHERE id = ?', [id]);
+
+        res.json({
+            success: true,
+            message: 'Property deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting property:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting property',
+            error: error.message
+        });
+    }
+};

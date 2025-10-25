@@ -103,9 +103,9 @@ export const createBooking = async (req, res) => {
 
     // Create booking
     const [result] = await db.query(
-      `INSERT INTO bookings 
-       (property_id, traveler_id, owner_id, check_in, check_out, number_of_guests, total_price, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')`,
+      `INSERT INTO bookings
+       (property_id, traveler_id, owner_id, check_in, check_out, number_of_guests, total_price, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', NOW(), NOW())`,
       [property_id, traveler_id, property.owner_id, check_in_date, check_out_date, guests, total_price]
     );
 
@@ -151,9 +151,12 @@ export const createBooking = async (req, res) => {
 // Get all bookings for the logged-in user
 export const getBookings = async (req, res) => {
   try {
+    console.log('📋 Get bookings - Session data:', req.session?.user);
     const userId = req.session.user.id;
     const userRole = req.session.user.role;
     const { status } = req.query;
+
+    console.log('🔍 Fetching bookings for userId:', userId, 'role:', userRole, 'status filter:', status);
 
     let query = `
       SELECT b.*, 
@@ -188,7 +191,12 @@ export const getBookings = async (req, res) => {
 
     query += ' ORDER BY b.created_at DESC';
 
+    console.log('📝 Executing query:', query);
+    console.log('📝 Query params:', params);
+
     const [bookings] = await db.query(query, params);
+
+    console.log('✅ Found bookings:', bookings.length);
 
     // Parse JSON fields
     const parsedBookings = bookings.map(booking => {

@@ -36,5 +36,53 @@ export const propertyService = {
         } catch (error: any) {
             throw error.response?.data || { message: 'Failed to fetch property' };
         }
+    },
+
+    // Get my properties (owner only)
+    getMyProperties: async () => {
+        try {
+            const response = await axios.get(`${API_URL}/properties/my/properties`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data || { message: 'Failed to fetch your properties' };
+        }
+    },
+
+    // Create new property
+    createProperty: async (formData: FormData) => {
+        try {
+            const response = await axios.post(`${API_URL}/properties`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data || { message: 'Failed to create property' };
+        }
+    },
+
+    // Update existing property
+    updateProperty: async (id: string | number, formData: FormData) => {
+        try {
+            const response = await axios.put(`${API_URL}/properties/${id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data || { message: 'Failed to update property' };
+        }
+    },
+
+    // Delete property
+    deleteProperty: async (id: string | number) => {
+        try {
+            const response = await axios.delete(`${API_URL}/properties/${id}`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data || { message: 'Failed to delete property' };
+        }
     }
 };

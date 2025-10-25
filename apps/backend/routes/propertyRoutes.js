@@ -12,4 +12,8 @@ router.post('/', upload.array('images', 10), propertyController.createProperty);
 router.get('/', propertyController.getAllProperties);
 router.get('/:id', propertyController.getPropertyById);
 
+// Owner-only update/delete routes (must own the property)
+router.put('/:id', upload.array('images', 10), propertyController.updateProperty);
+router.delete('/:id', propertyController.deleteProperty);
+
 export default router;
