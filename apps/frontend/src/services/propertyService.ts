@@ -1,9 +1,6 @@
-import axios from 'axios';
+import api from './api';
 
-const API_URL = 'http://localhost:5001/api';
-
-// Configure axios to send cookies
-axios.defaults.withCredentials = true;
+const API_URL = '/api';
 
 export const propertyService = {
     // Get all properties with optional filters
@@ -21,7 +18,7 @@ export const propertyService = {
             if (filters?.max_price) params.append('max_price', filters.max_price.toString());
             if (filters?.guests) params.append('guests', filters.guests.toString());
 
-            const response = await axios.get(`${API_URL}/properties?${params.toString()}`);
+            const response = await api.get(`${API_URL}/properties?${params.toString()}`);
             return response.data;
         } catch (error: any) {
             throw error.response?.data || { message: 'Failed to fetch properties' };
@@ -31,7 +28,7 @@ export const propertyService = {
     // Get single property by ID
     getPropertyById: async (id: string | number) => {
         try {
-            const response = await axios.get(`${API_URL}/properties/${id}`);
+            const response = await api.get(`${API_URL}/properties/${id}`);
             return response.data;
         } catch (error: any) {
             throw error.response?.data || { message: 'Failed to fetch property' };

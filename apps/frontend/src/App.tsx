@@ -11,7 +11,7 @@ import Favorites from './pages/Favorites';
 import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
 import AddProperty from './pages/AddProperty';
-import { Moon, Sun, Heart, Home as HomeIcon } from 'lucide-react';
+import { Moon, Sun, Heart, Home as HomeIcon, Calendar } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
