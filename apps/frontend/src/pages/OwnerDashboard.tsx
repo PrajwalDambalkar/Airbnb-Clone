@@ -215,8 +215,16 @@ export default function OwnerDashboard() {
               <Link
                 to="/owner/properties/new"
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                title="Add Property"
               >
                 <Plus className="w-5 h-5" />
+              </Link>
+              <Link
+                to="/owner/bookings"
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                title="Manage Bookings"
+              >
+                <Calendar className="w-5 h-5" />
               </Link>
               <button
                 onClick={handleLogout}
