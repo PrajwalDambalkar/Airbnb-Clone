@@ -83,7 +83,7 @@ function Header() {
   if (!user) return null;
 
   return (
-    <header className={`sticky top-0 z-50 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-b shadow-sm transition-colors`}>
+    <header className={`sticky top-0 z-[10001] overflow-visible ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-b shadow-sm transition-colors`}>
       <div className={`flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
         <button
           onClick={() => window.location.reload()}
@@ -119,7 +119,7 @@ function Header() {
           </button>
 
           {/* Profile Dropdown */}
-          <div className="relative profile-dropdown">
+          <div className="relative profile-dropdown z-[10000]">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className={`flex items-center gap-2 px-3 py-2 rounded-full transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-300'}`}
@@ -132,7 +132,7 @@ function Header() {
 
             {/* Dropdown Menu */}
             {showProfileMenu && (
-              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border overflow-hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border overflow-hidden z-[10000] ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <div className={`px-4 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                   <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.name}</p>
                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</p>
