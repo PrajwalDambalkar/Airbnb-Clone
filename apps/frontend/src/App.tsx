@@ -11,6 +11,7 @@ import Favorites from './pages/Favorites';
 import Bookings from './pages/Bookings';
 import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
+import OwnerBookings from './pages/OwnerBookings';
 import AddProperty from './pages/AddProperty';
 import { Moon, Sun, Heart, Home as HomeIcon, Calendar, Settings, LogOut, ChevronDown } from 'lucide-react';
 
@@ -273,6 +274,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AddProperty />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/owner/bookings"
+              element={
+                <ProtectedRoute>
+                  <OwnerBookings />
                 </ProtectedRoute>
               }
             />
