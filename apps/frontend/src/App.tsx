@@ -8,10 +8,11 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
+import Bookings from './pages/Bookings';
 import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
 import AddProperty from './pages/AddProperty';
-import { Moon, Sun, Heart, Home as HomeIcon } from 'lucide-react';
+import { Moon, Sun, Heart, Home as HomeIcon, Calendar, Settings, LogOut, ChevronDown } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
@@ -34,6 +35,7 @@ function Header() {
   const { user, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
   const [favCount, setFavCount] = useState<number>(0);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Load favourites count from localStorage
   useEffect(() => {
@@ -60,10 +62,28 @@ function Header() {
     };
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showProfileMenu]);
+
   if (!user) return null;
 
   return (
-    <header className={`sticky top-0 z-50 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-b shadow-sm transition-colors`}>
+    <header className={`sticky top-0 z-[10001] overflow-visible ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-b shadow-sm transition-colors`}>
       <div className={`flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
         <button
           onClick={() => window.location.reload()}
@@ -90,15 +110,6 @@ function Header() {
             </Link>
           )}
           
-          <Link to="/favorites" title="Favourites" className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
-            <Heart size={16} className="text-[#FF385C]" />
-            <span className="font-medium">Favourites</span>
-            <span className="ml-1 inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
-          </Link>
-          <Link to="/bookings" title="My Bookings" className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
-            <Calendar size={16} className="text-[#FF385C]" />
-            <span className="font-medium">Bookings</span>
-          </Link>
           <button
             onClick={toggleDarkMode}
             className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
@@ -106,12 +117,74 @@ function Header() {
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <button
-            onClick={logout}
-            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg border ${isDark ? 'text-gray-300 bg-gray-800 border-gray-600 hover:bg-gray-700' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'}`}
-          >
-            Logout
-          </button>
+
+          {/* Profile Dropdown */}
+          <div className="relative profile-dropdown z-[10000]">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-300'}`}
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <ChevronDown size={16} className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {showProfileMenu && (
+              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border overflow-hidden z-[10000] ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                <div className={`px-4 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.name}</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</p>
+                </div>
+                
+                <div className="py-1">
+                  <Link
+                    to="/favorites"
+                    onClick={() => setShowProfileMenu(false)}
+                    className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    <Heart size={16} className="text-[#FF385C]" />
+                    <span>Favourites</span>
+                    {favCount > 0 && (
+                      <span className="ml-auto inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
+                    )}
+                  </Link>
+                  
+                  <Link
+                    to="/bookings"
+                    onClick={() => setShowProfileMenu(false)}
+                    className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    <Calendar size={16} className="text-[#FF385C]" />
+                    <span>Bookings</span>
+                  </Link>
+                  
+                  <button
+                    disabled
+                    className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left cursor-not-allowed opacity-50 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
+                  >
+                    <Settings size={16} />
+                    <span>Edit Profile</span>
+                    <span className="ml-auto text-xs">(Soon)</span>
+                  </button>
+                </div>
+
+                <div className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      logout();
+                    }}
+                    className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'}`}
+                  >
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
@@ -210,6 +283,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Favorites />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookings"
+              element={
+                <ProtectedRoute>
+                  <Bookings />
                 </ProtectedRoute>
               }
             />

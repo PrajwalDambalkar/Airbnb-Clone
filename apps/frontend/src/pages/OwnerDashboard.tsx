@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
 import api from '../services/api';
-import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2 } from 'lucide-react';
+import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Heart } from 'lucide-react';
 import { getFirstImage } from '../utils/imageUtils';
 
 interface Property {
@@ -32,6 +32,8 @@ export default function OwnerDashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [favCount, setFavCount] = useState<number>(0);
 
   const fetchMyProperties = async () => {
     try {
@@ -57,6 +59,49 @@ export default function OwnerDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
+  // Load favourites count from localStorage
+  useEffect(() => {
+    const loadFavs = () => {
+      try {
+        const raw = localStorage.getItem('favorites');
+        const arr = raw ? JSON.parse(raw) : [];
+        setFavCount(Array.isArray(arr) ? arr.length : 0);
+      } catch (e) {
+        setFavCount(0);
+      }
+    };
+
+    loadFavs();
+
+    // Listen for cross-tab or app-level updates
+    const handler = () => loadFavs();
+    window.addEventListener('storage', handler);
+    window.addEventListener('favoritesUpdated', handler as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener('favoritesUpdated', handler as EventListener);
+    };
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showProfileMenu]);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -69,7 +114,7 @@ export default function OwnerDashboard() {
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header/Navigation */}
-      <header className={`sticky top-0 z-50 shadow-md ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
+      <header className={`sticky top-0 z-[10001] overflow-visible shadow-md ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -83,27 +128,13 @@ export default function OwnerDashboard() {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              <Link
-                to="/owner/dashboard"
-                className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
-              >
-                <Home className="w-4 h-4" />
-                <span>Dashboard</span>
-              </Link>
+            <nav className="items-center hidden space-x-4 md:flex lg:space-x-6">
               <Link
                 to="/owner/properties/new"
                 className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Property</span>
-              </Link>
-              <Link
-                to="/owner/bookings"
-                className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Bookings</span>
               </Link>
               
               {/* Divider */}
@@ -120,25 +151,77 @@ export default function OwnerDashboard() {
                 <span>Browse Properties</span>
               </Link>
               
-              {/* User Menu */}
-              <div className="flex items-center space-x-3">
-                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {user?.name}
-                </span>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-pink-900 text-pink-200' : 'bg-pink-100 text-[#FF385C]'}`}>
-                  🏠 Owner
-                </span>
+              {/* User Menu - Profile Dropdown */}
+              <div className="relative profile-dropdown z-[10000]">
                 <button
-                  onClick={handleLogout}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isDark ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600 border border-gray-600' : 'bg-white hover:bg-gray-50 border border-gray-300'}`}
                 >
-                  Logout
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
+                    {user?.name.charAt(0).toUpperCase()}
+                  </div>
+                  <ChevronDown size={16} className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
                 </button>
+
+                {/* Dropdown Menu */}
+                {showProfileMenu && (
+                  <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border overflow-hidden z-[10000] ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                    <div className={`px-4 py-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                      <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</p>
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email}</p>
+                    </div>
+                    
+                    <div className="py-1">
+                      <Link
+                        to="/favorites"
+                        onClick={() => setShowProfileMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        <Heart size={16} className="text-[#FF385C]" />
+                        <span>Favourites</span>
+                        {favCount > 0 && (
+                          <span className="ml-auto inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
+                        )}
+                      </Link>
+                      
+                      <Link
+                        to="/owner/bookings"
+                        onClick={() => setShowProfileMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        <Calendar size={16} className="text-[#FF385C]" />
+                        <span>Bookings</span>
+                      </Link>
+                      
+                      <button
+                        disabled
+                        className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left cursor-not-allowed opacity-50 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
+                      >
+                        <Settings size={16} />
+                        <span>Edit Profile</span>
+                        <span className="ml-auto text-xs">(Soon)</span>
+                      </button>
+                    </div>
+
+                    <div className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                      <button
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          handleLogout();
+                        }}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'}`}
+                      >
+                        <LogOut size={16} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </nav>
 
             {/* Mobile Navigation */}
-            <div className="flex md:hidden items-center space-x-2">
+            <div className="flex items-center space-x-2 md:hidden">
               <Link
                 to="/"
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]' : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'}`}
