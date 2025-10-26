@@ -1,8 +1,5 @@
 // services/agentService.ts
-import axios from 'axios';
 import api from './api';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export interface AgentPlanRequest {
   booking_id: number;
@@ -112,6 +109,43 @@ const agentService = {
       return response.data;
     } catch (error: any) {
       console.error('Process query error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Send a chat message to the AI assistant
+   */
+  chat: async (request: { 
+    message: string; 
+    booking_id?: number;
+    conversation_history?: Array<{ role: string; content: string }>;
+  }): Promise<{ message: string; data?: any }> => {
+    try {
+      console.log('📡 [Frontend] Calling API:', '/api/agent/chat');
+      console.log('📦 [Frontend] Request payload:', {
+        ...request,
+        conversation_history: request.conversation_history ? `${request.conversation_history.length} messages` : 'none'
+      });
+      
+      const response = await api.post<{ success: boolean; message: string; data?: any }>(
+        '/api/agent/chat',
+        request
+      );
+      
+      console.log('✅ [Frontend] Chat response:', response.data);
+      return {
+        message: response.data.message,
+        data: response.data.data
+      };
+    } catch (error: any) {
+      console.error('❌ [Frontend] Chat error:', error);
+      console.error('🔍 [Frontend] Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url
+      });
       throw error;
     }
   }

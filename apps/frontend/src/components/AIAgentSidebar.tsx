@@ -1,13 +1,14 @@
 // components/AIAgentSidebar.tsx
-import { useState } from 'react';
-import { X, Sparkles, Send, Loader2, ChevronDown, ChevronUp, MapPin, Calendar, DollarSign, Utensils, Sun } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { X, Sparkles, Send, Loader2, MapPin, Calendar, User, Bot, Sun, Utensils, ChevronDown, ChevronUp } from 'lucide-react';
 import { useDarkMode } from '../App';
-import agentService, { type AgentPlanResponse, type DayPlan } from '../services/agentService';
+import { useAuth } from '../context/AuthContext';
+import agentService from '../services/agentService';
 
 interface AIAgentSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  bookingId: number;
+  bookingId?: number;
   bookingDetails?: {
     property_name: string;
     city: string;
@@ -18,112 +19,131 @@ interface AIAgentSidebarProps {
   };
 }
 
-export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDetails }: AIAgentSidebarProps) {
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  data?: any; // For structured data like booking lists or plans
+}
+
+export default function AIAgentSidebar({ isOpen, onClose, bookingId }: AIAgentSidebarProps) {
   const { isDark } = useDarkMode();
+  const { user } = useAuth();
   
   // State
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [plan, setPlan] = useState<AgentPlanResponse | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Preferences state
-  const [showPreferences, setShowPreferences] = useState(false);
-  const [preferences, setPreferences] = useState({
-    budget: 'medium',
-    interests: [] as string[],
-    dietary_restrictions: [] as string[],
-    mobility_needs: {
-      wheelchair: false,
-      child_friendly: false
+  // State for expandable itinerary sections
+  const [expandedDays, setExpandedDays] = useState<{[key: string]: number | null}>({});
+  const [showRestaurants, setShowRestaurants] = useState<{[key: string]: boolean}>({});
+  const [showPacking, setShowPacking] = useState<{[key: string]: boolean}>({});
+  
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+  
+  // Initialize with welcome message
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `Hi ${user?.name || 'there'}! 👋 I'm your AI travel assistant. I can help you with:\n\n• View your bookings\n• Plan trips for your bookings\n• Get travel recommendations\n• Answer questions about your travels\n\nTry asking me "Show me my bookings" or "Tell me about my upcoming trips!"`,
+        timestamp: new Date()
+      }]);
     }
-  });
-  
-  // Expandable sections
-  const [expandedDay, setExpandedDay] = useState<number | null>(null);
-  const [showActivities, setShowActivities] = useState(true);
-  const [showRestaurants, setShowRestaurants] = useState(true);
-  const [showPacking, setShowPacking] = useState(true);
+  }, [isOpen, user]);
 
-  const handleGeneratePlan = async () => {
-    console.log('🚀 handleGeneratePlan called');
-    console.log('📋 Booking ID:', bookingId);
-    console.log('📍 Booking Details:', bookingDetails);
-    console.log('💬 Query:', query);
-    console.log('⚙️ Preferences:', preferences);
+  const handleSendMessage = async () => {
+    if (!query.trim()) return;
     
-    if (!bookingId || bookingId === 0) {
-      console.error('❌ Invalid booking ID:', bookingId);
-      setError('❌ No booking selected. Booking ID is ' + bookingId);
-      return;
-    }
+    // Add user message to chat
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: query.trim(),
+      timestamp: new Date()
+    };
     
+    setMessages(prev => [...prev, userMessage]);
+    setQuery('');
     setLoading(true);
-    setError(null);
     
     try {
-      console.log('📡 Calling agent service with:', {
+      console.log('💬 Sending chat message:', userMessage.content);
+      
+      // Prepare conversation history (last 10 messages for context)
+      const conversationHistory = [...messages, userMessage]
+        .slice(-10) // Keep last 10 messages
+        .map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }));
+      
+      // Call conversational API with history
+      const response = await agentService.chat({
+        message: userMessage.content,
         booking_id: bookingId,
-        query: query || undefined,
-        preferences: preferences
+        conversation_history: conversationHistory
       });
       
-      const response = await agentService.generatePlan({
-        booking_id: bookingId,
-        query: query || undefined,
-        preferences: preferences
-      });
+      console.log('✅ Chat response:', response);
       
-      console.log('✅ Agent service response:', response);
-      setPlan(response);
+      // Add assistant response
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response.message,
+        timestamp: new Date(),
+        data: response.data // Could contain bookings, plans, etc.
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      
+      // Initialize expandable sections for new messages with plans
+      if (response.data?.plan) {
+        setShowRestaurants({...showRestaurants, [assistantMessage.id]: true});
+        setShowPacking({...showPacking, [assistantMessage.id]: true});
+      }
+      
     } catch (err: any) {
-      console.error('❌ Plan generation error:', err);
-      console.error('Error details:', {
-        code: err.code,
-        status: err.response?.status,
-        message: err.response?.data?.message,
-        fullError: err
-      });
+      console.error('❌ Chat error:', err);
       
-      // Provide specific error messages based on error type
-      let errorMessage = 'Failed to generate travel plan.';
+      let errorMessage = 'Sorry, I encountered an error. Please try again.';
       
       if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
-        errorMessage = '🔌 Cannot connect to AI service. Please ensure the agent service is running on port 8000.';
+        errorMessage = '🔌 Cannot connect to AI service. Please ensure the agent service is running.';
       } else if (err.response?.status === 503) {
-        errorMessage = '🤖 AI service is not available. Please start the agent service and try again.';
+        errorMessage = '🤖 AI service is not available. Please start the agent service.';
       } else if (err.response?.status === 504) {
-        errorMessage = '⏱️ Request timed out. The AI is taking longer than expected. This usually happens on first request - please try again.';
-      } else if (err.response?.status === 404) {
-        errorMessage = '📋 Booking not found. Please ensure you have a valid booking. (Booking ID: ' + bookingId + ')';
-      } else if (err.response?.status === 403) {
-        errorMessage = '🔒 Authentication error. Please refresh the page and try again.';
+        errorMessage = '⏱️ Request timed out. Please try again.';
       } else if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       }
       
-      setError(errorMessage);
+      const errorMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: errorMessage,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleInterest = (interest: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest]
-    }));
-  };
-
-  const toggleDietary = (diet: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      dietary_restrictions: prev.dietary_restrictions.includes(diet)
-        ? prev.dietary_restrictions.filter(d => d !== diet)
-        : [...prev.dietary_restrictions, diet]
-    }));
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   if (!isOpen) return null;
@@ -140,14 +160,14 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDeta
       <div
         className={`fixed right-0 top-0 h-full w-full md:w-[500px] ${
           isDark ? 'bg-gray-900' : 'bg-white'
-        } shadow-2xl z-[9999] overflow-y-auto transition-transform`}
+        } shadow-2xl z-[9999] flex flex-col transition-transform`}
       >
         {/* Header */}
-        <div className={`sticky top-0 ${isDark ? 'bg-gray-800' : 'bg-white'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} p-4 flex items-center justify-between z-10`}>
+        <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} p-4 flex items-center justify-between`}>
           <div className="flex items-center gap-2">
             <Sparkles className="text-[#FF385C]" size={24} />
             <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              AI Travel Planner
+              AI Travel Assistant
             </h2>
           </div>
           <button
@@ -160,333 +180,142 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDeta
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-        {/* No Bookings Message */}
-        {!bookingDetails && bookingId === 0 && (
-          <div className={`p-6 rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'} border-2`}>
-            <div className="text-center space-y-4">
-              <div className="text-6xl">✈️</div>
-              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                No Active Bookings
-              </h3>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                To use the AI Travel Planner, you need to have an active booking first.
-              </p>
-              <div className={`mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-white'} text-left`}>
-                <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  How to get started:
-                </p>
-                <ol className={`text-sm space-y-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <li className="flex items-start">
-                    <span className="mr-2">1️⃣</span>
-                    <span>Browse properties on the home page</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2">2️⃣</span>
-                    <span>Select a property and create a booking</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2">3️⃣</span>
-                    <span>Wait for the owner to accept your booking</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2">4️⃣</span>
-                    <span>Come back here to plan your perfect trip! 🎉</span>
-                  </li>
-                </ol>
-              </div>
-              <button
-                onClick={onClose}
-                className={`mt-4 px-6 py-2 rounded-lg font-medium transition-colors ${
-                  isDark 
-                    ? 'bg-pink-600 hover:bg-pink-700 text-white' 
-                    : 'bg-[#FF385C] hover:bg-[#E31C5F] text-white'
-                }`}
-              >
-                Browse Properties
-              </button>
-            </div>
+        {/* Chat Messages */}
+        <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {message.role === 'assistant' && (
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full ${isDark ? 'bg-pink-900' : 'bg-pink-100'} flex items-center justify-center`}>
+                  <Bot size={18} className="text-[#FF385C]" />
           </div>
         )}
 
-        {/* Booking Info */}
-        {bookingDetails && (
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
-            <h3 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Your Booking
-            </h3>
-            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              <MapPin size={14} className="inline mr-1" />
-              {bookingDetails.city}, {bookingDetails.state}
-            </p>
-            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              <Calendar size={14} className="inline mr-1" />
-              {new Date(bookingDetails.check_in).toLocaleDateString()} - {new Date(bookingDetails.check_out).toLocaleDateString()}
-            </p>
-          </div>
-        )}
-
-          {/* Query Input - Only show if there's a booking */}
-          {bookingDetails && (
-          <>
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Tell us about your trip
-            </label>
-            <textarea
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., We're a family with two kids, vegan diet, love outdoor activities..."
-              rows={3}
-              className={`w-full px-3 py-2 rounded-lg border ${
-                isDark
-                  ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-              } focus:ring-2 focus:ring-[#FF385C] focus:border-transparent`}
-            />
-          </div>
-
-          {/* Preferences Toggle */}
-          <button
-            onClick={() => setShowPreferences(!showPreferences)}
-            className={`w-full flex items-center justify-between p-3 rounded-lg ${
-              isDark ? 'bg-gray-800 hover:bg-gray-750' : 'bg-gray-50 hover:bg-gray-100'
-            } transition-colors`}
-          >
-            <span className={`font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Advanced Preferences
-            </span>
-            {showPreferences ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </button>
-
-          {/* Preferences Form */}
-          {showPreferences && (
-            <div className="space-y-4">
-              {/* Budget */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Budget
-                </label>
-                <select
-                  value={preferences.budget}
-                  onChange={(e) => setPreferences({ ...preferences, budget: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-lg border ${
-                    isDark
-                      ? 'bg-gray-800 border-gray-700 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
+              <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : ''}`}>
+                <div
+                  className={`rounded-2xl px-4 py-3 ${
+                    message.role === 'user'
+                      ? isDark
+                        ? 'bg-pink-900 text-white'
+                        : 'bg-[#FF385C] text-white'
+                      : isDark
+                      ? 'bg-gray-800 text-gray-100'
+                      : 'bg-white text-gray-900'
                   }`}
                 >
-                  <option value="low">Budget-friendly</option>
-                  <option value="medium">Moderate</option>
-                  <option value="high">Premium</option>
-                  <option value="luxury">Luxury</option>
-                </select>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               </div>
 
-              {/* Interests */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Interests
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {['adventure', 'food', 'culture', 'relaxation', 'nightlife', 'nature', 'shopping'].map((interest) => (
-                    <button
-                      key={interest}
-                      onClick={() => toggleInterest(interest)}
-                      className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                        preferences.interests.includes(interest)
-                          ? 'bg-[#FF385C] text-white'
-                          : isDark
-                          ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {interest}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dietary */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Dietary Restrictions
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {['vegan', 'vegetarian', 'gluten-free', 'halal', 'kosher'].map((diet) => (
-                    <button
-                      key={diet}
-                      onClick={() => toggleDietary(diet)}
-                      className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                        preferences.dietary_restrictions.includes(diet)
-                          ? 'bg-[#FF385C] text-white'
-                          : isDark
-                          ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {diet}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mobility */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Accessibility
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={preferences.mobility_needs.wheelchair}
-                      onChange={(e) => setPreferences({
-                        ...preferences,
-                        mobility_needs: { ...preferences.mobility_needs, wheelchair: e.target.checked }
-                      })}
-                      className="rounded border-gray-300 text-[#FF385C] focus:ring-[#FF385C]"
-                    />
-                    <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Wheelchair accessible
-                    </span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={preferences.mobility_needs.child_friendly}
-                      onChange={(e) => setPreferences({
-                        ...preferences,
-                        mobility_needs: { ...preferences.mobility_needs, child_friendly: e.target.checked }
-                      })}
-                      className="rounded border-gray-300 text-[#FF385C] focus:ring-[#FF385C]"
-                    />
-                    <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Child-friendly activities
-                    </span>
-                  </label>
-                </div>
-              </div>
+                {/* Show structured data if present (e.g., bookings list) */}
+                {message.data && message.data.bookings && (
+                  <div className="mt-2 space-y-2">
+                    {message.data.bookings.map((booking: any) => (
+                      <div
+                        key={booking.id}
+                        className={`p-3 rounded-lg border ${
+                          isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                        }`}
+                      >
+                        <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {booking.property_name}
+                        </p>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <MapPin size={12} className="inline mr-1" />
+                          {booking.city}, {booking.state}
+                        </p>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <Calendar size={12} className="inline mr-1" />
+                          {new Date(booking.check_in).toLocaleDateString()} - {new Date(booking.check_out).toLocaleDateString()}
+                        </p>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          booking.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                    ))}
             </div>
           )}
 
-          {/* Generate Button */}
-          <button
-            onClick={handleGeneratePlan}
-            disabled={loading}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-              loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#FF385C] hover:bg-[#E31C5F] text-white'
-            }`}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                Generating your plan...
-              </>
-            ) : (
-              <>
-                <Sparkles size={20} />
-                Generate Travel Plan
-              </>
-            )}
-          </button>
-          </>
-          )}
-          {/* End of form inputs - only shown with booking */}
-
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
-
-          {/* Results */}
-          {plan && (
-            <div className="space-y-6 mt-8">
-              {/* Destination Header */}
-              <div className={`p-4 rounded-lg ${isDark ? 'bg-gradient-to-r from-pink-900/30 to-purple-900/30' : 'bg-gradient-to-r from-pink-50 to-purple-50'}`}>
-                <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {plan.destination}
-                </h3>
-                <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {new Date(plan.dates.check_in).toLocaleDateString()} - {new Date(plan.dates.check_out).toLocaleDateString()}
-                </p>
-              </div>
-
+                {/* Show travel plan/itinerary if present */}
+                {message.data && message.data.plan && (
+                  <div className="mt-3 space-y-3">
               {/* Weather Summary */}
-              {plan.weather_summary && (
-                <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                    {message.data.plan.weather_summary && (
+                      <div className={`p-3 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
                   <div className="flex items-start gap-2">
-                    <Sun className="text-blue-500 mt-1" size={20} />
+                          <Sun className="text-blue-500 mt-1" size={16} />
                     <div>
-                      <h4 className={`font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Weather</h4>
-                      <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{plan.weather_summary}</p>
+                            <p className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Weather</p>
+                            <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{message.data.plan.weather_summary}</p>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Daily Itinerary */}
+                    {message.data.plan.itinerary && message.data.plan.itinerary.length > 0 && (
               <div>
-                <h4 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <p className={`text-xs font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   Daily Itinerary
-                </h4>
-                <div className="space-y-3">
-                  {plan.itinerary.map((day) => (
+                        </p>
+                        <div className="space-y-2">
+                          {message.data.plan.itinerary.map((day: any) => (
                     <div
                       key={day.day_number}
                       className={`rounded-lg border ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
                     >
                       <button
-                        onClick={() => setExpandedDay(expandedDay === day.day_number ? null : day.day_number)}
-                        className="w-full p-4 flex items-center justify-between"
+                                onClick={() => setExpandedDays({...expandedDays, [message.id]: expandedDays[message.id] === day.day_number ? null : day.day_number})}
+                                className="w-full p-3 flex items-center justify-between text-left"
                       >
-                        <div className="text-left">
-                          <h5 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                <div>
+                                  <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             Day {day.day_number}
-                          </h5>
-                          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {new Date(day.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                  </p>
+                                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                           </p>
                         </div>
-                        {expandedDay === day.day_number ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                {expandedDays[message.id] === day.day_number ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                       
-                      {expandedDay === day.day_number && (
-                        <div className={`px-4 pb-4 space-y-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                              {expandedDays[message.id] === day.day_number && (
+                                <div className={`px-3 pb-3 space-y-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                           {day.morning && (
-                            <div className="pt-3">
-                              <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <div className="pt-2">
+                                      <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                 {day.morning.time} - Morning
                               </p>
-                              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{day.morning.activity}</p>
+                                      <p className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{day.morning.activity}</p>
                               {day.morning.description && (
-                                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{day.morning.description}</p>
+                                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{day.morning.description}</p>
                               )}
                             </div>
                           )}
                           {day.afternoon && (
                             <div>
-                              <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                 {day.afternoon.time} - Afternoon
                               </p>
-                              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{day.afternoon.activity}</p>
+                                      <p className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{day.afternoon.activity}</p>
                               {day.afternoon.description && (
-                                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{day.afternoon.description}</p>
+                                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{day.afternoon.description}</p>
                               )}
                             </div>
                           )}
                           {day.evening && (
                             <div>
-                              <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                 {day.evening.time} - Evening
                               </p>
-                              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{day.evening.activity}</p>
+                                      <p className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{day.evening.activity}</p>
                               {day.evening.description && (
-                                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{day.evening.description}</p>
+                                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{day.evening.description}</p>
                               )}
                             </div>
                           )}
@@ -496,59 +325,48 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDeta
                   ))}
                 </div>
               </div>
+                    )}
 
               {/* Restaurants */}
-              {plan.restaurants && plan.restaurants.length > 0 && (
+                    {message.data.plan.restaurants && message.data.plan.restaurants.length > 0 && (
                 <div>
                   <button
-                    onClick={() => setShowRestaurants(!showRestaurants)}
-                    className="w-full flex items-center justify-between mb-3"
-                  >
-                    <h4 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      <Utensils size={20} className="inline mr-2" />
-                      Restaurants ({plan.restaurants.length})
-                    </h4>
-                    {showRestaurants ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                          onClick={() => setShowRestaurants({...showRestaurants, [message.id]: !showRestaurants[message.id]})}
+                          className="w-full flex items-center justify-between mb-2"
+                        >
+                          <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <Utensils size={14} className="inline mr-1" />
+                            Restaurants ({message.data.plan.restaurants.length})
+                          </p>
+                          {showRestaurants[message.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </button>
                   
-                  {showRestaurants && (
-                    <div className="space-y-3">
-                      {plan.restaurants.map((restaurant, idx) => (
+                        {showRestaurants[message.id] && (
+                          <div className="space-y-2">
+                            {message.data.plan.restaurants.map((restaurant: any, idx: number) => (
                         <div
                           key={idx}
-                          className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}
+                                className={`p-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}
                         >
-                          <div className="flex items-start justify-between mb-2">
-                            <h5 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                <div className="flex items-start justify-between mb-1">
+                                  <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                               {restaurant.name}
-                            </h5>
+                                  </p>
                             {restaurant.price_tier && (
-                              <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                                    <span className={`text-xs px-2 py-0.5 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
                                 {restaurant.price_tier}
                               </span>
                             )}
                           </div>
                           {restaurant.cuisine && (
-                            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                               {restaurant.cuisine}
                             </p>
                           )}
                           {restaurant.description && (
-                            <p className={`text-sm mt-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                               {restaurant.description}
                             </p>
-                          )}
-                          {restaurant.dietary_tags && restaurant.dietary_tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {restaurant.dietary_tags.map((tag, i) => (
-                                <span
-                                  key={i}
-                                  className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
                           )}
                         </div>
                       ))}
@@ -558,23 +376,23 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDeta
               )}
 
               {/* Packing List */}
-              {plan.packing_list && plan.packing_list.length > 0 && (
+                    {message.data.plan.packing_list && message.data.plan.packing_list.length > 0 && (
                 <div>
                   <button
-                    onClick={() => setShowPacking(!showPacking)}
-                    className="w-full flex items-center justify-between mb-3"
+                          onClick={() => setShowPacking({...showPacking, [message.id]: !showPacking[message.id]})}
+                          className="w-full flex items-center justify-between mb-2"
                   >
-                    <h4 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       Packing List
-                    </h4>
-                    {showPacking ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                          </p>
+                          {showPacking[message.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </button>
                   
-                  {showPacking && (
-                    <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
-                      <ul className="space-y-2">
-                        {plan.packing_list.map((item, idx) => (
-                          <li key={idx} className={`text-sm flex items-start gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {showPacking[message.id] && (
+                          <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                            <ul className="space-y-1">
+                              {message.data.plan.packing_list.map((item: string, idx: number) => (
+                                <li key={idx} className={`text-xs flex items-start gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             <span className="text-[#FF385C]">•</span>
                             <span>{item}</span>
                           </li>
@@ -586,14 +404,14 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDeta
               )}
 
               {/* Local Tips */}
-              {plan.local_tips && plan.local_tips.length > 0 && (
-                <div className={`p-4 rounded-lg ${isDark ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
-                  <h4 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {message.data.plan.local_tips && message.data.plan.local_tips.length > 0 && (
+                      <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
+                        <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Local Tips
-                  </h4>
+                        </p>
                   <ul className="space-y-1">
-                    {plan.local_tips.map((tip, idx) => (
-                      <li key={idx} className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {message.data.plan.local_tips.map((tip: string, idx: number) => (
+                            <li key={idx} className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                         💡 {tip}
                       </li>
                     ))}
@@ -602,6 +420,61 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId, bookingDeta
               )}
             </div>
           )}
+                
+                <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+              
+              {message.role === 'user' && (
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} flex items-center justify-center`}>
+                  <User size={18} className={isDark ? 'text-gray-400' : 'text-gray-600'} />
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {loading && (
+            <div className="flex gap-3">
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full ${isDark ? 'bg-pink-900' : 'bg-pink-100'} flex items-center justify-center`}>
+                <Bot size={18} className="text-[#FF385C]" />
+              </div>
+              <div className={`rounded-2xl px-4 py-3 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+                <Loader2 className="animate-spin text-[#FF385C]" size={20} />
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area */}
+        <div className={`border-t ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} p-4`}>
+          <div className="flex gap-2">
+            <textarea
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me about your bookings, trips, or travel plans..."
+              rows={1}
+              className={`flex-1 px-4 py-3 rounded-lg border resize-none ${
+                isDark
+                  ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-500'
+                  : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+              } focus:ring-2 focus:ring-[#FF385C] focus:border-transparent`}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={loading || !query.trim()}
+              className={`px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
+                loading || !query.trim()
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#FF385C] hover:bg-[#E31C5F] text-white'
+              }`}
+            >
+              <Send size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </>

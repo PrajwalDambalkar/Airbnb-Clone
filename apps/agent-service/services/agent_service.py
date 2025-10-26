@@ -176,6 +176,167 @@ class AgentService:
         # TODO: Implement NLU query processing
         # For now, just return the query
         return query
+    
+    async def process_chat(self, user_id: int, message: str, booking_id: int = None, conversation_history: list = None) -> Dict[str, Any]:
+        """
+        Process conversational chat message
+        
+        Determines intent and responds appropriately:
+        - Show bookings
+        - Plan a trip
+        - Answer questions
+        - General conversation
+        """
+        
+        logger.info(f"💬 Processing chat for user {user_id}: '{message}' (history: {len(conversation_history or [])} msgs)")
+        
+        try:
+            # Normalize message for intent detection
+            message_lower = message.lower().strip()
+            conversation_history = conversation_history or []
+            
+            # Intent detection
+            is_booking_query = any(keyword in message_lower for keyword in [
+                'booking', 'bookings', 'reservation', 'reservations', 
+                'my trips', 'my trip', 'upcoming trip', 'my travel'
+            ])
+            
+            is_plan_query = any(keyword in message_lower for keyword in [
+                'plan', 'itinerary', 'schedule', 'activities', 
+                'what to do', 'where to go', 'recommend'
+            ])
+            
+            # INTENT 1: Show user's bookings
+            if is_booking_query and not is_plan_query:
+                logger.info("🎯 Intent: Show bookings")
+                
+                # Fetch user's bookings from MySQL
+                bookings = self.mysql.get_user_bookings(user_id)
+                
+                if not bookings or len(bookings) == 0:
+                    return {
+                        "message": "You don't have any bookings yet. Browse our properties and make your first booking to start your travel journey! ✈️",
+                        "data": None
+                    }
+                
+                # Filter for active bookings (ACCEPTED or PENDING)
+                active_bookings = [b for b in bookings if b['status'] in ['ACCEPTED', 'PENDING']]
+                
+                if len(active_bookings) == 0:
+                    return {
+                        "message": f"You have {len(bookings)} booking(s), but none are currently active. All your bookings have been cancelled or rejected.",
+                        "data": {"bookings": bookings}
+                    }
+                
+                # Create friendly message
+                booking_word = "booking" if len(active_bookings) == 1 else "bookings"
+                message_parts = [
+                    f"You have {len(active_bookings)} active {booking_word}! 🎉\n"
+                ]
+                
+                for i, booking in enumerate(active_bookings[:3], 1):  # Show max 3 in text
+                    status_emoji = "✅" if booking['status'] == 'ACCEPTED' else "⏳"
+                    message_parts.append(
+                        f"{status_emoji} {booking['property_name']} in {booking['city']}, {booking['state']}"
+                    )
+                
+                if len(active_bookings) > 3:
+                    message_parts.append(f"\n...and {len(active_bookings) - 3} more!")
+                
+                message_parts.append("\n\nWould you like me to help you plan any of these trips?")
+                
+                return {
+                    "message": "\n".join(message_parts),
+                    "data": {"bookings": active_bookings}
+                }
+            
+            # INTENT 2: Plan a trip
+            elif is_plan_query and booking_id:
+                logger.info(f"🎯 Intent: Plan trip for booking {booking_id}")
+                
+                # Use existing plan generation
+                from models.schemas import AgentRequest, UserPreferences
+                
+                request = AgentRequest(
+                    booking_id=booking_id,
+                    user_id=user_id,
+                    query=message,
+                    preferences=UserPreferences(),
+                    secret="internal"
+                )
+                
+                plan = await self.generate_plan(request)
+                
+                return {
+                    "message": f"🎉 I've created a personalized travel plan for your trip to {plan['destination']}! Check out the itinerary below.",
+                    "data": {"plan": plan}
+                }
+            
+            # INTENT 3: Need booking context for planning
+            elif is_plan_query and not booking_id:
+                logger.info("🎯 Intent: Plan trip (but no booking specified)")
+                
+                # Fetch bookings
+                bookings = self.mysql.get_user_bookings(user_id)
+                active_bookings = [b for b in bookings if b['status'] == 'ACCEPTED']
+                
+                if len(active_bookings) == 0:
+                    return {
+                        "message": "To create a travel plan, you'll need an accepted booking first. Would you like to see your current bookings?",
+                        "data": None
+                    }
+                elif len(active_bookings) == 1:
+                    return {
+                        "message": f"I can help you plan your trip to {active_bookings[0]['city']}, {active_bookings[0]['state']}! What kind of activities are you interested in? (adventure, food, culture, relaxation, etc.)",
+                        "data": {"bookings": active_bookings}
+                    }
+                else:
+                    return {
+                        "message": f"You have {len(active_bookings)} accepted bookings. Which trip would you like me to help you plan?",
+                        "data": {"bookings": active_bookings}
+                    }
+            
+            # INTENT 4: General conversation / help
+            else:
+                logger.info("🎯 Intent: General conversation")
+                
+                # Build conversation context for LLM
+                context_messages = "\n".join([
+                    f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
+                    for msg in conversation_history[-6:]  # Last 6 messages for context
+                ])
+                
+                # Use LLM for general responses with conversation context
+                prompt = f"""You are a friendly AI travel assistant for an Airbnb-like platform.
+
+CONVERSATION HISTORY:
+{context_messages if context_messages else 'No previous conversation'}
+
+USER'S CURRENT MESSAGE: "{message}"
+
+Provide a helpful, friendly response. Keep it concise (2-3 sentences max) and remember the conversation context.
+
+IMPORTANT: 
+- If they mentioned specific cities/bookings earlier, remember that context
+- If they're asking follow-up questions about a location, reference what you know
+- If they express interests (like "Hollywood glamour" or "beaches"), incorporate that into your response
+- If relevant, suggest they can ask to see their bookings or get help planning a trip
+
+Response:"""
+                
+                llm_response = await self.llm.chat(prompt)
+                
+                return {
+                    "message": llm_response,
+                    "data": None
+                }
+                
+        except Exception as e:
+            logger.error(f"❌ Chat processing failed: {e}", exc_info=True)
+            return {
+                "message": "I'm sorry, I encountered an error processing your request. Please try again or rephrase your question.",
+                "data": None
+            }
 
 # Global instance
 agent_service = AgentService()

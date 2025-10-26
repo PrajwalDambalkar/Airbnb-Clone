@@ -81,3 +81,57 @@ async def process_natural_language_query(
             detail=str(e)
         )
 
+@router.post("/chat")
+async def chat_with_assistant(request: dict):
+    """
+    Conversational chat endpoint for AI assistant
+    Handles queries like "show me my bookings", "plan a trip", etc.
+    """
+    
+    try:
+        # Verify secret
+        secret = request.get("secret", "")
+        if secret != AGENT_SECRET:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid authentication token"
+            )
+        
+        user_id = request.get("user_id")
+        message = request.get("message", "")
+        booking_id = request.get("booking_id")
+        conversation_history = request.get("conversation_history", [])
+        
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="user_id is required"
+            )
+        
+        if not message:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="message is required"
+            )
+        
+        logger.info(f"💬 Chat: user={user_id}, message='{message[:50]}...', booking={booking_id}, history={len(conversation_history)} msgs")
+        
+        # Process chat message
+        response = await agent_service.process_chat(
+            user_id=user_id,
+            message=message,
+            booking_id=booking_id,
+            conversation_history=conversation_history
+        )
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Chat processing error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process chat message: {str(e)}"
+        )
+

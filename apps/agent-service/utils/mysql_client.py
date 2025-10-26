@@ -114,6 +114,59 @@ class MySQLClient:
             "mobility_needs": {}
         }
     
+    def get_user_bookings(self, user_id: int) -> List[Dict[str, Any]]:
+        """
+        Fetch all user's bookings (current and upcoming)
+        """
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor(dictionary=True)
+            
+            query = """
+                SELECT 
+                    b.id,
+                    b.check_in,
+                    b.check_out,
+                    b.number_of_guests,
+                    b.status,
+                    b.total_price,
+                    p.property_name,
+                    p.city,
+                    p.state,
+                    p.property_type,
+                    p.images
+                FROM bookings b
+                JOIN properties p ON b.property_id = p.id
+                WHERE b.traveler_id = %s
+                ORDER BY b.check_in DESC
+            """
+            
+            cursor.execute(query, (user_id,))
+            results = cursor.fetchall()
+            
+            # Convert dates to strings and parse JSON fields
+            for result in results:
+                if result.get('check_in'):
+                    result['check_in'] = result['check_in'].strftime('%Y-%m-%d')
+                if result.get('check_out'):
+                    result['check_out'] = result['check_out'].strftime('%Y-%m-%d')
+                if result.get('images'):
+                    try:
+                        result['images'] = json.loads(result['images'])
+                    except:
+                        result['images'] = []
+            
+            logger.info(f"✅ Found {len(results)} bookings for user {user_id}")
+            
+            cursor.close()
+            conn.close()
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"❌ Error fetching user bookings: {e}", exc_info=True)
+            return []
+    
     def get_user_booking_history(self, user_id: int, limit: int = 5) -> List[Dict[str, Any]]:
         """
         Fetch user's past bookings for context

@@ -1,6 +1,6 @@
 // routes/agentRoutes.js
 import express from 'express';
-import { createPlan } from '../controllers/agentController.js';
+import { createPlan, chat } from '../controllers/agentController.js';
 
 const router = express.Router();
 
@@ -17,6 +17,9 @@ const requireAuth = (req, res, next) => {
 
 // POST /api/agent/plan - Generate travel plan for a booking
 router.post('/plan', requireAuth, createPlan);
+
+// POST /api/agent/chat - Conversational AI assistant
+router.post('/chat', requireAuth, chat);
 
 export default router;
 

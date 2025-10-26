@@ -358,6 +358,22 @@ Return ONLY valid JSON with this exact structure:
             "weather_summary": "Check forecast closer to travel dates"
         }
     
+    async def chat(self, prompt: str) -> str:
+        """
+        Simple chat/conversation with LLM
+        """
+        try:
+            if not self.llm:
+                logger.warning("⚠️ Ollama not available for chat")
+                return "I'm currently unavailable. Please try again later or ask about your bookings!"
+            
+            response = self.llm.invoke(prompt)
+            return response.strip()
+            
+        except Exception as e:
+            logger.error(f"❌ Chat error: {e}")
+            return "I apologize, but I'm having trouble responding right now. Please try rephrasing your question."
+    
     def test_connection(self) -> bool:
         """Test Ollama connection"""
         try:
