@@ -257,27 +257,36 @@ class AgentService:
                     "data": {"bookings": active_bookings}
                 }
             
-            # INTENT 2: Plan a trip
+            # INTENT 2: Plan a trip (with booking context)
             elif is_plan_query and booking_id:
-                logger.info(f"🎯 Intent: Plan trip for booking {booking_id}")
+                logger.info(f"🎯 Intent: Generate structured travel plan for booking {booking_id}")
                 
-                # Use existing plan generation
-                from models.schemas import AgentRequest, UserPreferences
-                
-                request = AgentRequest(
-                    booking_id=booking_id,
-                    user_id=user_id,
-                    query=message,
-                    preferences=UserPreferences(),
-                    secret="internal"
-                )
-                
-                plan = await self.generate_plan(request)
-                
-                return {
-                    "message": f"🎉 I've created a personalized travel plan for your trip to {plan['destination']}! Check out the itinerary below.",
-                    "data": {"plan": plan}
-                }
+                try:
+                    # Use existing plan generation
+                    from models.schemas import AgentRequest, UserPreferences
+                    
+                    request = AgentRequest(
+                        booking_id=booking_id,
+                        user_id=user_id,
+                        query=message,
+                        preferences=UserPreferences(),
+                        secret="internal"
+                    )
+                    
+                    logger.info(f"🚀 Calling generate_plan for booking {booking_id}...")
+                    plan = await self.generate_plan(request)
+                    logger.info(f"✅ Plan generated successfully: {plan.get('destination')}")
+                    
+                    return {
+                        "message": f"🎉 I've created a personalized travel plan for your trip to {plan['destination']}! Check out the detailed itinerary below with day-by-day activities, restaurant recommendations, packing list, and local tips.",
+                        "data": {"plan": plan}
+                    }
+                except Exception as e:
+                    logger.error(f"❌ Failed to generate plan: {e}", exc_info=True)
+                    return {
+                        "message": f"I encountered an error creating your itinerary. Please try again or contact support. Error: {str(e)}",
+                        "data": None
+                    }
             
             # INTENT 3: Need booking context for planning
             elif is_plan_query and not booking_id:

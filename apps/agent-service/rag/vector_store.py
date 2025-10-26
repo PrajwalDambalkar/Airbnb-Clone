@@ -123,6 +123,30 @@ class VectorStore:
             return self.collection.count()
         except:
             return 0
+    
+    def get_or_create_collection(self, collection_name: str):
+        """Get or create a ChromaDB collection"""
+        if not self.client:
+            logger.warning("⚠️ ChromaDB client not available")
+            return None
+        
+        try:
+            # Try to get existing collection
+            collection = self.client.get_collection(collection_name)
+            logger.info(f"✅ Collection '{collection_name}' loaded")
+            return collection
+        except:
+            # Create new collection if it doesn't exist
+            try:
+                collection = self.client.create_collection(
+                    name=collection_name,
+                    metadata={"description": f"Collection: {collection_name}"}
+                )
+                logger.info(f"✅ Collection '{collection_name}' created")
+                return collection
+            except Exception as e:
+                logger.error(f"❌ Error creating collection '{collection_name}': {e}")
+                return None
 
 # Global instance
 vector_store = VectorStore()
