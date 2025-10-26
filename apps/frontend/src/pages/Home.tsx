@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
 import { getFirstImage } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
+import AIAgentSidebar from '../components/AIAgentSidebar';
+import bookingService, { type Booking } from '../services/bookingService';
 
 export default function Home() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -34,6 +36,11 @@ export default function Home() {
     const { user } = useAuth();
     const sdCarouselRef = useRef<HTMLDivElement>(null);
     const destinationDropdownRef = useRef<HTMLDivElement>(null);
+    
+    // AI Chatbot state
+    const [showChatbot, setShowChatbot] = useState(false);
+    const [userBookings, setUserBookings] = useState<Booking[]>([]);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -137,6 +144,45 @@ export default function Home() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showDestinations]);
+
+    // Fetch user bookings for AI chatbot
+    useEffect(() => {
+        const fetchBookings = async () => {
+            if (user) {
+                try {
+                    console.log('🔍 Fetching bookings for AI chatbot...');
+                    const response = await bookingService.getBookings();
+                    console.log('📋 All bookings:', response.data);
+                    
+                    const acceptedBookings = response.data.filter(
+                        (b: Booking) => b.status === 'ACCEPTED' || b.status === 'PENDING'
+                    );
+                    
+                    console.log('✅ Filtered bookings (ACCEPTED/PENDING):', acceptedBookings);
+                    
+                    setUserBookings(acceptedBookings);
+                    
+                    // Auto-select most recent booking
+                    if (acceptedBookings.length > 0) {
+                        const selected = acceptedBookings[0];
+                        console.log('🎯 Auto-selected booking:', {
+                            id: selected.id,
+                            property: selected.property_name,
+                            city: selected.city,
+                            state: selected.state,
+                            status: selected.status
+                        });
+                        setSelectedBooking(selected);
+                    } else {
+                        console.warn('⚠️ No bookings found with ACCEPTED or PENDING status');
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching bookings:', error);
+                }
+            }
+        };
+        fetchBookings();
+    }, [user]);
 
     const fetchProperties = async () => {
         try {
@@ -847,6 +893,74 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
+
+            {/* Floating AI Chatbot Button */}
+            {user && (
+                <>
+                    {!showChatbot && (
+                        <button
+                            onClick={() => {
+                                console.log('🤖 Opening AI Chatbot');
+                                console.log('Selected booking:', selectedBooking);
+                                console.log('User bookings:', userBookings);
+                                setShowChatbot(true);
+                            }}
+                            className="fixed bottom-6 right-6 z-[9997] group"
+                            title="AI Travel Assistant"
+                        >
+                            <div className={`relative flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 ${
+                                isDark 
+                                    ? 'bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700' 
+                                    : 'bg-gradient-to-br from-[#FF385C] to-[#E31C5F] hover:from-[#E31C5F] hover:to-[#C13551]'
+                            }`}>
+                                <MessageCircle size={28} className="text-white" />
+                                
+                                {/* Pulse animation */}
+                                <span className="absolute inset-0 rounded-full bg-pink-400 opacity-75 animate-ping"></span>
+                                
+                                {/* Notification badge if user has bookings */}
+                                {userBookings.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-green-500 rounded-full border-2 border-white">
+                                        {userBookings.length}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            {/* Tooltip */}
+                            <div className={`absolute bottom-full right-0 mb-2 px-3 py-2 text-sm font-medium text-white whitespace-nowrap rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${
+                                isDark ? 'bg-gray-800' : 'bg-gray-900'
+                            }`}>
+                                AI Travel Planner ✨
+                                <div className={`absolute top-full right-4 w-2 h-2 transform rotate-45 ${
+                                    isDark ? 'bg-gray-800' : 'bg-gray-900'
+                                }`}></div>
+                            </div>
+                        </button>
+                    )}
+
+                    {/* AI Agent Sidebar - Always render when chatbot is open */}
+                    <AIAgentSidebar
+                        isOpen={showChatbot}
+                        onClose={() => setShowChatbot(false)}
+                        bookingId={selectedBooking?.id || 0}
+                        bookingDetails={
+                            selectedBooking && 
+                            selectedBooking.property_name && 
+                            selectedBooking.city && 
+                            selectedBooking.state
+                                ? {
+                                    property_name: selectedBooking.property_name,
+                                    city: selectedBooking.city,
+                                    state: selectedBooking.state,
+                                    check_in: selectedBooking.check_in,
+                                    check_out: selectedBooking.check_out,
+                                    number_of_guests: selectedBooking.number_of_guests
+                                }
+                                : undefined
+                        }
+                    />
+                </>
+            )}
         </div>
     );
 }
