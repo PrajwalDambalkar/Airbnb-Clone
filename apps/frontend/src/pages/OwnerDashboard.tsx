@@ -128,27 +128,13 @@ export default function OwnerDashboard() {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              <Link
-                to="/owner/dashboard"
-                className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
-              >
-                <Home className="w-4 h-4" />
-                <span>Dashboard</span>
-              </Link>
+            <nav className="items-center hidden space-x-4 md:flex lg:space-x-6">
               <Link
                 to="/owner/properties/new"
                 className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Property</span>
-              </Link>
-              <Link
-                to="/owner/bookings"
-                className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Bookings</span>
               </Link>
               
               {/* Divider */}
@@ -235,7 +221,7 @@ export default function OwnerDashboard() {
             </nav>
 
             {/* Mobile Navigation */}
-            <div className="flex md:hidden items-center space-x-2">
+            <div className="flex items-center space-x-2 md:hidden">
               <Link
                 to="/"
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]' : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'}`}
