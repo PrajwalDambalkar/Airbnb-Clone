@@ -205,7 +205,7 @@ export default function OwnerBookings() {
               </span>
             </div>
 
-            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            <nav className="items-center hidden space-x-4 md:flex lg:space-x-6">
               <Link
                 to="/owner/properties/new"
                 className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
@@ -322,7 +322,7 @@ export default function OwnerBookings() {
                     {stats.pending_count}
                   </p>
                 </div>
-                <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                <div className="p-3 bg-yellow-100 rounded-full dark:bg-yellow-900">
                   <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
                 </div>
               </div>
@@ -338,7 +338,7 @@ export default function OwnerBookings() {
                     {stats.confirmed_count}
                   </p>
                 </div>
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                <div className="p-3 bg-green-100 rounded-full dark:bg-green-900">
                   <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-300" />
                 </div>
               </div>
@@ -351,10 +351,10 @@ export default function OwnerBookings() {
                     Total Revenue
                   </p>
                   <p className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    ${stats.total_revenue.toFixed(2)}
+                    ${(Number(stats.total_revenue) || 0).toFixed(2)}
                   </p>
                 </div>
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                <div className="p-3 bg-green-100 rounded-full dark:bg-green-900">
                   <DollarSign className="w-6 h-6 text-green-600 dark:text-green-300" />
                 </div>
               </div>
@@ -405,7 +405,7 @@ export default function OwnerBookings() {
 
         {/* Bookings List */}
         {loading ? (
-          <div className="text-center py-12">
+          <div className="py-12 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FF385C] border-t-transparent"></div>
             <p className={`mt-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Loading bookings...</p>
           </div>
@@ -464,7 +464,7 @@ export default function OwnerBookings() {
                       </div>
                       <div className="flex items-center gap-1">
                         <DollarSign size={14} />
-                        <span className="font-semibold">${booking.total_price.toFixed(2)}</span>
+                        <span className="font-semibold">${(Number(booking.total_price) || 0).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -475,14 +475,14 @@ export default function OwnerBookings() {
                       <>
                         <button
                           onClick={() => handleApprove(booking.id)}
-                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
                         >
                           <Check size={16} />
                           Approve
                         </button>
                         <button
                           onClick={() => handleReject(booking.id)}
-                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
                         >
                           <X size={16} />
                           Reject

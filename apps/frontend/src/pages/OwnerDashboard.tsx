@@ -4,8 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
 import api from '../services/api';
-import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Heart } from 'lucide-react';
+import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut } from 'lucide-react';
 import { getFirstImage } from '../utils/imageUtils';
+import * as ownerBookingService from '../services/ownerBookingService';
+import type { BookingStats } from '../services/ownerBookingService';
 
 interface Property {
   id: number;
@@ -33,7 +35,7 @@ export default function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [favCount, setFavCount] = useState<number>(0);
+  const [bookingStats, setBookingStats] = useState<BookingStats | null>(null);
 
   const fetchMyProperties = async () => {
     try {
@@ -48,6 +50,15 @@ export default function OwnerDashboard() {
     }
   };
 
+  const fetchBookingStats = async () => {
+    try {
+      const response = await ownerBookingService.getOwnerBookingStats();
+      setBookingStats(response.data);
+    } catch (err) {
+      console.error('Error fetching booking stats:', err);
+    }
+  };
+
   useEffect(() => {
     // Redirect if not owner
     if (user && user.role !== 'owner') {
@@ -56,33 +67,9 @@ export default function OwnerDashboard() {
     }
 
     fetchMyProperties();
+    fetchBookingStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
-
-  // Load favourites count from localStorage
-  useEffect(() => {
-    const loadFavs = () => {
-      try {
-        const raw = localStorage.getItem('favorites');
-        const arr = raw ? JSON.parse(raw) : [];
-        setFavCount(Array.isArray(arr) ? arr.length : 0);
-      } catch (e) {
-        setFavCount(0);
-      }
-    };
-
-    loadFavs();
-
-    // Listen for cross-tab or app-level updates
-    const handler = () => loadFavs();
-    window.addEventListener('storage', handler);
-    window.addEventListener('favoritesUpdated', handler as EventListener);
-
-    return () => {
-      window.removeEventListener('storage', handler);
-      window.removeEventListener('favoritesUpdated', handler as EventListener);
-    };
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -137,6 +124,14 @@ export default function OwnerDashboard() {
                 <span>Add Property</span>
               </Link>
               
+              <Link
+                to="/owner/bookings"
+                className={`flex items-center space-x-2 text-sm font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Manage Bookings</span>
+              </Link>
+              
               {/* Divider */}
               <div className={`h-6 w-px ${isDark ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
               
@@ -173,24 +168,12 @@ export default function OwnerDashboard() {
                     
                     <div className="py-1">
                       <Link
-                        to="/favorites"
-                        onClick={() => setShowProfileMenu(false)}
-                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
-                      >
-                        <Heart size={16} className="text-[#FF385C]" />
-                        <span>Favourites</span>
-                        {favCount > 0 && (
-                          <span className="ml-auto inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
-                        )}
-                      </Link>
-                      
-                      <Link
                         to="/owner/bookings"
                         onClick={() => setShowProfileMenu(false)}
                         className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                       >
                         <Calendar size={16} className="text-[#FF385C]" />
-                        <span>Bookings</span>
+                        <span>Manage Bookings</span>
                       </Link>
                       
                       <button
@@ -277,7 +260,7 @@ export default function OwnerDashboard() {
             </div>
           </div>
 
-          {/* Pending Bookings (Placeholder) */}
+          {/* Pending Bookings */}
           <div className={`p-6 rounded-lg shadow ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="flex items-center justify-between">
               <div>
@@ -285,19 +268,16 @@ export default function OwnerDashboard() {
                   Pending Bookings
                 </p>
                 <p className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  0
+                  {bookingStats?.pending_count || 0}
                 </p>
               </div>
               <div className={`p-3 rounded-full ${isDark ? 'bg-yellow-900' : 'bg-yellow-100'}`}>
                 <Calendar className={`w-6 h-6 ${isDark ? 'text-yellow-300' : 'text-yellow-600'}`} />
               </div>
             </div>
-            <p className={`mt-2 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-              Coming soon with bookings feature
-            </p>
           </div>
 
-          {/* Total Revenue (Placeholder) */}
+          {/* Total Revenue */}
           <div className={`p-6 rounded-lg shadow ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="flex items-center justify-between">
               <div>
@@ -305,16 +285,13 @@ export default function OwnerDashboard() {
                   Total Revenue
                 </p>
                 <p className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  $0
+                  ${(Number(bookingStats?.total_revenue) || 0).toFixed(2)}
                 </p>
               </div>
               <div className={`p-3 rounded-full ${isDark ? 'bg-green-900' : 'bg-green-100'}`}>
                 <DollarSign className={`w-6 h-6 ${isDark ? 'text-green-300' : 'text-green-600'}`} />
               </div>
             </div>
-            <p className={`mt-2 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-              Coming soon with bookings feature
-            </p>
           </div>
         </div>
 
