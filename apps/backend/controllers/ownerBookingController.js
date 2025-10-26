@@ -6,7 +6,7 @@ const db = pool.promise();
 // Get all bookings for owner's properties with statistics
 export const getOwnerBookings = async (req, res) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.session.user.id;
     const { status, propertyId, search, sortBy = 'created_at', order = 'DESC' } = req.query;
 
     // Build query with filters
@@ -69,7 +69,7 @@ export const getOwnerBookings = async (req, res) => {
 // Get booking statistics for owner
 export const getOwnerBookingStats = async (req, res) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.session.user.id;
 
     const [stats] = await db.query(`
       SELECT 
@@ -101,7 +101,7 @@ export const getOwnerBookingStats = async (req, res) => {
 export const getBookingDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.session.user.id;
 
     const [bookings] = await db.query(`
       SELECT 
@@ -147,7 +147,7 @@ export const getBookingDetails = async (req, res) => {
 export const approveBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.session.user.id;
 
     // Verify booking belongs to owner and is pending
     const [booking] = await db.query(
@@ -186,7 +186,7 @@ export const approveBooking = async (req, res) => {
 export const rejectBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.session.user.id;
     const { reason } = req.body;
 
     // Verify booking belongs to owner and is pending
@@ -232,7 +232,7 @@ export const rejectBooking = async (req, res) => {
 export const cancelBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.session.user.id;
     const { reason } = req.body;
 
     // Verify booking belongs to owner and is accepted
