@@ -39,10 +39,12 @@ app.add_middleware(
 # Import routes
 from routes.health_routes import router as health_router
 from routes.agent_routes import router as agent_router
+from routes.admin_routes import router as admin_router
 
 # Include routers
 app.include_router(health_router)
 app.include_router(agent_router)
+app.include_router(admin_router)
 
 # Startup event
 @app.on_event("startup")
@@ -68,6 +70,15 @@ async def startup_event():
             logger.warning("⚠️ Ollama connection failed")
     except Exception as e:
         logger.error(f"❌ Ollama connection error: {e}")
+    
+    # Load policy documents into RAG
+    try:
+        from rag.policy_loader import policy_loader
+        logger.info("📚 Loading policy documents...")
+        policy_loader.ingest_policies()
+        logger.info("✅ Policy documents loaded successfully")
+    except Exception as e:
+        logger.warning(f"⚠️ Policy loading failed (non-critical): {e}")
     
     logger.info("✅ Agent service ready!")
 

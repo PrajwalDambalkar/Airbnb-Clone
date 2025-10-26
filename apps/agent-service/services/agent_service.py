@@ -206,6 +206,13 @@ class AgentService:
                 'what to do', 'where to go', 'recommend'
             ])
             
+            is_policy_query = any(keyword in message_lower for keyword in [
+                'policy', 'policies', 'cancellation', 'cancel', 'refund',
+                'payment', 'pay', 'charge', 'fee', 'fees',
+                'rules', 'house rules', 'guest rules', 'privacy',
+                'terms', 'conditions', 'modify', 'change booking'
+            ])
+            
             # INTENT 1: Show user's bookings
             if is_booking_query and not is_plan_query:
                 logger.info("🎯 Intent: Show bookings")
@@ -296,7 +303,65 @@ class AgentService:
                         "data": {"bookings": active_bookings}
                     }
             
-            # INTENT 4: General conversation / help
+            # INTENT 4: Policy Query
+            elif is_policy_query and not (is_booking_query or is_plan_query):
+                logger.info("🎯 Intent: Policy query")
+                
+                from rag.policy_loader import policy_loader
+                
+                # Search policy documents
+                policy_results = policy_loader.search_policies(message, n_results=3)
+                
+                if not policy_results:
+                    return {
+                        "message": "I couldn't find specific information about that policy. Please contact our support team for detailed policy information, or try rephrasing your question.",
+                        "data": None
+                    }
+                
+                # Build context from retrieved policies
+                policy_context = "\n\n".join([
+                    f"[{result['metadata'].get('policy_type', 'Policy')}]\n{result['content']}"
+                    for result in policy_results
+                ])
+                
+                # Build conversation context
+                context_messages = "\n".join([
+                    f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
+                    for msg in conversation_history[-4:]
+                ])
+                
+                # Use LLM to generate natural answer
+                prompt = f"""You are a helpful AI assistant for an Airbnb-like platform.
+
+CONVERSATION HISTORY:
+{context_messages if context_messages else 'No previous conversation'}
+
+USER'S QUESTION: "{message}"
+
+RELEVANT POLICY INFORMATION:
+{policy_context}
+
+Based ONLY on the policy information provided above, answer the user's question clearly and concisely.
+If the provided information doesn't fully answer the question, say so and suggest they contact support.
+Keep the response under 4 sentences and use a friendly, helpful tone.
+
+Answer:"""
+                
+                llm_response = await self.llm.chat(prompt)
+                
+                # Add source attribution
+                sources = list(set([r['metadata'].get('policy_type', 'Policy') for r in policy_results]))
+                source_text = f"\n\n📋 Source: {', '.join(sources)}"
+                
+                return {
+                    "message": llm_response + source_text,
+                    "data": {
+                        "policy_sources": sources,
+                        "retrieved_chunks": len(policy_results)
+                    }
+                }
+            
+            # INTENT 5: General conversation / help
             else:
                 logger.info("🎯 Intent: General conversation")
                 
