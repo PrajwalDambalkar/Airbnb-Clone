@@ -3,8 +3,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Storage configuration
-const storage = multer.diskStorage({
+// Storage configuration for properties
+const propertyStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = 'uploads/properties';
     if (!fs.existsSync(uploadDir)) {
@@ -15,6 +15,21 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, 'property-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// Storage configuration for profile pictures
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/profiles';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
@@ -31,9 +46,15 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Export multer instance
+// Export multer instances
 export const upload = multer({
-  storage: storage,
+  storage: propertyStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: fileFilter
+});
+
+export const uploadProfile = multer({
+  storage: profileStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: fileFilter
 });
