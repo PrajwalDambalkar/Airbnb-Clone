@@ -13,6 +13,18 @@ const api = axios.create({
   },
 });
 
+// Add response interceptor to handle errors gracefully
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Don't log 401 errors as they're expected for unauthenticated users
+    if (error.response?.status !== 401) {
+      console.error('API Error:', error);
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Types
 export interface User {
   id: number;
