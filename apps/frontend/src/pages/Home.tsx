@@ -603,7 +603,7 @@ export default function Home() {
                     <div className="px-4 mx-auto max-w-7xl">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className={`text-3xl font-bold bg-gradient-to-r from-[#FF385C] to-[#E31C5F] bg-clip-text text-transparent ${isDark ? '' : ''}`}>
-                                ✨ Popular homes in Los Angeles
+                                ✨ Popular homes
                             </h2>
                             <div className="flex gap-3">
                                 <button 
