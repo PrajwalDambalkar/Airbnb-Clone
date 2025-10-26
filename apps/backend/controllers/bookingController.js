@@ -155,6 +155,8 @@ export const getBookings = async (req, res) => {
     const userRole = req.session.user.role;
     const { status } = req.query;
 
+    console.log('📋 [getBookings] User:', { userId, userRole, statusFilter: status });
+
     let query = `
       SELECT b.*, 
              p.property_name, p.city, p.state, p.images, p.address,
@@ -168,17 +170,10 @@ export const getBookings = async (req, res) => {
 
     const params = [];
 
-    // Filter based on user role
-    if (userRole === 'traveler') {
-      query += 'b.traveler_id = ?';
-      params.push(userId);
-    } else if (userRole === 'owner') {
-      query += 'b.owner_id = ?';
-      params.push(userId);
-    } else {
-      query += '(b.traveler_id = ? OR b.owner_id = ?)';
-      params.push(userId, userId);
-    }
+    // Always show bookings where user is EITHER traveler OR owner
+    // This allows owners to also make bookings as travelers
+    query += '(b.traveler_id = ? OR b.owner_id = ?)';
+    params.push(userId, userId);
 
     // Filter by status if provided
     if (status) {
@@ -188,7 +183,12 @@ export const getBookings = async (req, res) => {
 
     query += ' ORDER BY b.created_at DESC';
 
+    console.log('📋 [getBookings] Query:', query);
+    console.log('📋 [getBookings] Params:', params);
+
     const [bookings] = await db.query(query, params);
+    
+    console.log('📋 [getBookings] Found bookings:', bookings.length);
 
     // Parse JSON fields
     const parsedBookings = bookings.map(booking => {

@@ -11,7 +11,7 @@ main (production)
   ↑
 dev (integration/staging)
   ↑              ↑
-prajwal       pukhraj (personal integration branches)
+prajwal       Pukhraj (personal integration branches)
   ↑              ↑
 feature/*    feature/* (feature branches)
 ```
@@ -26,11 +26,11 @@ feature/*    feature/* (feature branches)
    - Requires PR review
 
 2. **`dev`** - Integration/Staging environment
-   - Only accepts merges from `prajwal` or `pukhraj`
+   - Only accepts merges from `prajwal` or `Pukhraj`
    - All features are integrated here before production
    - Protected branch
 
-3. **`prajwal` / `pukhraj`** - Personal integration branches
+3. **`prajwal` / `Pukhraj`** - Personal integration branches
    - Only accept merges from `feature/*` branches
    - Used to integrate multiple features from the same developer
    - Can also accept PRs from forked repositories
@@ -38,7 +38,7 @@ feature/*    feature/* (feature branches)
 4. **`feature/*`** - Feature development branches
    - Must follow naming: `feature/descriptive-name`
    - Examples: `feature/add-login`, `feature/booking-system`
-   - Merge into `prajwal` or `pukhraj` only
+   - Merge into `prajwal` or `Pukhraj` only
 
 ### Workflow
 
@@ -46,7 +46,7 @@ feature/*    feature/* (feature branches)
 
 1. **Create a feature branch from your personal branch:**
    ```bash
-   git checkout prajwal  # or pukhraj
+   git checkout prajwal  # or Pukhraj
    git pull origin prajwal
    git checkout -b feature/your-feature-name
    ```
@@ -60,12 +60,12 @@ feature/*    feature/* (feature branches)
    ```
 
 3. **Create PR to your personal branch:**
-   - `feature/your-feature-name` → `prajwal` (or `pukhraj`)
+   - `feature/your-feature-name` → `prajwal` (or `Pukhraj`)
    - Get code review
    - Merge after approval
 
 4. **Integrate to dev:**
-   - `prajwal` (or `pukhraj`) → `dev`
+   - `prajwal` (or `Pukhraj`) → `dev`
    - After testing multiple features together
 
 5. **Deploy to production:**
@@ -90,10 +90,10 @@ feature/*    feature/* (feature branches)
 
 4. **Create PR to main repo's personal branch:**
    - From: `your-fork/feature/your-feature-name`
-   - To: `main-repo/pukhraj` (or your designated branch)
+   - To: `main-repo/Pukhraj` (or your designated branch)
 
 5. **After merge, main repo owner will:**
-   - Integrate `pukhraj` → `dev`
+   - Integrate `Pukhraj` → `dev`
    - Then `dev` → `main`
 
 ## Branch Protection Rules
@@ -101,8 +101,8 @@ feature/*    feature/* (feature branches)
 The following rules are enforced automatically via GitHub Actions:
 
 - ✅ PRs to `main` must come from `dev` only
-- ✅ PRs to `dev` must come from `prajwal` or `pukhraj` only
-- ✅ PRs to `prajwal`/`pukhraj` must come from `feature/*` branches
+- ✅ PRs to `dev` must come from `prajwal` or `Pukhraj` only
+- ✅ PRs to `prajwal`/`Pukhraj` must come from `feature/*` branches
 
 **These rules are validated automatically** - PRs that violate the hierarchy will fail CI checks.
 

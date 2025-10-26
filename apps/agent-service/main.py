@@ -1,93 +1,102 @@
-from fastapi import FastAPI, HTTPException
+# main.py
+import logging
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from pydantic import BaseModel
 import os
 
+# Load environment variables
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Create FastAPI app
 app = FastAPI(
     title="Airbnb AI Agent Service",
-    description="RAG-powered travel planning with Ollama",
-    version="1.0.0"
+    description="AI-powered travel planning with LangChain + Ollama + RAG",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5000"],
+    allow_origins=[
+        "http://localhost:5173",  # Frontend
+        "http://localhost:5000",  # Backend
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Pydantic models
-class AgentRequest(BaseModel):
-    booking_id: str
-    location: str
-    dates: dict
-    preferences: dict
-    query: str
+# Import routes
+from routes.health_routes import router as health_router
+from routes.agent_routes import router as agent_router
+from routes.admin_routes import router as admin_router
 
-class AgentResponse(BaseModel):
-    itinerary: dict
-    recommendations: list
-    packing_list: list
+# Include routers
+app.include_router(health_router)
+app.include_router(agent_router)
+app.include_router(admin_router)
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Airbnb AI Agent Service is running with Ollama!",
-        "model": os.getenv("OLLAMA_MODEL", "llama3"),
-        "status": "operational"
-    }
-
-@app.get("/health")
-async def health():
-    return {
-        "status": "healthy",
-        "ollama": "connected",
-        "model": os.getenv("OLLAMA_MODEL", "llama3")
-    }
-
-@app.post("/agent/plan", response_model=AgentResponse)
-async def create_travel_plan(request: AgentRequest):
-    """Generate personalized travel itinerary"""
-    # TODO: Implement RAG pipeline
-    return {
-        "itinerary": {
-            "day_1": "RAG implementation coming",
-            "day_2": "Placeholder",
-            "day_3": "Placeholder"
-        },
-        "recommendations": [
-            {"type": "restaurant", "name": "Coming soon"}
-        ],
-        "packing_list": ["Coming soon"]
-    }
-
-@app.get("/test-ollama")
-async def test_ollama():
-    """Test Ollama connection"""
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup"""
+    logger.info("🚀 Starting Airbnb AI Agent Service...")
+    
+    # Test connections
     try:
-        from langchain_ollama import OllamaLLM
-        
-        llm = OllamaLLM(
-            model=os.getenv("OLLAMA_MODEL", "llama3"),
-            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        )
-        
-        response = llm.invoke("Say hello in one short sentence")
-        
-        return {
-            "status": "success",
-            "model": os.getenv("OLLAMA_MODEL", "llama3"),
-            "response": response
-        }
+        from utils.mysql_client import mysql_client
+        if mysql_client.test_connection():
+            logger.info("✅ MySQL connection successful")
+        else:
+            logger.warning("⚠️ MySQL connection failed")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ollama error: {str(e)}")
+        logger.error(f"❌ MySQL connection error: {e}")
+    
+    try:
+        from utils.llm_client import llm_client
+        if llm_client.test_connection():
+            logger.info("✅ Ollama connection successful")
+        else:
+            logger.warning("⚠️ Ollama connection failed")
+    except Exception as e:
+        logger.error(f"❌ Ollama connection error: {e}")
+    
+    # Load policy documents into RAG
+    try:
+        from rag.policy_loader import policy_loader
+        logger.info("📚 Loading policy documents...")
+        policy_loader.ingest_policies()
+        logger.info("✅ Policy documents loaded successfully")
+    except Exception as e:
+        logger.warning(f"⚠️ Policy loading failed (non-critical): {e}")
+    
+    logger.info("✅ Agent service ready!")
+
+# Shutdown event
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    logger.info("👋 Shutting down Agent Service...")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
-    # , reload=True)
+    
+    port = int(os.getenv("AGENT_PORT", "8000"))
+    
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=port,
+        reload=True,  # Enable auto-reload for development
+        log_level="info"
+    )
