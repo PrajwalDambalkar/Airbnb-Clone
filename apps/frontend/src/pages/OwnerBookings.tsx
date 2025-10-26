@@ -19,14 +19,17 @@ import {
   Settings,
   LogOut,
   Heart,
-  Plus
+  Plus,
+  Moon,
+  Sun,
+  Menu
 } from 'lucide-react';
 import * as ownerBookingService from '../services/ownerBookingService';
 import type { OwnerBooking, BookingStats } from '../services/ownerBookingService';
 
 export default function OwnerBookings() {
   const { user, logout } = useAuth();
-  const { isDark } = useDarkMode();
+  const { isDark, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
   
   const [bookings, setBookings] = useState<OwnerBooking[]>([]);
@@ -38,6 +41,7 @@ export default function OwnerBookings() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [favCount, setFavCount] = useState<number>(0);
 
   // Fetch bookings and stats
@@ -205,6 +209,23 @@ export default function OwnerBookings() {
               </span>
             </div>
 
+            {/* Mobile Menu Button */}
+            <div className="flex items-center gap-3 md:hidden">
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+
             <nav className="items-center hidden space-x-4 md:flex lg:space-x-6">
               <Link
                 to="/owner/properties/new"
@@ -226,15 +247,32 @@ export default function OwnerBookings() {
                 <span>Browse Properties</span>
               </Link>
               
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              
               {/* Profile Dropdown */}
               <div className="relative profile-dropdown z-[10000]">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-full transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600 border border-gray-600' : 'bg-white hover:bg-gray-50 border border-gray-300'}`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
-                    {user?.name.charAt(0).toUpperCase()}
-                  </div>
+                  {user?.profile_picture ? (
+                    <img 
+                      src={`http://localhost:5001${user.profile_picture}`} 
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
+                      {user?.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <ChevronDown size={16} className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -296,6 +334,62 @@ export default function OwnerBookings() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Dropdown */}
+      {showMobileMenu && (
+        <div className={`md:hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b shadow-lg`}>
+          <div className="px-4 py-2 space-y-1">
+            <Link
+              to="/owner/dashboard"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Home size={20} />
+              <span className="font-medium">Dashboard</span>
+            </Link>
+            
+            <Link
+              to="/owner/properties/new"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Plus size={20} />
+              <span className="font-medium">Add Property</span>
+            </Link>
+            
+            <Link
+              to="/"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Eye size={20} />
+              <span className="font-medium">Browse Properties</span>
+            </Link>
+            
+            <div className={`my-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}></div>
+            
+            <Link
+              to="/profile/edit"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Settings size={20} />
+              <span className="font-medium">Edit Profile</span>
+            </Link>
+            
+            <button
+              onClick={() => {
+                setShowMobileMenu(false);
+                handleLogout();
+              }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'}`}
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
