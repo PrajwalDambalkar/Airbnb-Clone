@@ -13,7 +13,8 @@ import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
 import OwnerBookings from './pages/OwnerBookings';
 import AddProperty from './pages/AddProperty';
-import { Moon, Sun, Heart, Home as HomeIcon, Calendar, ChevronDown, Settings, LogOut } from 'lucide-react';
+import EditProfile from './pages/EditProfile';
+import { Moon, Sun, Heart, Home as HomeIcon, Calendar, Settings, LogOut, ChevronDown, Menu, X } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
@@ -37,6 +38,7 @@ function Header() {
   const { isDark, toggleDarkMode } = useDarkMode();
   const [favCount, setFavCount] = useState<number>(0);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   // Load favourites count from localStorage
   useEffect(() => {
@@ -92,7 +94,26 @@ function Header() {
         >
           airbnb
         </button>
-        <div className="flex items-center gap-4">
+
+        {/* Mobile Menu Button */}
+        <div className="flex items-center gap-3 lg:hidden">
+          <button
+            onClick={toggleDarkMode}
+            className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+          >
+            {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center gap-4">
           <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
             Welcome, <span className="font-semibold">{user.name}</span>
           </span>
@@ -125,9 +146,17 @@ function Header() {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className={`flex items-center gap-2 px-3 py-2 rounded-full transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-300'}`}
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+              {user.profile_picture ? (
+                <img 
+                  src={`http://localhost:5001${user.profile_picture}`} 
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
               <ChevronDown size={16} className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
             </button>
 
@@ -161,14 +190,14 @@ function Header() {
                     <span>Bookings</span>
                   </Link>
                   
-                  <button
-                    disabled
-                    className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left cursor-not-allowed opacity-50 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
+                  <Link
+                    to="/profile/edit"
+                    onClick={() => setShowProfileMenu(false)}
+                    className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                   >
-                    <Settings size={16} />
+                    <Settings size={16} className="text-[#FF385C]" />
                     <span>Edit Profile</span>
-                    <span className="ml-auto text-xs">(Soon)</span>
-                  </button>
+                  </Link>
                 </div>
 
                 <div className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -188,6 +217,77 @@ function Header() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {showMobileMenu && (
+        <div className={`lg:hidden ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-t shadow-lg`}>
+          <div className="px-4 py-2 space-y-1 max-w-7xl mx-auto">
+            {/* User Info */}
+            <div className={`px-4 py-3 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+              <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.name}</p>
+              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</p>
+              <span className={`inline-block mt-2 px-2 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-pink-900 text-pink-200' : 'bg-pink-100 text-[#FF385C]'}`}>
+                {user.role === 'traveler' ? '✈️ Traveler' : '🏠 Owner'}
+              </span>
+            </div>
+
+            {/* Owner-specific menu item */}
+            {user.role === 'owner' && (
+              <Link
+                to="/owner/dashboard"
+                onClick={() => setShowMobileMenu(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'}`}
+              >
+                <HomeIcon size={20} />
+                <span className="font-medium">Manage Properties</span>
+              </Link>
+            )}
+
+            <Link
+              to="/favorites"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Heart size={20} />
+              <span className="font-medium">Favourites</span>
+              {favCount > 0 && (
+                <span className="ml-auto inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{favCount}</span>
+              )}
+            </Link>
+            
+            <Link
+              to="/bookings"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Calendar size={20} />
+              <span className="font-medium">Bookings</span>
+            </Link>
+            
+            <div className={`my-2 border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}></div>
+            
+            <Link
+              to="/profile/edit"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Settings size={20} />
+              <span className="font-medium">Edit Profile</span>
+            </Link>
+            
+            <button
+              onClick={() => {
+                setShowMobileMenu(false);
+                logout();
+              }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-800' : 'text-red-600 hover:bg-red-50'}`}
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -259,6 +359,16 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            
+            {/* Profile Route - Available for both travelers and owners */}
+            <Route
+              path="/profile/edit"
+              element={
+                <ProtectedRoute>
+                  <EditProfile />
+                </ProtectedRoute>
+              }
+            />
             
             {/* Owner Routes */}
             <Route

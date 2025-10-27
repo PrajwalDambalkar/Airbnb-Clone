@@ -630,13 +630,12 @@ export default function Home() {
                                     to={`/property/${property.id}`}
                                     className="flex-none group"
                                 >
-                                    <div className={`overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-lg w-[300px] ${isDark ? 'bg-gray-800' : 'bg-white'}`}> 
-                                        {/* Property Image */}
-                                        <div className="relative h-48 overflow-hidden">
+                                    <div className="w-[280px] sm:w-[300px] transition-all duration-300 hover:scale-105">
+                                        <div className="relative aspect-[4/3] mb-3 overflow-hidden rounded-xl shadow-md">
                                             <img
                                                 src={getFirstImage(property.images)}
                                                 alt={property.property_name}
-                                                className="object-cover w-full h-full"
+                                                className="object-cover w-full h-full transition-all duration-300 group-hover:brightness-110"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     if (!target.dataset.errorHandled) {
@@ -645,16 +644,8 @@ export default function Home() {
                                                     }
                                                 }}
                                             />
-                                            <div className="absolute top-2 right-2">
-                                                <span
-                                                    className={`px-2 py-1 text-xs font-medium rounded ${
-                                                        property.available
-                                                            ? isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'
-                                                            : isDark ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800'
-                                                    }`}
-                                                >
-                                                    {property.available ? 'Available' : 'Unavailable'}
-                                                </span>
+                                            <div className="absolute px-2.5 py-1 text-xs font-semibold text-gray-900 rounded-full shadow-sm top-3 left-3 bg-white/90 backdrop-blur-sm">
+                                                ⭐ Guest favorite
                                             </div>
                                             <button 
                                                 type="button"
@@ -663,34 +654,31 @@ export default function Home() {
                                                     e.stopPropagation();
                                                     toggleFavorite(property.id);
                                                 }}
-                                                className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+                                                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200 z-10 ${
                                                     favorites.has(property.id) 
-                                                        ? 'bg-red-500/80 shadow-lg' 
-                                                        : 'bg-white/70 hover:bg-white'
+                                                        ? 'bg-red-500/90 shadow-lg scale-110' 
+                                                        : 'bg-white/80 hover:bg-white hover:scale-110'
                                                 }`}
                                             >
                                                 <Heart 
-                                                    className={`w-5 h-5 transition-all duration-300 ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
+                                                    className={`w-5 h-5 transition-all ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
                                                 />
                                             </button>
                                         </div>
-                                        {/* Property Details */}
-                                        <div className="p-4">
-                                            <h3 className={`text-lg font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}> 
+                                        <div>
+                                            <h3 className={`text-base font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                                 {property.property_name}
                                             </h3>
-                                            <div className={`flex items-center gap-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}> 
-                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
-                                                <span className={`ml-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 200) + 50} reviews)</span>
-                                            </div>
-                                            <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}> 
+                                            <p className={`mt-0.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 {property.city}, {property.state}
                                             </p>
-                                            <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}> 
-                                                {property.bedrooms} bed • {property.bathrooms} bath • {property.max_guests} guests
-                                            </p>
-                                            <p className={`mt-3 text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}> 
+                                            <div className={`flex items-center gap-1 mt-1 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
+                                                <span className={`ml-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 250) + 100} reviews)</span>
+                                            </div>
+                                            <p className={`mt-2.5 text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                                 ${property.price_per_night}
+                                                <span className={`ml-1 text-sm font-normal ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>/night</span>
                                             </p>
                                         </div>
                                     </div>
@@ -732,18 +720,18 @@ export default function Home() {
                                     to={`/property/${property.id}`}
                                     className="flex-none group"
                                 >
-                                    <div className="w-[300px] transition-all duration-300 hover:scale-105">
-                                        <div className="relative aspect-[4/3] mb-4 overflow-hidden">
+                                    <div className="w-[280px] sm:w-[300px] transition-all duration-300 hover:scale-105">
+                                        <div className="relative aspect-[4/3] mb-3 overflow-hidden rounded-xl shadow-md">
                                             <img
                                                 src={getFirstImage(property.images)}
                                                 alt={property.property_name}
-                                                className="object-cover w-full h-full transition-all duration-300 shadow-lg rounded-2xl group-hover:shadow-2xl group-hover:brightness-110"
+                                                className="object-cover w-full h-full transition-all duration-300 group-hover:brightness-110"
                                                 onError={(e) => {
                                                     console.error('❌ SD Image failed:', property.images?.[0]);
                                                     e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
                                                 }}
                                             />
-                                            <div className="absolute px-3 py-1 text-xs font-bold text-gray-900 rounded-full shadow-md top-3 left-3 bg-white/90 backdrop-blur-md">
+                                            <div className="absolute px-2.5 py-1 text-xs font-semibold text-gray-900 rounded-full shadow-sm top-3 left-3 bg-white/90 backdrop-blur-sm">
                                                 ⭐ Guest favorite
                                             </div>
                                             <button 
@@ -753,37 +741,32 @@ export default function Home() {
                                                     e.stopPropagation();
                                                     toggleFavorite(property.id);
                                                 }}
-                                                className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+                                                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200 z-10 ${
                                                     favorites.has(property.id) 
-                                                        ? 'bg-red-500/80 shadow-lg' 
-                                                        : 'bg-white/70 hover:bg-white'
+                                                        ? 'bg-red-500/90 shadow-lg scale-110' 
+                                                        : 'bg-white/80 hover:bg-white hover:scale-110'
                                                 }`}
                                             >
                                                 <Heart 
-                                                    className={`w-5 h-5 transition-all duration-300 ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
+                                                    className={`w-5 h-5 transition-all ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
                                                 />
                                             </button>
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <h3 className={`font-bold text-lg truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                                        <div>
+                                            <h3 className={`text-base font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                                 {property.property_name}
                                             </h3>
-                                            <div className={`flex items-center gap-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
-                                                <span className={`ml-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 200) + 50} reviews)</span>
-                                            </div>
-                                            <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <p className={`mt-0.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 {property.city}, {property.state}
+                                            </p>
+                                            <div className={`flex items-center gap-1 mt-1 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
+                                                <span className={`ml-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 250) + 100} reviews)</span>
                                             </div>
-                                            <div className="flex items-baseline gap-1 pt-2">
-                                                <span className={`text-lg font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                                                    ${property.price_per_night}
-                                                </span>
-                                                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                    /night
-                                                </span>
-                                            </div>
+                                            <p className={`mt-2.5 text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                                ${property.price_per_night}
+                                                <span className={`ml-1 text-sm font-normal ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>/night</span>
+                                            </p>
                                         </div>
                                     </div>
                                 </Link>
