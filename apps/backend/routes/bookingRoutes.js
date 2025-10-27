@@ -28,7 +28,11 @@ const isAuthenticated = (req, res, next) => {
   });
 };
 
-// Apply authentication to all booking routes
+// PUBLIC ROUTES (before authentication middleware)
+// Get booked dates for a specific property - anyone can see which dates are booked
+router.get('/property/:propertyId/booked-dates', bookingController.getPropertyBookedDates);
+
+// Apply authentication to all other booking routes
 router.use(isAuthenticated);
 
 // Create a new booking

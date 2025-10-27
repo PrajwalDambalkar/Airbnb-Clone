@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, MapPin, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Users, MapPin, Clock, CheckCircle, XCircle, AlertCircle, Sparkles } from 'lucide-react';
 import bookingService, { type Booking } from '../services/bookingService';
 import { useDarkMode } from '../App';
+import AIAgentSidebar from '../components/AIAgentSidebar';
+import { getImageUrl } from '../utils/imageUtils';
 
-type BookingStatus = 'all' | 'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'REJECTED';
+type BookingStatus = 'all' | 'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'REJECTED' | 'HISTORY';
 
 export default function Bookings() {
   const { isDark } = useDarkMode();
@@ -14,6 +16,10 @@ export default function Bookings() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<BookingStatus>('all');
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  
+  // AI Agent state
+  const [agentOpen, setAgentOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     fetchBookings();
@@ -41,6 +47,17 @@ export default function Bookings() {
   const filterBookings = () => {
     if (activeTab === 'all') {
       setFilteredBookings(bookings);
+    } else if (activeTab === 'HISTORY') {
+      // Show completed bookings (check_out date has passed, excluding CANCELLED)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      setFilteredBookings(
+        bookings.filter(b => {
+          const checkOut = new Date(b.check_out);
+          return checkOut < today && b.status !== 'CANCELLED' && b.status !== 'REJECTED';
+        })
+      );
     } else {
       setFilteredBookings(bookings.filter(b => b.status === activeTab));
     }
@@ -60,6 +77,11 @@ export default function Bookings() {
     } finally {
       setCancellingId(null);
     }
+  };
+
+  const handleOpenAgent = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setAgentOpen(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -103,6 +125,7 @@ export default function Bookings() {
     { key: 'PENDING', label: 'Pending' },
     { key: 'ACCEPTED', label: 'Accepted' },
     { key: 'CANCELLED', label: 'Cancelled' },
+    { key: 'HISTORY', label: 'History' },
   ];
 
   if (loading) {
@@ -168,7 +191,17 @@ export default function Bookings() {
                       ? 'bg-[#FF385C] text-white'
                       : isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'
                   }`}>
-                    {bookings.filter(b => b.status === tab.key).length}
+                    {tab.key === 'HISTORY' 
+                      ? (() => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return bookings.filter(b => {
+                            const checkOut = new Date(b.check_out);
+                            return checkOut < today && b.status !== 'CANCELLED' && b.status !== 'REJECTED';
+                          }).length;
+                        })()
+                      : bookings.filter(b => b.status === tab.key).length
+                    }
                   </span>
                 )}
               </button>
@@ -198,7 +231,7 @@ export default function Bookings() {
           <div className="grid gap-6">
             {filteredBookings.map(booking => {
               const images = Array.isArray(booking.images) ? booking.images : [];
-              const mainImage = images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9';
+              const mainImage = images.length > 0 ? getImageUrl(images[0]) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9';
               
               return (
                 <div
@@ -277,7 +310,7 @@ export default function Bookings() {
                         )}
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 flex-wrap">
                         <Link
                           to={`/property/${booking.property_id}`}
                           className={`px-4 py-2 rounded-lg transition ${
@@ -288,6 +321,21 @@ export default function Bookings() {
                         >
                           View Property
                         </Link>
+                        
+                        {(booking.status === 'ACCEPTED' || booking.status === 'PENDING') && (
+                          <button
+                            onClick={() => handleOpenAgent(booking)}
+                            className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
+                              isDark
+                                ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'
+                                : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'
+                            }`}
+                          >
+                            <Sparkles size={16} />
+                            AI Travel Planner
+                          </button>
+                        )}
+                        
                         {booking.status === 'PENDING' && (
                           <button
                             onClick={() => handleCancelBooking(booking.id)}
@@ -310,6 +358,21 @@ export default function Bookings() {
           </div>
         )}
       </div>
+      
+      {/* AI Agent Sidebar */}
+      <AIAgentSidebar
+        isOpen={agentOpen}
+        onClose={() => setAgentOpen(false)}
+        bookingId={selectedBooking?.id || 0}
+        bookingDetails={selectedBooking ? {
+          property_name: selectedBooking.property_name || '',
+          city: selectedBooking.city || '',
+          state: selectedBooking.state || '',
+          check_in: selectedBooking.check_in,
+          check_out: selectedBooking.check_out,
+          number_of_guests: selectedBooking.number_of_guests
+        } : undefined}
+      />
     </div>
   );
 }

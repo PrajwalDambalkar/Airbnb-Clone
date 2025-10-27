@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
 import { getFirstImage } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
+import AIAgentSidebar from '../components/AIAgentSidebar';
+import bookingService, { type Booking } from '../services/bookingService';
 
 export default function Home() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -18,22 +20,19 @@ export default function Home() {
     const [showCalendar, setShowCalendar] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9)); // October 2025
     const [dateMode, setDateMode] = useState<'Dates' | 'Months' | 'Flexible'>('Dates');
+    const [hoveredDate, setHoveredDate] = useState<string | null>(null);
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
-    const [favorites, setFavorites] = useState<Set<number>>(() => {
-        try {
-            const raw = localStorage.getItem('favorites');
-            const arr: number[] = raw ? JSON.parse(raw) : [];
-            return new Set(arr);
-        } catch (e) {
-            return new Set();
-        }
-    
-    });
-    const laCarouselRef = useRef<HTMLDivElement>(null);
     const { user } = useAuth();
+    const [favorites, setFavorites] = useState<Set<number>>(new Set());
+    const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);
     const destinationDropdownRef = useRef<HTMLDivElement>(null);
+    
+    // AI Chatbot state
+    const [showChatbot, setShowChatbot] = useState(false);
+    const [userBookings, setUserBookings] = useState<Booking[]>([]);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -121,6 +120,36 @@ export default function Home() {
         fetchProperties();
     }, []);
 
+    // Load user-specific favorites and migrate old global favorites
+    useEffect(() => {
+        if (user) {
+            try {
+                // Check for user-specific favorites
+                let userFavs = localStorage.getItem(`favorites_${user.id}`);
+                
+                // If user doesn't have favorites yet, migrate from old global key (one-time migration)
+                if (!userFavs) {
+                    const oldFavs = localStorage.getItem('favorites');
+                    if (oldFavs) {
+                        // Migrate old favorites to user-specific key
+                        localStorage.setItem(`favorites_${user.id}`, oldFavs);
+                        userFavs = oldFavs;
+                    }
+                }
+                
+                // Remove old global favorites key after migration
+                localStorage.removeItem('favorites');
+                
+                const arr: number[] = userFavs ? JSON.parse(userFavs) : [];
+                setFavorites(new Set(arr));
+            } catch (e) {
+                setFavorites(new Set());
+            }
+        } else {
+            setFavorites(new Set());
+        }
+    }, [user]);
+
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -137,6 +166,45 @@ export default function Home() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showDestinations]);
+
+    // Fetch user bookings for AI chatbot
+    useEffect(() => {
+        const fetchBookings = async () => {
+            if (user) {
+                try {
+                    console.log('🔍 Fetching bookings for AI chatbot...');
+                    const response = await bookingService.getBookings();
+                    console.log('📋 All bookings:', response.data);
+                    
+                    const acceptedBookings = response.data.filter(
+                        (b: Booking) => b.status === 'ACCEPTED' || b.status === 'PENDING'
+                    );
+                    
+                    console.log('✅ Filtered bookings (ACCEPTED/PENDING):', acceptedBookings);
+                    
+                    setUserBookings(acceptedBookings);
+                    
+                    // Auto-select most recent booking
+                    if (acceptedBookings.length > 0) {
+                        const selected = acceptedBookings[0];
+                        console.log('🎯 Auto-selected booking:', {
+                            id: selected.id,
+                            property: selected.property_name,
+                            city: selected.city,
+                            state: selected.state,
+                            status: selected.status
+                        });
+                        setSelectedBooking(selected);
+                    } else {
+                        console.warn('⚠️ No bookings found with ACCEPTED or PENDING status');
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching bookings:', error);
+                }
+            }
+        };
+        fetchBookings();
+    }, [user]);
 
     const fetchProperties = async () => {
         try {
@@ -162,11 +230,13 @@ export default function Home() {
         
         let filtered = [...allProperties];
 
-        // Filter by destination/city
+        // Filter by destination/city - check both city and combined city+state
         if (destination) {
-            filtered = filtered.filter(p => 
-                p.city.toLowerCase().includes(destination.toLowerCase())
-            );
+            filtered = filtered.filter(p => {
+                const cityMatch = p.city.toLowerCase().includes(destination.toLowerCase());
+                const cityStateMatch = `${p.city}, ${p.state}`.toLowerCase().includes(destination.toLowerCase());
+                return cityMatch || cityStateMatch;
+            });
         }
 
         // Filter properties based on guests
@@ -211,6 +281,8 @@ export default function Home() {
     };
 
     const toggleFavorite = (propertyId: number) => {
+        if (!user) return;
+        
         setFavorites(prev => {
             const newFavorites = new Set(prev);
             if (newFavorites.has(propertyId)) {
@@ -219,10 +291,10 @@ export default function Home() {
                 newFavorites.add(propertyId);
             }
 
-            // persist to localStorage as array of ids
+            // persist to user-specific localStorage as array of ids
             try {
                 const arr = Array.from(newFavorites.values());
-                localStorage.setItem('favorites', JSON.stringify(arr));
+                localStorage.setItem(`favorites_${user.id}`, JSON.stringify(arr));
                 // notify other listeners in the app
                 window.dispatchEvent(new Event('favoritesUpdated'));
             } catch (e) {
@@ -364,31 +436,45 @@ export default function Home() {
                                                     <div>S</div>
                                                 </div>
                                                 <div className="grid grid-cols-7 gap-2">
-                                                    {generateCalendarDays(currentMonth).map((day, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            type="button"
-                                                            onClick={() => day && handleDateSelect(day)}
-                                                            className={`p-2 text-sm rounded-lg transition-colors ${
-                                                                day === null 
-                                                                    ? 'text-gray-300' 
-                                                                    : checkInDate && checkOutDate
-                                                                    ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) >= new Date(checkInDate) &&
-                                                                      new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) <= new Date(checkOutDate)
-                                                                        ? 'bg-red-200 text-gray-900'
-                                                                        : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0] === checkInDate ||
-                                                                          new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0] === checkOutDate
+                                                    {generateCalendarDays(currentMonth).map((day, idx) => {
+                                                        const currentDate = day ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) : null;
+                                                        const currentDateString = currentDate?.toISOString().split('T')[0];
+                                                        
+                                                        // Determine if this date is in the hover range
+                                                        const isInHoverRange = checkInDate && !checkOutDate && hoveredDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(hoveredDate);
+                                                        
+                                                        // Determine if this date is in the selected range
+                                                        const isInSelectedRange = checkInDate && checkOutDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(checkOutDate);
+                                                        
+                                                        const isCheckInDate = currentDateString === checkInDate;
+                                                        const isCheckOutDate = currentDateString === checkOutDate;
+                                                        
+                                                        return (
+                                                            <button
+                                                                key={idx}
+                                                                type="button"
+                                                                onClick={() => day && handleDateSelect(day)}
+                                                                onMouseEnter={() => day && setHoveredDate(currentDateString || null)}
+                                                                onMouseLeave={() => setHoveredDate(null)}
+                                                                className={`p-2 text-sm rounded-lg transition-colors ${
+                                                                    day === null 
+                                                                        ? 'text-gray-300' 
+                                                                        : isCheckInDate || isCheckOutDate
                                                                         ? 'bg-gray-900 text-white'
+                                                                        : isInSelectedRange
+                                                                        ? 'bg-red-200 text-gray-900'
+                                                                        : isInHoverRange
+                                                                        ? 'bg-gray-200 text-gray-700'
                                                                         : 'hover:bg-gray-100'
-                                                                    : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0] === checkInDate
-                                                                    ? 'bg-gray-900 text-white'
-                                                                    : 'hover:bg-gray-100'
-                                                            }`}
-                                                            disabled={day === null}
-                                                        >
-                                                            {day}
-                                                        </button>
-                                                    ))}
+                                                                }`}
+                                                                disabled={day === null}
+                                                            >
+                                                                {day}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
 
@@ -407,31 +493,46 @@ export default function Home() {
                                                     <div>S</div>
                                                 </div>
                                                 <div className="grid grid-cols-7 gap-2">
-                                                    {generateCalendarDays(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)).map((day, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            type="button"
-                                                            onClick={() => day && handleDateSelect(day)}
-                                                            className={`p-2 text-sm rounded-lg transition-colors ${
-                                                                day === null 
-                                                                    ? 'text-gray-300' 
-                                                                    : checkInDate && checkOutDate
-                                                                    ? new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day) >= new Date(checkInDate) &&
-                                                                      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day) <= new Date(checkOutDate)
-                                                                        ? 'bg-red-200 text-gray-900'
-                                                                        : new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day).toISOString().split('T')[0] === checkInDate ||
-                                                                          new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day).toISOString().split('T')[0] === checkOutDate
+                                                    {generateCalendarDays(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)).map((day, idx) => {
+                                                        const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1);
+                                                        const currentDate = day ? new Date(nextMonth.getFullYear(), nextMonth.getMonth(), day) : null;
+                                                        const currentDateString = currentDate?.toISOString().split('T')[0];
+                                                        
+                                                        // Determine if this date is in the hover range
+                                                        const isInHoverRange = checkInDate && !checkOutDate && hoveredDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(hoveredDate);
+                                                        
+                                                        // Determine if this date is in the selected range
+                                                        const isInSelectedRange = checkInDate && checkOutDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(checkOutDate);
+                                                        
+                                                        const isCheckInDate = currentDateString === checkInDate;
+                                                        const isCheckOutDate = currentDateString === checkOutDate;
+                                                        
+                                                        return (
+                                                            <button
+                                                                key={idx}
+                                                                type="button"
+                                                                onClick={() => day && handleDateSelect(day)}
+                                                                onMouseEnter={() => day && setHoveredDate(currentDateString || null)}
+                                                                onMouseLeave={() => setHoveredDate(null)}
+                                                                className={`p-2 text-sm rounded-lg transition-colors ${
+                                                                    day === null 
+                                                                        ? 'text-gray-300' 
+                                                                        : isCheckInDate || isCheckOutDate
                                                                         ? 'bg-gray-900 text-white'
+                                                                        : isInSelectedRange
+                                                                        ? 'bg-red-200 text-gray-900'
+                                                                        : isInHoverRange
+                                                                        ? 'bg-gray-200 text-gray-700'
                                                                         : 'hover:bg-gray-100'
-                                                                    : new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day).toISOString().split('T')[0] === checkInDate
-                                                                    ? 'bg-gray-900 text-white'
-                                                                    : 'hover:bg-gray-100'
-                                                            }`}
-                                                            disabled={day === null}
-                                                        >
-                                                            {day}
-                                                        </button>
-                                                    ))}
+                                                                }`}
+                                                                disabled={day === null}
+                                                            >
+                                                                {day}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
 
@@ -557,7 +658,7 @@ export default function Home() {
                     <div className="px-4 mx-auto max-w-7xl">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className={`text-3xl font-bold bg-gradient-to-r from-[#FF385C] to-[#E31C5F] bg-clip-text text-transparent ${isDark ? '' : ''}`}>
-                                ✨ Popular homes in Los Angeles
+                                ✨ Popular homes
                             </h2>
                             <div className="flex gap-3">
                                 <button 
@@ -830,6 +931,74 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
+
+            {/* Floating AI Chatbot Button */}
+            {user && (
+                <>
+                    {!showChatbot && (
+                        <button
+                            onClick={() => {
+                                console.log('🤖 Opening AI Chatbot');
+                                console.log('Selected booking:', selectedBooking);
+                                console.log('User bookings:', userBookings);
+                                setShowChatbot(true);
+                            }}
+                            className="fixed bottom-6 right-6 z-[9997] group"
+                            title="AI Travel Assistant"
+                        >
+                            <div className={`relative flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 ${
+                                isDark 
+                                    ? 'bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700' 
+                                    : 'bg-gradient-to-br from-[#FF385C] to-[#E31C5F] hover:from-[#E31C5F] hover:to-[#C13551]'
+                            }`}>
+                                <MessageCircle size={28} className="text-white" />
+                                
+                                {/* Pulse animation */}
+                                <span className="absolute inset-0 rounded-full bg-pink-400 opacity-75 animate-ping"></span>
+                                
+                                {/* Notification badge if user has bookings */}
+                                {userBookings.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-green-500 rounded-full border-2 border-white">
+                                        {userBookings.length}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            {/* Tooltip */}
+                            <div className={`absolute bottom-full right-0 mb-2 px-3 py-2 text-sm font-medium text-white whitespace-nowrap rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${
+                                isDark ? 'bg-gray-800' : 'bg-gray-900'
+                            }`}>
+                                AI Travel Planner ✨
+                                <div className={`absolute top-full right-4 w-2 h-2 transform rotate-45 ${
+                                    isDark ? 'bg-gray-800' : 'bg-gray-900'
+                                }`}></div>
+                            </div>
+                        </button>
+                    )}
+
+                    {/* AI Agent Sidebar - Always render when chatbot is open */}
+                    <AIAgentSidebar
+                        isOpen={showChatbot}
+                        onClose={() => setShowChatbot(false)}
+                        bookingId={selectedBooking?.id || 0}
+                        bookingDetails={
+                            selectedBooking && 
+                            selectedBooking.property_name && 
+                            selectedBooking.city && 
+                            selectedBooking.state
+                                ? {
+                                    property_name: selectedBooking.property_name,
+                                    city: selectedBooking.city,
+                                    state: selectedBooking.state,
+                                    check_in: selectedBooking.check_in,
+                                    check_out: selectedBooking.check_out,
+                                    number_of_guests: selectedBooking.number_of_guests
+                                }
+                                : undefined
+                        }
+                    />
+                </>
+            )}
         </div>
     );
 }

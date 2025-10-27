@@ -155,6 +155,8 @@ export const getBookings = async (req, res) => {
     const userRole = req.session.user.role;
     const { status } = req.query;
 
+    console.log('📋 [getBookings] User:', { userId, userRole, statusFilter: status });
+
     let query = `
       SELECT b.*, 
              p.property_name, p.city, p.state, p.images, p.address,
@@ -168,17 +170,10 @@ export const getBookings = async (req, res) => {
 
     const params = [];
 
-    // Filter based on user role
-    if (userRole === 'traveler') {
-      query += 'b.traveler_id = ?';
-      params.push(userId);
-    } else if (userRole === 'owner') {
-      query += 'b.owner_id = ?';
-      params.push(userId);
-    } else {
-      query += '(b.traveler_id = ? OR b.owner_id = ?)';
-      params.push(userId, userId);
-    }
+    // Always show bookings where user is EITHER traveler OR owner
+    // This allows owners to also make bookings as travelers
+    query += '(b.traveler_id = ? OR b.owner_id = ?)';
+    params.push(userId, userId);
 
     // Filter by status if provided
     if (status) {
@@ -188,7 +183,12 @@ export const getBookings = async (req, res) => {
 
     query += ' ORDER BY b.created_at DESC';
 
+    console.log('📋 [getBookings] Query:', query);
+    console.log('📋 [getBookings] Params:', params);
+
     const [bookings] = await db.query(query, params);
+    
+    console.log('📋 [getBookings] Found bookings:', bookings.length);
 
     // Parse JSON fields
     const parsedBookings = bookings.map(booking => {
@@ -418,6 +418,60 @@ export const cancelBooking = async (req, res) => {
     });
   } catch (error) {
     console.error('Cancel booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Get booked dates for a specific property (public endpoint)
+export const getPropertyBookedDates = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+
+    console.log('📅 Fetching booked dates for property:', propertyId);
+
+    // Get all PENDING and ACCEPTED bookings for this property
+    const [bookings] = await db.query(
+      `SELECT check_in, check_out 
+       FROM bookings 
+       WHERE property_id = ? 
+       AND status IN ('PENDING', 'ACCEPTED')
+       AND check_out >= CURDATE()
+       ORDER BY check_in ASC`,
+      [propertyId]
+    );
+
+    console.log('📅 Found bookings:', bookings.length);
+
+    // Generate array of all booked dates
+    const bookedDates = [];
+    bookings.forEach(booking => {
+      const checkIn = new Date(booking.check_in);
+      const checkOut = new Date(booking.check_out);
+      
+      // Add all dates from check-in to check-out (inclusive)
+      const currentDate = new Date(checkIn);
+      while (currentDate <= checkOut) {
+        bookedDates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        bookedDates: [...new Set(bookedDates)], // Remove duplicates
+        bookings: bookings.map(b => ({
+          checkIn: b.check_in,
+          checkOut: b.check_out
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Get booked dates error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
