@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Users, Bed, Bath, Star, Wifi, Car, Utensils, Wind, Waves, Mountain, Zap, Home as HomeIcon, Calendar, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Bed, Bath, Star, Wifi, Car, Utensils, Wind, Waves, Mountain, Zap, Home as HomeIcon, Calendar, CheckCircle, X, Mail, User, Clock } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { propertyService } from '../services/propertyService';
@@ -306,6 +306,56 @@ export default function PropertyDetail() {
               </div>
             </div>
 
+            {/* Owner Information */}
+            {property.owner_name && (
+              <div className={`p-6 rounded-2xl ${isDark ? 'bg-gray-900' : 'bg-white'} shadow-lg`}>
+                <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Hosted by {property.owner_name.split(' ')[0]}
+                </h2>
+                <div className="flex items-start gap-4">
+                  {/* Owner Avatar */}
+                  <div className={`w-16 h-16 rounded-full overflow-hidden flex items-center justify-center ${isDark ? 'bg-gray-800' : 'bg-gray-200'}`}>
+                    {property.owner_profile_picture ? (
+                      <img 
+                        src={`http://localhost:5001${property.owner_profile_picture}`}
+                        alt={property.owner_name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <User 
+                      size={32} 
+                      className={`${property.owner_profile_picture ? 'hidden' : ''} ${isDark ? 'text-gray-400' : 'text-gray-600'}`} 
+                    />
+                  </div>
+                  
+                  {/* Owner Details */}
+                  <div className="flex-1">
+                    <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {property.owner_name}
+                    </h3>
+                    <div className={`space-y-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {property.owner_email && (
+                        <div className="flex items-center gap-2">
+                          <Mail size={16} />
+                          <span>{property.owner_email}</span>
+                        </div>
+                      )}
+                      {property.owner_since && (
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} />
+                          <span>Hosting since {new Date(property.owner_since).getFullYear()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <div className={`p-6 rounded-2xl ${isDark ? 'bg-gray-900' : 'bg-white'} shadow-lg`}>
               <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -406,10 +456,14 @@ export default function PropertyDetail() {
                                 setCheckOutDate(null);
                               }
                             }}
+                            selectsStart
+                            startDate={checkInDate}
+                            endDate={checkOutDate}
                             minDate={new Date()}
                             filterDate={(date) => !isDateBooked(date)}
                             dateFormat="MM/dd/yyyy"
                             placeholderText="Select check-in date"
+                            withPortal={window.innerWidth <= 640}
                             className={`w-full px-4 py-2 rounded-lg border ${
                               isDark 
                                 ? 'bg-gray-800 border-gray-700 text-white' 
@@ -427,22 +481,34 @@ export default function PropertyDetail() {
                           <DatePicker
                             selected={checkOutDate}
                             onChange={(date: Date | null) => setCheckOutDate(date)}
+                            selectsEnd
+                            startDate={checkInDate}
+                            endDate={checkOutDate}
                             minDate={checkInDate ? new Date(checkInDate.getTime() + 86400000) : new Date()}
                             filterDate={(date) => {
                               if (!checkInDate) return !isDateBooked(date);
                               // Don't allow checkout if it's on or before checkin
                               if (date <= checkInDate) return false;
-                              // Check if any date in the range is booked
+                              // Check if any date in the range is booked (excluding check-in date itself)
                               const currentDate = new Date(checkInDate);
+                              currentDate.setDate(currentDate.getDate() + 1); // Start from day after check-in
                               while (currentDate <= date) {
                                 if (isDateBooked(currentDate)) return false;
                                 currentDate.setDate(currentDate.getDate() + 1);
                               }
                               return true;
                             }}
+                            dayClassName={(date) => {
+                              // Highlight check-in date in checkout calendar as dark red
+                              if (checkInDate && date.toDateString() === checkInDate.toDateString()) {
+                                return 'checkin-date-in-checkout';
+                              }
+                              return '';
+                            }}
                             dateFormat="MM/dd/yyyy"
                             placeholderText="Select check-out date"
                             disabled={!checkInDate}
+                            withPortal={window.innerWidth <= 640}
                             className={`w-full px-4 py-2 rounded-lg border ${
                               isDark 
                                 ? 'bg-gray-800 border-gray-700 text-white disabled:bg-gray-900 disabled:text-gray-600' 
@@ -473,6 +539,25 @@ export default function PropertyDetail() {
                             Maximum {property.max_guests} guests
                           </p>
                         </div>
+
+                        {/* Clear Dates Button */}
+                        {(checkInDate || checkOutDate) && (
+                          <button
+                            onClick={() => {
+                              setCheckInDate(null);
+                              setCheckOutDate(null);
+                              setBookingError(null);
+                            }}
+                            className={`w-full py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
+                              isDark 
+                                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                            }`}
+                          >
+                            <X size={16} />
+                            Clear Dates
+                          </button>
+                        )}
                       </div>
 
                       {/* Pricing Breakdown */}
