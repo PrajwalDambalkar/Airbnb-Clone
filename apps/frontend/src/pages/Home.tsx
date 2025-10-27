@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
 import { getFirstImage } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
+import AIAgentSidebar from '../components/AIAgentSidebar';
+import bookingService, { type Booking } from '../services/bookingService';
 
 export default function Home() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -34,6 +36,11 @@ export default function Home() {
     const { user } = useAuth();
     const sdCarouselRef = useRef<HTMLDivElement>(null);
     const destinationDropdownRef = useRef<HTMLDivElement>(null);
+    
+    // AI Chatbot state
+    const [showChatbot, setShowChatbot] = useState(false);
+    const [userBookings, setUserBookings] = useState<Booking[]>([]);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -137,6 +144,45 @@ export default function Home() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showDestinations]);
+
+    // Fetch user bookings for AI chatbot
+    useEffect(() => {
+        const fetchBookings = async () => {
+            if (user) {
+                try {
+                    console.log('🔍 Fetching bookings for AI chatbot...');
+                    const response = await bookingService.getBookings();
+                    console.log('📋 All bookings:', response.data);
+                    
+                    const acceptedBookings = response.data.filter(
+                        (b: Booking) => b.status === 'ACCEPTED' || b.status === 'PENDING'
+                    );
+                    
+                    console.log('✅ Filtered bookings (ACCEPTED/PENDING):', acceptedBookings);
+                    
+                    setUserBookings(acceptedBookings);
+                    
+                    // Auto-select most recent booking
+                    if (acceptedBookings.length > 0) {
+                        const selected = acceptedBookings[0];
+                        console.log('🎯 Auto-selected booking:', {
+                            id: selected.id,
+                            property: selected.property_name,
+                            city: selected.city,
+                            state: selected.state,
+                            status: selected.status
+                        });
+                        setSelectedBooking(selected);
+                    } else {
+                        console.warn('⚠️ No bookings found with ACCEPTED or PENDING status');
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching bookings:', error);
+                }
+            }
+        };
+        fetchBookings();
+    }, [user]);
 
     const fetchProperties = async () => {
         try {
@@ -557,7 +603,7 @@ export default function Home() {
                     <div className="px-4 mx-auto max-w-7xl">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className={`text-3xl font-bold bg-gradient-to-r from-[#FF385C] to-[#E31C5F] bg-clip-text text-transparent ${isDark ? '' : ''}`}>
-                                ✨ Popular homes in Los Angeles
+                                ✨ Popular homes
                             </h2>
                             <div className="flex gap-3">
                                 <button 
@@ -584,13 +630,12 @@ export default function Home() {
                                     to={`/property/${property.id}`}
                                     className="flex-none group"
                                 >
-                                    <div className={`overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-lg w-[300px] ${isDark ? 'bg-gray-800' : 'bg-white'}`}> 
-                                        {/* Property Image */}
-                                        <div className="relative h-48 overflow-hidden">
+                                    <div className="w-[280px] sm:w-[300px] transition-all duration-300 hover:scale-105">
+                                        <div className="relative aspect-[4/3] mb-3 overflow-hidden rounded-xl shadow-md">
                                             <img
                                                 src={getFirstImage(property.images)}
                                                 alt={property.property_name}
-                                                className="object-cover w-full h-full"
+                                                className="object-cover w-full h-full transition-all duration-300 group-hover:brightness-110"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     if (!target.dataset.errorHandled) {
@@ -599,16 +644,8 @@ export default function Home() {
                                                     }
                                                 }}
                                             />
-                                            <div className="absolute top-2 right-2">
-                                                <span
-                                                    className={`px-2 py-1 text-xs font-medium rounded ${
-                                                        property.available
-                                                            ? isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'
-                                                            : isDark ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800'
-                                                    }`}
-                                                >
-                                                    {property.available ? 'Available' : 'Unavailable'}
-                                                </span>
+                                            <div className="absolute px-2.5 py-1 text-xs font-semibold text-gray-900 rounded-full shadow-sm top-3 left-3 bg-white/90 backdrop-blur-sm">
+                                                ⭐ Guest favorite
                                             </div>
                                             <button 
                                                 type="button"
@@ -617,34 +654,31 @@ export default function Home() {
                                                     e.stopPropagation();
                                                     toggleFavorite(property.id);
                                                 }}
-                                                className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+                                                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200 z-10 ${
                                                     favorites.has(property.id) 
-                                                        ? 'bg-red-500/80 shadow-lg' 
-                                                        : 'bg-white/70 hover:bg-white'
+                                                        ? 'bg-red-500/90 shadow-lg scale-110' 
+                                                        : 'bg-white/80 hover:bg-white hover:scale-110'
                                                 }`}
                                             >
                                                 <Heart 
-                                                    className={`w-5 h-5 transition-all duration-300 ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
+                                                    className={`w-5 h-5 transition-all ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
                                                 />
                                             </button>
                                         </div>
-                                        {/* Property Details */}
-                                        <div className="p-4">
-                                            <h3 className={`text-lg font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}> 
+                                        <div>
+                                            <h3 className={`text-base font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                                 {property.property_name}
                                             </h3>
-                                            <div className={`flex items-center gap-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}> 
-                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
-                                                <span className={`ml-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 200) + 50} reviews)</span>
-                                            </div>
-                                            <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}> 
+                                            <p className={`mt-0.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 {property.city}, {property.state}
                                             </p>
-                                            <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}> 
-                                                {property.bedrooms} bed • {property.bathrooms} bath • {property.max_guests} guests
-                                            </p>
-                                            <p className={`mt-3 text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}> 
+                                            <div className={`flex items-center gap-1 mt-1 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
+                                                <span className={`ml-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 250) + 100} reviews)</span>
+                                            </div>
+                                            <p className={`mt-2.5 text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                                 ${property.price_per_night}
+                                                <span className={`ml-1 text-sm font-normal ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>/night</span>
                                             </p>
                                         </div>
                                     </div>
@@ -686,18 +720,18 @@ export default function Home() {
                                     to={`/property/${property.id}`}
                                     className="flex-none group"
                                 >
-                                    <div className="w-[300px] transition-all duration-300 hover:scale-105">
-                                        <div className="relative aspect-[4/3] mb-4 overflow-hidden">
+                                    <div className="w-[280px] sm:w-[300px] transition-all duration-300 hover:scale-105">
+                                        <div className="relative aspect-[4/3] mb-3 overflow-hidden rounded-xl shadow-md">
                                             <img
                                                 src={getFirstImage(property.images)}
                                                 alt={property.property_name}
-                                                className="object-cover w-full h-full transition-all duration-300 shadow-lg rounded-2xl group-hover:shadow-2xl group-hover:brightness-110"
+                                                className="object-cover w-full h-full transition-all duration-300 group-hover:brightness-110"
                                                 onError={(e) => {
                                                     console.error('❌ SD Image failed:', property.images?.[0]);
                                                     e.currentTarget.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3';
                                                 }}
                                             />
-                                            <div className="absolute px-3 py-1 text-xs font-bold text-gray-900 rounded-full shadow-md top-3 left-3 bg-white/90 backdrop-blur-md">
+                                            <div className="absolute px-2.5 py-1 text-xs font-semibold text-gray-900 rounded-full shadow-sm top-3 left-3 bg-white/90 backdrop-blur-sm">
                                                 ⭐ Guest favorite
                                             </div>
                                             <button 
@@ -707,37 +741,32 @@ export default function Home() {
                                                     e.stopPropagation();
                                                     toggleFavorite(property.id);
                                                 }}
-                                                className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+                                                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200 z-10 ${
                                                     favorites.has(property.id) 
-                                                        ? 'bg-red-500/80 shadow-lg' 
-                                                        : 'bg-white/70 hover:bg-white'
+                                                        ? 'bg-red-500/90 shadow-lg scale-110' 
+                                                        : 'bg-white/80 hover:bg-white hover:scale-110'
                                                 }`}
                                             >
                                                 <Heart 
-                                                    className={`w-5 h-5 transition-all duration-300 ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
+                                                    className={`w-5 h-5 transition-all ${favorites.has(property.id) ? 'fill-white stroke-white' : 'stroke-gray-900'}`}
                                                 />
                                             </button>
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <h3 className={`font-bold text-lg truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                                        <div>
+                                            <h3 className={`text-base font-semibold truncate group-hover:text-[#FF385C] transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                                 {property.property_name}
                                             </h3>
-                                            <div className={`flex items-center gap-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
-                                                <span className={`ml-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 200) + 50} reviews)</span>
-                                            </div>
-                                            <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <p className={`mt-0.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 {property.city}, {property.state}
+                                            </p>
+                                            <div className={`flex items-center gap-1 mt-1 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                <span>⭐ {(property.rating || 4.5).toFixed(2)}</span>
+                                                <span className={`ml-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>({Math.floor(Math.random() * 250) + 100} reviews)</span>
                                             </div>
-                                            <div className="flex items-baseline gap-1 pt-2">
-                                                <span className={`text-lg font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                                                    ${property.price_per_night}
-                                                </span>
-                                                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                    /night
-                                                </span>
-                                            </div>
+                                            <p className={`mt-2.5 text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                                ${property.price_per_night}
+                                                <span className={`ml-1 text-sm font-normal ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>/night</span>
+                                            </p>
                                         </div>
                                     </div>
                                 </Link>
@@ -847,6 +876,74 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
+
+            {/* Floating AI Chatbot Button */}
+            {user && (
+                <>
+                    {!showChatbot && (
+                        <button
+                            onClick={() => {
+                                console.log('🤖 Opening AI Chatbot');
+                                console.log('Selected booking:', selectedBooking);
+                                console.log('User bookings:', userBookings);
+                                setShowChatbot(true);
+                            }}
+                            className="fixed bottom-6 right-6 z-[9997] group"
+                            title="AI Travel Assistant"
+                        >
+                            <div className={`relative flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 ${
+                                isDark 
+                                    ? 'bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700' 
+                                    : 'bg-gradient-to-br from-[#FF385C] to-[#E31C5F] hover:from-[#E31C5F] hover:to-[#C13551]'
+                            }`}>
+                                <MessageCircle size={28} className="text-white" />
+                                
+                                {/* Pulse animation */}
+                                <span className="absolute inset-0 rounded-full bg-pink-400 opacity-75 animate-ping"></span>
+                                
+                                {/* Notification badge if user has bookings */}
+                                {userBookings.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-green-500 rounded-full border-2 border-white">
+                                        {userBookings.length}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            {/* Tooltip */}
+                            <div className={`absolute bottom-full right-0 mb-2 px-3 py-2 text-sm font-medium text-white whitespace-nowrap rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${
+                                isDark ? 'bg-gray-800' : 'bg-gray-900'
+                            }`}>
+                                AI Travel Planner ✨
+                                <div className={`absolute top-full right-4 w-2 h-2 transform rotate-45 ${
+                                    isDark ? 'bg-gray-800' : 'bg-gray-900'
+                                }`}></div>
+                            </div>
+                        </button>
+                    )}
+
+                    {/* AI Agent Sidebar - Always render when chatbot is open */}
+                    <AIAgentSidebar
+                        isOpen={showChatbot}
+                        onClose={() => setShowChatbot(false)}
+                        bookingId={selectedBooking?.id || 0}
+                        bookingDetails={
+                            selectedBooking && 
+                            selectedBooking.property_name && 
+                            selectedBooking.city && 
+                            selectedBooking.state
+                                ? {
+                                    property_name: selectedBooking.property_name,
+                                    city: selectedBooking.city,
+                                    state: selectedBooking.state,
+                                    check_in: selectedBooking.check_in,
+                                    check_out: selectedBooking.check_out,
+                                    number_of_guests: selectedBooking.number_of_guests
+                                }
+                                : undefined
+                        }
+                    />
+                </>
+            )}
         </div>
     );
 }
