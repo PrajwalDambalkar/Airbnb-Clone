@@ -89,12 +89,12 @@ function Header() {
   return (
     <header className={`sticky top-0 z-[10001] overflow-visible ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-b shadow-sm transition-colors`}>
       <div className={`flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        <button
-          onClick={() => window.location.reload()}
+        <Link
+          to={user?.role === 'owner' ? '/owner/dashboard' : '/'}
           className={`text-2xl font-bold hover:opacity-80 transition-opacity ${isDark ? 'text-white' : 'text-[#FF385C]'}`}
         >
           airbnb
-        </button>
+        </Link>
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-3 lg:hidden">
