@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import * as ownerBookingService from '../services/ownerBookingService';
 import type { OwnerBooking, BookingStats } from '../services/ownerBookingService';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function OwnerBookings() {
   const { user, logout } = useAuth();
@@ -51,7 +52,8 @@ export default function OwnerBookings() {
       setError('');
       
       const filters: any = {};
-      if (activeTab !== 'all') {
+      // Don't send status filter for 'history' - we'll filter on frontend
+      if (activeTab !== 'all' && activeTab !== 'history') {
         filters.status = activeTab.toUpperCase();
       }
       if (searchTerm) {
@@ -63,7 +65,20 @@ export default function OwnerBookings() {
         ownerBookingService.getOwnerBookingStats()
       ]);
       
-      setBookings(bookingsData.data || []);
+      let finalBookings = bookingsData.data || [];
+      
+      // Filter for history on frontend (exclude CANCELLED)
+      if (activeTab === 'history') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        finalBookings = finalBookings.filter((b: OwnerBooking) => {
+          const checkOut = new Date(b.check_out);
+          return checkOut < today && b.status !== 'CANCELLED';
+        });
+      }
+      
+      setBookings(finalBookings);
       setStats(statsData.data);
     } catch (err: any) {
       console.error('Error fetching bookings:', err);
@@ -85,16 +100,45 @@ export default function OwnerBookings() {
   // Load favourites count
   useEffect(() => {
     const loadFavs = () => {
+      if (!user) {
+        setFavCount(0);
+        return;
+      }
       try {
-        const raw = localStorage.getItem('favorites');
-        const arr = raw ? JSON.parse(raw) : [];
+        // Check for user-specific favorites
+        let userFavs = localStorage.getItem(`favorites_${user.id}`);
+        
+        // If user doesn't have favorites yet, migrate from old global key (one-time migration)
+        if (!userFavs) {
+          const oldFavs = localStorage.getItem('favorites');
+          if (oldFavs) {
+            // Migrate old favorites to user-specific key
+            localStorage.setItem(`favorites_${user.id}`, oldFavs);
+            userFavs = oldFavs;
+          }
+        }
+        
+        // Remove old global favorites key after migration
+        localStorage.removeItem('favorites');
+        
+        const arr = userFavs ? JSON.parse(userFavs) : [];
         setFavCount(Array.isArray(arr) ? arr.length : 0);
       } catch (e) {
         setFavCount(0);
       }
     };
     loadFavs();
-  }, []);
+
+    // Listen for updates
+    const handler = () => loadFavs();
+    window.addEventListener('storage', handler);
+    window.addEventListener('favoritesUpdated', handler as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener('favoritesUpdated', handler as EventListener);
+    };
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -201,7 +245,7 @@ export default function OwnerBookings() {
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <Link to="/owner/dashboard" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
+              <Link to="/" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
                 airbnb
               </Link>
               <span className={`hidden sm:inline-block px-2 py-1 text-xs font-medium rounded ${isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'}`}>
@@ -264,7 +308,7 @@ export default function OwnerBookings() {
                 >
                   {user?.profile_picture ? (
                     <img 
-                      src={`http://localhost:5001${user.profile_picture}`} 
+                      src={getImageUrl(user.profile_picture)} 
                       alt={user.name}
                       className="w-8 h-8 rounded-full object-cover"
                     />
@@ -461,7 +505,7 @@ export default function OwnerBookings() {
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
             {/* Status Tabs */}
             <div className="flex flex-wrap gap-2">
-              {['all', 'pending', 'accepted', 'cancelled'].map((tab) => (
+              {['all', 'pending', 'accepted', 'cancelled', 'history'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}

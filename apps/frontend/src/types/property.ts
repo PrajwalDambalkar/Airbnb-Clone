@@ -21,4 +21,8 @@ export interface Property {
     rating?: number;
     created_at: string;
     updated_at: string;
+    owner_name?: string;
+    owner_email?: string;
+    owner_since?: string;
+    owner_profile_picture?: string;
 }
