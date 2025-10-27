@@ -19,10 +19,78 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [nameError, setNameError] = useState('');
+
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError('Email is required');
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  // Password validation function
+  const validatePassword = (password: string): boolean => {
+    if (!password) {
+      setPasswordError('Password is required');
+      return false;
+    }
+    if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      return false;
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      setPasswordError('Password must contain at least one lowercase letter');
+      return false;
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      setPasswordError('Password must contain at least one uppercase letter');
+      return false;
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      setPasswordError('Password must contain at least one number');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
+  // Name validation function
+  const validateName = (name: string): boolean => {
+    if (!name.trim()) {
+      setNameError('Name is required');
+      return false;
+    }
+    if (name.trim().length < 2) {
+      setNameError('Name must be at least 2 characters long');
+      return false;
+    }
+    setNameError('');
+    return true;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate all fields
+    const isNameValid = validateName(formData.name);
+    const isEmailValid = validateEmail(formData.email);
+    const isPasswordValid = validatePassword(formData.password);
+
+    if (!isNameValid || !isEmailValid || !isPasswordValid) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -107,10 +175,23 @@ export default function Signup() {
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent"
+                onChange={(e) => {
+                  setFormData({ ...formData, name: e.target.value });
+                  if (e.target.value) validateName(e.target.value);
+                }}
+                onBlur={(e) => validateName(e.target.value)}
+                className={`mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 ${
+                  nameError
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-[#FF385C] focus:border-transparent'
+                }`}
                 placeholder="John Doe"
               />
+              {nameError && (
+                <p className="mt-1 text-sm text-red-600">
+                  {nameError}
+                </p>
+              )}
             </div>
 
             {/* Email Field */}
@@ -124,10 +205,23 @@ export default function Signup() {
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent"
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  if (e.target.value) validateEmail(e.target.value);
+                }}
+                onBlur={(e) => validateEmail(e.target.value)}
+                className={`mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 ${
+                  emailError
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-[#FF385C] focus:border-transparent'
+                }`}
                 placeholder="you@example.com"
               />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -142,10 +236,17 @@ export default function Signup() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent"
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    if (e.target.value) validatePassword(e.target.value);
+                  }}
+                  onBlur={(e) => validatePassword(e.target.value)}
+                  className={`block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 ${
+                    passwordError
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300 focus:ring-[#FF385C] focus:border-transparent'
+                  }`}
                   placeholder="••••••••"
-                  minLength={6}
                 />
                 <button
                   type="button"
@@ -164,9 +265,15 @@ export default function Signup() {
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Must be at least 6 characters
-              </p>
+              {passwordError ? (
+                <p className="mt-1 text-sm text-red-600">
+                  {passwordError}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-500">
+                  Must be at least 8 characters with uppercase, lowercase, and number
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
