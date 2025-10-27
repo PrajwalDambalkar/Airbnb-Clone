@@ -33,3 +33,6 @@ pip-log.txt
 # Testing
 coverage/
 .pytest_cache/
+
+# Workspace settings
+Airbnb_Clone.code-workspace

@@ -298,10 +298,17 @@ Return ONLY valid JSON with this exact structure:
         Fallback itinerary when Ollama is unavailable
         """
         booking = context.get('booking', {})
+        tavily_data = context.get('tavily_data', {})
         destination = f"{booking.get('city', 'Destination')}, {booking.get('state', '')}"
         num_days = context.get('num_days', 3)
         
+        # Get real weather data if available from Tavily
+        weather_info = tavily_data.get('weather', {})
+        weather_summary = weather_info.get('summary', f"Check the weather forecast for {destination} closer to your travel dates. Pack layers and be prepared for changing conditions.")
+        
         logger.info(f"📦 Using fallback itinerary for {destination} ({num_days} days)")
+        if weather_info:
+            logger.info(f"🌤️ Including real weather data in fallback")
         
         # Generate itinerary for each day
         itinerary = []
@@ -452,7 +459,7 @@ Return ONLY valid JSON with this exact structure:
                 "🌍 Learn a few basic phrases in the local language - it's always appreciated",
                 "📸 Take photos but also remember to enjoy the moment without your phone"
             ],
-            "weather_summary": f"Check the weather forecast for {destination} closer to your travel dates. Pack layers and be prepared for changing conditions."
+            "weather_summary": weather_summary
         }
     
     async def chat(self, prompt: str) -> str:
