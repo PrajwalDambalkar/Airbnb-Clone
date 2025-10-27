@@ -57,6 +57,43 @@ export default function EditProfile() {
   const [success, setSuccess] = useState('');
   const [previewImage, setPreviewImage] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  // Phone number validation function
+  const validatePhone = (phone: string): boolean => {
+    // If phone is empty, it's valid (optional field)
+    if (!phone.trim()) {
+      setPhoneError('');
+      return true;
+    }
+    
+    // Remove all non-digit characters
+    const digitsOnly = phone.replace(/\D/g, '');
+    
+    if (digitsOnly.length !== 10) {
+      setPhoneError('Phone number must be exactly 10 digits');
+      return false;
+    }
+    
+    setPhoneError('');
+    return true;
+  };
 
   const [formData, setFormData] = useState<ProfileData>({
     name: '',
@@ -104,6 +141,14 @@ export default function EditProfile() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Real-time validation
+    if (name === 'email') {
+      validateEmail(value);
+    } else if (name === 'phone_number') {
+      validatePhone(value);
+    }
+    
     setError('');
     setSuccess('');
   };
@@ -145,8 +190,12 @@ export default function EditProfile() {
       setError('Name is required');
       return;
     }
-    if (!formData.email.trim()) {
-      setError('Email is required');
+    
+    const isEmailValid = validateEmail(formData.email);
+    const isPhoneValid = validatePhone(formData.phone_number);
+    
+    if (!isEmailValid || !isPhoneValid) {
+      setError('Please fix the validation errors before submitting');
       return;
     }
 
@@ -172,9 +221,14 @@ export default function EditProfile() {
       await profileAPI.updateProfile(data);
       await refreshUser(); // Refresh user data to update profile picture in header
       setSuccess('Profile updated successfully!');
+      
+      // Navigate with success message after 2 seconds
       setTimeout(() => {
-        navigate(user?.role === 'owner' ? '/owner/dashboard' : '/');
-      }, 1500);
+        const redirectPath = user?.role === 'owner' ? '/owner/dashboard' : '/';
+        navigate(redirectPath, { 
+          state: { successMessage: 'Profile updated successfully!' }
+        });
+      }, 2000);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to update profile');
     } finally {
@@ -195,6 +249,18 @@ export default function EditProfile() {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} py-8`}>
+      {/* Fixed Success Toast */}
+      {success && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[10002] animate-fade-in-down">
+          <div className="px-6 py-4 text-white bg-green-500 rounded-lg shadow-xl flex items-center gap-3">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">{success}</span>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-4xl px-4 mx-auto sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -215,15 +281,10 @@ export default function EditProfile() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6 space-y-6`}>
-          {/* Error/Success Messages */}
+          {/* Error Message */}
           {error && (
             <div className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50">
               {error}
-            </div>
-          )}
-          {success && (
-            <div className="px-4 py-3 text-green-700 border border-green-200 rounded-lg bg-green-50">
-              {success}
             </div>
           )}
 
@@ -300,18 +361,25 @@ export default function EditProfile() {
                 Email *
               </label>
               <input
-                type="email"
+                type="text"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
                 className={`w-full px-4 py-2 rounded-lg border ${
-                  isDark
+                  emailError
+                    ? 'border-red-500 focus:ring-red-500'
+                    : isDark
                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                     : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-pink-500 focus:border-transparent`}
+                } ${isDark ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-white text-gray-900'} focus:ring-2 focus:border-transparent ${!emailError && 'focus:ring-pink-500'}`}
                 placeholder="your.email@example.com"
               />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* Phone Number */}
@@ -326,12 +394,23 @@ export default function EditProfile() {
                 value={formData.phone_number}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-2 rounded-lg border ${
-                  isDark
+                  phoneError
+                    ? 'border-red-500 focus:ring-red-500'
+                    : isDark
                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                     : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-pink-500 focus:border-transparent`}
-                placeholder="+1 (555) 123-4567"
+                } ${isDark ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-white text-gray-900'} focus:ring-2 focus:border-transparent ${!phoneError && 'focus:ring-pink-500'}`}
+                placeholder="1234567890"
               />
+              {phoneError ? (
+                <p className="mt-1 text-sm text-red-600">
+                  {phoneError}
+                </p>
+              ) : (
+                <p className={`mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Optional - Must be 10 digits if provided
+                </p>
+              )}
             </div>
 
             {/* Gender */}
