@@ -7,10 +7,23 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true, // Important for session cookies!
+  timeout: 300000, // 5 minute timeout for AI agent requests
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Add response interceptor to handle errors gracefully
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Don't log 401 errors as they're expected for unauthenticated users
+    if (error.response?.status !== 401) {
+      console.error('API Error:', error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Types
 export interface User {
