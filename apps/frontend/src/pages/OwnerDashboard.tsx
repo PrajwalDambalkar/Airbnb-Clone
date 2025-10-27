@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
 import api from '../services/api';
-import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut } from 'lucide-react';
+import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
 import { getFirstImage } from '../utils/imageUtils';
 import * as ownerBookingService from '../services/ownerBookingService';
 import type { BookingStats } from '../services/ownerBookingService';
@@ -29,12 +29,13 @@ interface Property {
 
 export default function OwnerDashboard() {
   const { user, logout } = useAuth();
-  const { isDark } = useDarkMode();
+  const { isDark, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [bookingStats, setBookingStats] = useState<BookingStats | null>(null);
 
   const fetchMyProperties = async () => {
@@ -114,6 +115,23 @@ export default function OwnerDashboard() {
               </span>
             </div>
 
+            {/* Mobile Menu Button */}
+            <div className="flex items-center gap-3 md:hidden">
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+
             {/* Desktop Navigation */}
             <nav className="items-center hidden space-x-4 md:flex lg:space-x-6">
               <Link
@@ -146,15 +164,32 @@ export default function OwnerDashboard() {
                 <span>Browse Properties</span>
               </Link>
               
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              
               {/* User Menu - Profile Dropdown */}
               <div className="relative profile-dropdown z-[10000]">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-full transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600 border border-gray-600' : 'bg-white hover:bg-gray-50 border border-gray-300'}`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
-                    {user?.name.charAt(0).toUpperCase()}
-                  </div>
+                  {user?.profile_picture ? (
+                    <img 
+                      src={`http://localhost:5001${user.profile_picture}`} 
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
+                      {user?.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <ChevronDown size={16} className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -176,14 +211,14 @@ export default function OwnerDashboard() {
                         <span>Manage Bookings</span>
                       </Link>
                       
-                      <button
-                        disabled
-                        className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left cursor-not-allowed opacity-50 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
+                      <Link
+                        to="/profile/edit"
+                        onClick={() => setShowProfileMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                       >
-                        <Settings size={16} />
+                        <Settings size={16} className="text-[#FF385C]" />
                         <span>Edit Profile</span>
-                        <span className="ml-auto text-xs">(Soon)</span>
-                      </button>
+                      </Link>
                     </div>
 
                     <div className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -202,40 +237,65 @@ export default function OwnerDashboard() {
                 )}
               </div>
             </nav>
-
-            {/* Mobile Navigation */}
-            <div className="flex items-center space-x-2 md:hidden">
-              <Link
-                to="/"
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-[#FF385C] text-white hover:bg-[#E31C5F]' : 'bg-[#FF385C] text-white hover:bg-[#E31C5F]'}`}
-                title="Browse Properties"
-              >
-                <Eye className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/owner/properties/new"
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
-                title="Add Property"
-              >
-                <Plus className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/owner/bookings"
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
-                title="Manage Bookings"
-              >
-                <Calendar className="w-5 h-5" />
-              </Link>
-              <button
-                onClick={handleLogout}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isDark ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
-              >
-                Logout
-              </button>
-            </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Dropdown */}
+      {showMobileMenu && (
+        <div className={`md:hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b shadow-lg`}>
+          <div className="px-4 py-2 space-y-1">
+            <Link
+              to="/owner/properties/new"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Plus size={20} />
+              <span className="font-medium">Add Property</span>
+            </Link>
+            
+            <Link
+              to="/owner/bookings"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Calendar size={20} />
+              <span className="font-medium">Manage Bookings</span>
+            </Link>
+            
+            <Link
+              to="/"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Eye size={20} />
+              <span className="font-medium">Browse Properties</span>
+            </Link>
+            
+            <div className={`my-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}></div>
+            
+            <Link
+              to="/profile/edit"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <Settings size={20} />
+              <span className="font-medium">Edit Profile</span>
+            </Link>
+            
+            <button
+              onClick={() => {
+                setShowMobileMenu(false);
+                handleLogout();
+              }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'}`}
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
