@@ -44,9 +44,28 @@ function Header() {
   // Load favourites count from localStorage
   useEffect(() => {
     const loadFavs = () => {
+      if (!user) {
+        setFavCount(0);
+        return;
+      }
       try {
-        const raw = localStorage.getItem('favorites');
-        const arr = raw ? JSON.parse(raw) : [];
+        // Check for user-specific favorites
+        let userFavs = localStorage.getItem(`favorites_${user.id}`);
+        
+        // If user doesn't have favorites yet, migrate from old global key (one-time migration)
+        if (!userFavs) {
+          const oldFavs = localStorage.getItem('favorites');
+          if (oldFavs) {
+            // Migrate old favorites to user-specific key
+            localStorage.setItem(`favorites_${user.id}`, oldFavs);
+            userFavs = oldFavs;
+          }
+        }
+        
+        // Remove old global favorites key after migration
+        localStorage.removeItem('favorites');
+        
+        const arr = userFavs ? JSON.parse(userFavs) : [];
         setFavCount(Array.isArray(arr) ? arr.length : 0);
       } catch (e) {
         setFavCount(0);
@@ -64,7 +83,7 @@ function Header() {
       window.removeEventListener('storage', handler);
       window.removeEventListener('favoritesUpdated', handler as EventListener);
     };
-  }, []);
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -90,7 +109,7 @@ function Header() {
     <header className={`sticky top-0 z-[10001] overflow-visible ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-b shadow-sm transition-colors`}>
       <div className={`flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
         <Link
-          to={user?.role === 'owner' ? '/owner/dashboard' : '/'}
+          to="/"
           className={`text-2xl font-bold hover:opacity-80 transition-opacity ${isDark ? 'text-white' : 'text-[#FF385C]'}`}
         >
           airbnb

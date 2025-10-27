@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Users, Bed, Bath, Star, Wifi, Car, Utensils, Wind, Waves, Mountain, Zap, Home as HomeIcon, Calendar, CheckCircle } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { propertyService } from '../services/propertyService';
 import bookingService from '../services/bookingService';
 import { useDarkMode } from '../App';
@@ -17,12 +19,15 @@ export default function PropertyDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   
   // Booking state
-  const [checkInDate, setCheckInDate] = useState('');
-  const [checkOutDate, setCheckOutDate] = useState('');
+  const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guests, setGuests] = useState(1);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  
+  // Booked dates state
+  const [bookedDates, setBookedDates] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -45,12 +50,36 @@ export default function PropertyDetail() {
     fetchProperty();
   }, [id]);
 
+  // Fetch booked dates when property is loaded
+  useEffect(() => {
+    const fetchBookedDates = async () => {
+      if (!id) return;
+      
+      try {
+        const response = await bookingService.getPropertyBookedDates(id);
+        console.log('📅 Booked dates:', response.data.bookedDates);
+        setBookedDates(response.data.bookedDates || []);
+      } catch (err: any) {
+        console.error('Error fetching booked dates:', err);
+        // Don't show error to user, just log it
+      }
+    };
+
+    if (id && property) {
+      fetchBookedDates();
+    }
+  }, [id, property]);
+
+  // Check if a date is booked
+  const isDateBooked = (date: Date) => {
+    const dateString = date.toISOString().split('T')[0];
+    return bookedDates.includes(dateString);
+  };
+
   // Calculate number of nights
   const calculateNights = () => {
     if (!checkInDate || !checkOutDate) return 0;
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-    const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
+    const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
@@ -75,17 +104,15 @@ export default function PropertyDetail() {
       return;
     }
 
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (checkIn < today) {
+    if (checkInDate < today) {
       setBookingError('Check-in date cannot be in the past');
       return;
     }
 
-    if (checkOut <= checkIn) {
+    if (checkOutDate <= checkInDate) {
       setBookingError('Check-out date must be after check-in date');
       return;
     }
@@ -103,8 +130,8 @@ export default function PropertyDetail() {
 
       await bookingService.createBooking({
         property_id: parseInt(id),
-        check_in_date: checkInDate,
-        check_out_date: checkOutDate,
+        check_in_date: checkInDate.toISOString().split('T')[0],
+        check_out_date: checkOutDate.toISOString().split('T')[0],
         guests: guests,
         total_price: totalPrice
       });
@@ -131,20 +158,6 @@ export default function PropertyDetail() {
     } finally {
       setBookingLoading(false);
     }
-  };
-
-  // Get minimum date (today)
-  const getMinDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
-
-  // Get minimum checkout date (day after check-in)
-  const getMinCheckoutDate = () => {
-    if (!checkInDate) return getMinDate();
-    const checkIn = new Date(checkInDate);
-    checkIn.setDate(checkIn.getDate() + 1);
-    return checkIn.toISOString().split('T')[0];
   };
 
   const getAmenityIcon = (amenity: string) => {
@@ -384,16 +397,26 @@ export default function PropertyDetail() {
                             <Calendar size={16} className="inline mr-1" />
                             Check-in
                           </label>
-                          <input
-                            type="date"
-                            value={checkInDate}
-                            onChange={(e) => setCheckInDate(e.target.value)}
-                            min={getMinDate()}
+                          <DatePicker
+                            selected={checkInDate}
+                            onChange={(date: Date | null) => {
+                              setCheckInDate(date);
+                              // Reset checkout if it's before new checkin
+                              if (date && checkOutDate && checkOutDate <= date) {
+                                setCheckOutDate(null);
+                              }
+                            }}
+                            minDate={new Date()}
+                            filterDate={(date) => !isDateBooked(date)}
+                            dateFormat="MM/dd/yyyy"
+                            placeholderText="Select check-in date"
                             className={`w-full px-4 py-2 rounded-lg border ${
                               isDark 
                                 ? 'bg-gray-800 border-gray-700 text-white' 
                                 : 'bg-white border-gray-300 text-gray-900'
                             } focus:ring-2 focus:ring-[#FF385C] focus:border-transparent`}
+                            calendarClassName={isDark ? 'dark-calendar' : ''}
+                            wrapperClassName="w-full"
                           />
                         </div>
                         <div>
@@ -401,17 +424,32 @@ export default function PropertyDetail() {
                             <Calendar size={16} className="inline mr-1" />
                             Check-out
                           </label>
-                          <input
-                            type="date"
-                            value={checkOutDate}
-                            onChange={(e) => setCheckOutDate(e.target.value)}
-                            min={getMinCheckoutDate()}
+                          <DatePicker
+                            selected={checkOutDate}
+                            onChange={(date: Date | null) => setCheckOutDate(date)}
+                            minDate={checkInDate ? new Date(checkInDate.getTime() + 86400000) : new Date()}
+                            filterDate={(date) => {
+                              if (!checkInDate) return !isDateBooked(date);
+                              // Don't allow checkout if it's on or before checkin
+                              if (date <= checkInDate) return false;
+                              // Check if any date in the range is booked
+                              const currentDate = new Date(checkInDate);
+                              while (currentDate <= date) {
+                                if (isDateBooked(currentDate)) return false;
+                                currentDate.setDate(currentDate.getDate() + 1);
+                              }
+                              return true;
+                            }}
+                            dateFormat="MM/dd/yyyy"
+                            placeholderText="Select check-out date"
                             disabled={!checkInDate}
                             className={`w-full px-4 py-2 rounded-lg border ${
                               isDark 
                                 ? 'bg-gray-800 border-gray-700 text-white disabled:bg-gray-900 disabled:text-gray-600' 
                                 : 'bg-white border-gray-300 text-gray-900 disabled:bg-gray-100 disabled:text-gray-400'
                             } focus:ring-2 focus:ring-[#FF385C] focus:border-transparent`}
+                            calendarClassName={isDark ? 'dark-calendar' : ''}
+                            wrapperClassName="w-full"
                           />
                         </div>
                         <div>
