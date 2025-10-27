@@ -37,6 +37,7 @@ export default function OwnerDashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [bookingStats, setBookingStats] = useState<BookingStats | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   const fetchMyProperties = async () => {
     try {
@@ -96,6 +97,30 @@ export default function OwnerDashboard() {
       navigate('/login');
     } catch (err) {
       console.error('Logout error:', err);
+    }
+  };
+
+  const handleDeleteProperty = async (propertyId: number, propertyName: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${propertyName}"?\n\nThis action cannot be undone and will delete all associated photos.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeleting(propertyId);
+      await api.delete(`/api/properties/${propertyId}`);
+      
+      // Remove from local state
+      setProperties(properties.filter(p => p.id !== propertyId));
+      
+      // Show success message
+      alert('Property deleted successfully!');
+    } catch (err: any) {
+      console.error('Error deleting property:', err);
+      alert(err.response?.data?.message || 'Failed to delete property. It may have active bookings.');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -484,15 +509,19 @@ export default function OwnerDashboard() {
                         Edit
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this property?')) {
-                            // TODO: Implement delete
-                            alert('Delete functionality coming soon!');
-                          }
-                        }}
-                        className={`flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${isDark ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
+                        onClick={() => handleDeleteProperty(property.id, property.property_name)}
+                        disabled={deleting === property.id}
+                        className={`flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                          deleting === property.id
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        } ${isDark ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {deleting === property.id ? (
+                          <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>

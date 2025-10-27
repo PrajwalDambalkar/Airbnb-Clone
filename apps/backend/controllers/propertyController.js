@@ -1,5 +1,11 @@
 // controllers/propertyController.js
 import { promisePool as pool } from '../config/db.js'; // Import the database connection
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // GET all properties with optional filters
 export const getAllProperties = async (req, res) => {
@@ -240,6 +246,254 @@ export const createProperty = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error creating property',
+            error: error.message
+        });
+    }
+};
+
+// UPDATE property
+export const updateProperty = async (req, res) => {
+    try {
+        console.log('=== UPDATE PROPERTY REQUEST ===');
+        console.log('Property ID:', req.params.id);
+        console.log('Session:', { userId: req.session.userId, role: req.session.userRole });
+        console.log('Body:', req.body);
+        console.log('Files:', req.files);
+
+        const propertyId = req.params.id;
+
+        // Check if user is logged in as owner
+        if (!req.session.userId || req.session.userRole !== 'owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only owners can update properties'
+            });
+        }
+
+        // Verify property belongs to this owner
+        const [existing] = await pool.query(
+            'SELECT * FROM properties WHERE id = ? AND owner_id = ?',
+            [propertyId, req.session.userId]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Property not found or you do not have permission to edit it'
+            });
+        }
+
+        const currentProperty = existing[0];
+
+        const {
+            property_name, property_type, description,
+            address, city, state, zip_code, country,
+            price_per_night, bedrooms, bathrooms, max_guests,
+            amenities, available,
+            existing_photos, photos_to_delete
+        } = req.body;
+
+        // Parse existing photos and photos to delete
+        let existingPhotosList = [];
+        let photosToDeleteList = [];
+
+        if (existing_photos) {
+            try {
+                existingPhotosList = typeof existing_photos === 'string' 
+                    ? JSON.parse(existing_photos) 
+                    : existing_photos;
+            } catch (err) {
+                console.error('Error parsing existing_photos:', err);
+            }
+        }
+
+        if (photos_to_delete) {
+            try {
+                photosToDeleteList = typeof photos_to_delete === 'string' 
+                    ? JSON.parse(photos_to_delete) 
+                    : photos_to_delete;
+            } catch (err) {
+                console.error('Error parsing photos_to_delete:', err);
+            }
+        }
+
+        // Delete photos from filesystem
+        if (photosToDeleteList.length > 0) {
+            photosToDeleteList.forEach(photoPath => {
+                try {
+                    const fullPath = path.join(__dirname, '..', photoPath);
+                    if (fs.existsSync(fullPath)) {
+                        fs.unlinkSync(fullPath);
+                        console.log('Deleted photo:', photoPath);
+                    }
+                } catch (err) {
+                    console.error('Error deleting photo:', photoPath, err);
+                }
+            });
+        }
+
+        // Get new uploaded image paths
+        const newImages = req.files ? req.files.map(file => `/uploads/properties/${file.filename}`) : [];
+
+        // Combine existing photos (not deleted) + new photos
+        const finalImages = [...existingPhotosList, ...newImages];
+
+        // Parse amenities
+        let parsedAmenities = amenities;
+        if (typeof amenities === 'string') {
+            try {
+                parsedAmenities = JSON.parse(amenities);
+            } catch (err) {
+                console.error('Error parsing amenities:', err);
+                parsedAmenities = currentProperty.amenities;
+            }
+        }
+
+        console.log('Updating property with:', {
+            property_name,
+            finalImages: finalImages.length,
+            amenities: parsedAmenities
+        });
+
+        // Update the property
+        await pool.query(
+            `UPDATE properties SET
+                property_name = ?,
+                property_type = ?,
+                description = ?,
+                address = ?,
+                city = ?,
+                state = ?,
+                zipcode = ?,
+                country = ?,
+                price_per_night = ?,
+                bedrooms = ?,
+                bathrooms = ?,
+                max_guests = ?,
+                images = ?,
+                amenities = ?,
+                available = ?
+            WHERE id = ? AND owner_id = ?`,
+            [
+                property_name || currentProperty.property_name,
+                property_type || currentProperty.property_type,
+                description || currentProperty.description,
+                address || currentProperty.address,
+                city || currentProperty.city,
+                state || currentProperty.state,
+                zip_code || currentProperty.zipcode,
+                country || currentProperty.country,
+                price_per_night || currentProperty.price_per_night,
+                bedrooms || currentProperty.bedrooms,
+                bathrooms || currentProperty.bathrooms,
+                max_guests || currentProperty.max_guests,
+                JSON.stringify(finalImages),
+                JSON.stringify(parsedAmenities),
+                available !== undefined ? (available ? 1 : 0) : currentProperty.available,
+                propertyId,
+                req.session.userId
+            ]
+        );
+
+        console.log('Property updated successfully');
+
+        res.json({
+            success: true,
+            message: 'Property updated successfully'
+        });
+    } catch (error) {
+        console.error('Error updating property:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating property',
+            error: error.message
+        });
+    }
+};
+
+// DELETE property
+export const deleteProperty = async (req, res) => {
+    try {
+        console.log('=== DELETE PROPERTY REQUEST ===');
+        console.log('Property ID:', req.params.id);
+        console.log('Session:', { userId: req.session.userId, role: req.session.userRole });
+
+        const propertyId = req.params.id;
+
+        // Check if user is logged in as owner
+        if (!req.session.userId || req.session.userRole !== 'owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only owners can delete properties'
+            });
+        }
+
+        // Verify property belongs to this owner
+        const [existing] = await pool.query(
+            'SELECT * FROM properties WHERE id = ? AND owner_id = ?',
+            [propertyId, req.session.userId]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Property not found or you do not have permission to delete it'
+            });
+        }
+
+        const property = existing[0];
+
+        // Check for active bookings
+        const [bookings] = await pool.query(
+            'SELECT COUNT(*) as count FROM bookings WHERE property_id = ? AND status IN ("pending", "confirmed") AND check_out >= CURDATE()',
+            [propertyId]
+        );
+
+        if (bookings[0].count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot delete property with active or future bookings'
+            });
+        }
+
+        // Delete photos from filesystem
+        if (property.images) {
+            let imageList = [];
+            try {
+                imageList = typeof property.images === 'string' 
+                    ? JSON.parse(property.images) 
+                    : property.images;
+            } catch (err) {
+                console.error('Error parsing images:', err);
+            }
+
+            imageList.forEach(photoPath => {
+                try {
+                    const fullPath = path.join(__dirname, '..', photoPath);
+                    if (fs.existsSync(fullPath)) {
+                        fs.unlinkSync(fullPath);
+                        console.log('Deleted photo:', photoPath);
+                    }
+                } catch (err) {
+                    console.error('Error deleting photo:', photoPath, err);
+                }
+            });
+        }
+
+        // Delete the property
+        await pool.query('DELETE FROM properties WHERE id = ? AND owner_id = ?', [propertyId, req.session.userId]);
+
+        console.log('Property deleted successfully');
+
+        res.json({
+            success: true,
+            message: 'Property deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting property:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting property',
             error: error.message
         });
     }
