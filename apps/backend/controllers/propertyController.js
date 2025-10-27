@@ -79,7 +79,10 @@ export const getPropertyById = async (req, res) => {
         const { id } = req.params;
 
         const [properties] = await pool.query(
-            'SELECT * FROM properties WHERE id = ?',
+            `SELECT p.*, u.name as owner_name, u.email as owner_email, u.created_at as owner_since, u.profile_picture as owner_profile_picture
+             FROM properties p
+             LEFT JOIN users u ON p.owner_id = u.id
+             WHERE p.id = ?`,
             [id]
         );
 

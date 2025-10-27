@@ -49,8 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await authAPI.logout();
-    setUser(null);
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout API error:', error);
+      // Even if API call fails, clear the user from state
+    } finally {
+      setUser(null);
+    }
   };
 
   const refreshUser = async () => {

@@ -1,11 +1,11 @@
 // src/pages/OwnerDashboard.tsx
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
 import api from '../services/api';
 import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
-import { getFirstImage } from '../utils/imageUtils';
+import { getFirstImage, getImageUrl } from '../utils/imageUtils';
 import * as ownerBookingService from '../services/ownerBookingService';
 import type { BookingStats } from '../services/ownerBookingService';
 
@@ -31,6 +31,7 @@ export default function OwnerDashboard() {
   const { user, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
+  const location = useLocation();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -38,6 +39,7 @@ export default function OwnerDashboard() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [bookingStats, setBookingStats] = useState<BookingStats | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const fetchMyProperties = async () => {
     try {
@@ -70,8 +72,19 @@ export default function OwnerDashboard() {
 
     fetchMyProperties();
     fetchBookingStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [user, navigate]);
+
+  // Check for success message from navigation state
+  useEffect(() => {
+    const state = location.state as { successMessage?: string };
+    if (state?.successMessage) {
+      setSuccessMessage(state.successMessage);
+      // Clear the message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+      // Clear navigation state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -126,13 +139,25 @@ export default function OwnerDashboard() {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Fixed Success Toast */}
+      {successMessage && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[10002] animate-fade-in-down">
+          <div className="px-6 py-4 text-white bg-green-500 rounded-lg shadow-xl flex items-center gap-3">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">{successMessage}</span>
+          </div>
+        </div>
+      )}
+      
       {/* Header/Navigation */}
       <header className={`sticky top-0 z-[10001] overflow-visible shadow-md ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <Link to="/owner/dashboard" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
+              <Link to="/" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
                 airbnb
               </Link>
               <span className={`hidden sm:inline-block px-2 py-1 text-xs font-medium rounded ${isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'}`}>
@@ -206,7 +231,7 @@ export default function OwnerDashboard() {
                 >
                   {user?.profile_picture ? (
                     <img 
-                      src={`http://localhost:5001${user.profile_picture}`} 
+                      src={getImageUrl(user.profile_picture)} 
                       alt={user.name}
                       className="w-8 h-8 rounded-full object-cover"
                     />
