@@ -13,7 +13,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
 import OwnerBookings from './pages/OwnerBookings';
 import AddProperty from './pages/AddProperty';
-import { Moon, Sun, Heart, Home as HomeIcon, Calendar } from 'lucide-react';
+import { Moon, Sun, Heart, Home as HomeIcon, Calendar, ChevronDown, Settings, LogOut } from 'lucide-react';
 
 // Dark Mode Context
 interface DarkModeContextType {
