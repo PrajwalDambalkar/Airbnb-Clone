@@ -230,7 +230,7 @@ export const chat = async (req, res) => {
       `${AGENT_SERVICE_URL}/agent/chat`,
       agentPayload,
       {
-        timeout: 60000,  // 60 second timeout for chat
+        timeout: 300000,  // 5 minute timeout for chat (LLM can be slow)
         headers: {
           'Content-Type': 'application/json'
         }
