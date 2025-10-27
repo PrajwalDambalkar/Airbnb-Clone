@@ -19,6 +19,8 @@ export default function Login() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   // Redirect based on role after login
   useEffect(() => {
@@ -34,6 +36,33 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    setEmailError('');
+    setPasswordError('');
+    
+    // Validation
+    let hasError = false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!formData.email.trim()) {
+      setEmailError('Email is required');
+      hasError = true;
+    } else if (!emailRegex.test(formData.email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
+    }
+    
+    if (!formData.password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else if (formData.password.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -78,13 +107,25 @@ export default function Login() {
               <input
                 id="email"
                 name="email"
-                type="email"
+                type="text"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  setEmailError(''); // Clear error when user types
+                }}
+                className={`mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 ${
+                  emailError
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                    : `focus:ring-[#FF385C] focus:border-transparent ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`
+                }`}
                 placeholder="you@example.com"
               />
+              {emailError && (
+                <p className={`mt-1 text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -107,10 +148,16 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:border-transparent ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    setPasswordError(''); // Clear error when user types
+                  }}
+                  className={`block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 ${
+                    passwordError
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : `focus:ring-[#FF385C] focus:border-transparent ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`
+                  }`}
                   placeholder="••••••••"
-                  minLength={6}
                 />
                 <button
                   type="button"
@@ -129,9 +176,15 @@ export default function Login() {
                   )}
                 </button>
               </div>
-              <p className={`mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                Must be at least 6 characters
-              </p>
+              {passwordError ? (
+                <p className={`mt-1 text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                  {passwordError}
+                </p>
+              ) : (
+                <p className={`mt-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Must be at least 6 characters
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}

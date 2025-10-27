@@ -1,4 +1,5 @@
 // src/services/api.ts
+// Axios instance and API service functions - used for making HTTP requests to the backend API.
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';

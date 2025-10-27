@@ -17,10 +17,22 @@ export default function ForgotPassword() {
   const handleVerifyEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      setError('Email is required');
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      const { data } = await api.post('/auth/forgot-password', { email });
+      const { data } = await api.post('/api/auth/forgot-password', { email });
       
       console.log('Forgot password response:', data);
       
@@ -44,8 +56,23 @@ export default function ForgotPassword() {
     setError('');
 
     // Validation
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    
+    if (!/(?=.*[a-z])/.test(newPassword)) {
+      setError('Password must contain at least one lowercase letter');
+      return;
+    }
+    
+    if (!/(?=.*[A-Z])/.test(newPassword)) {
+      setError('Password must contain at least one uppercase letter');
+      return;
+    }
+    
+    if (!/(?=.*\d)/.test(newPassword)) {
+      setError('Password must contain at least one number');
       return;
     }
 
@@ -57,7 +84,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await api.post('/auth/reset-password', { 
+      await api.post('/api/auth/reset-password', { 
         email, 
         newPassword 
       });
@@ -107,7 +134,7 @@ export default function ForgotPassword() {
               <input
                 id="email"
                 name="email"
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -178,7 +205,7 @@ export default function ForgotPassword() {
                   </button>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
-                  Must be at least 6 characters
+                  Must be at least 8 characters with uppercase, lowercase, and number
                 </p>
               </div>
 
