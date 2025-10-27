@@ -758,7 +758,8 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* San Diego Section */}
+                {/* San Diego Section - Only show if no filter OR filter includes San Diego */}
+                {(!destination || destination.toLowerCase().includes('san diego') || properties.some(p => p.city.toLowerCase() === 'san diego')) && (
                 <section className="mb-16">
                     <div className="px-4 mx-auto max-w-7xl">
                         <div className="flex items-center justify-between mb-8">
@@ -844,6 +845,7 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+                )}
                 {/* Loading State */}
                 {loading ? (
                     <div className="py-20 text-center">
@@ -857,7 +859,8 @@ export default function Home() {
                     </div>
                 ) : null}
 
-                {/* Tokyo Section Placeholder */}
+                {/* Tokyo Section Placeholder - Only show when no filters active */}
+                {!destination && !checkInDate && !checkOutDate && !guests && (
                 <section className="mb-12">
                     <div className="px-4 mx-auto max-w-7xl">
                         <div className="flex items-center justify-between mb-6">
@@ -873,6 +876,7 @@ export default function Home() {
                         <p className="text-gray-500">Coming soon...</p>
                     </div>
                 </section>
+                )}
             </main>
 
             {/* Footer */}
