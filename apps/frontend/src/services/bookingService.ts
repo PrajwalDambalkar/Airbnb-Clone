@@ -82,6 +82,12 @@ const bookingService = {
     const response = await api.put(`/api/bookings/${id}/cancel`);
     return response.data;
   },
+
+  // Get booked dates for a property (public endpoint)
+  getPropertyBookedDates: async (propertyId: string | number) => {
+    const response = await api.get(`/api/bookings/property/${propertyId}/booked-dates`);
+    return response.data;
+  },
 };
 
 export default bookingService;

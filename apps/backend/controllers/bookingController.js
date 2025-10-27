@@ -425,3 +425,57 @@ export const cancelBooking = async (req, res) => {
     });
   }
 };
+
+// Get booked dates for a specific property (public endpoint)
+export const getPropertyBookedDates = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+
+    console.log('📅 Fetching booked dates for property:', propertyId);
+
+    // Get all PENDING and ACCEPTED bookings for this property
+    const [bookings] = await db.query(
+      `SELECT check_in, check_out 
+       FROM bookings 
+       WHERE property_id = ? 
+       AND status IN ('PENDING', 'ACCEPTED')
+       AND check_out >= CURDATE()
+       ORDER BY check_in ASC`,
+      [propertyId]
+    );
+
+    console.log('📅 Found bookings:', bookings.length);
+
+    // Generate array of all booked dates
+    const bookedDates = [];
+    bookings.forEach(booking => {
+      const checkIn = new Date(booking.check_in);
+      const checkOut = new Date(booking.check_out);
+      
+      // Add all dates from check-in to check-out (inclusive)
+      const currentDate = new Date(checkIn);
+      while (currentDate <= checkOut) {
+        bookedDates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        bookedDates: [...new Set(bookedDates)], // Remove duplicates
+        bookings: bookings.map(b => ({
+          checkIn: b.check_in,
+          checkOut: b.check_out
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Get booked dates error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

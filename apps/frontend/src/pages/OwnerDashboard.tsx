@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
 import api from '../services/api';
 import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
-import { getFirstImage } from '../utils/imageUtils';
+import { getFirstImage, getImageUrl } from '../utils/imageUtils';
 import * as ownerBookingService from '../services/ownerBookingService';
 import type { BookingStats } from '../services/ownerBookingService';
 
@@ -132,7 +132,7 @@ export default function OwnerDashboard() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <Link to="/owner/dashboard" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
+              <Link to="/" className="text-xl sm:text-2xl font-bold text-[#FF385C]">
                 airbnb
               </Link>
               <span className={`hidden sm:inline-block px-2 py-1 text-xs font-medium rounded ${isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'}`}>
@@ -206,7 +206,7 @@ export default function OwnerDashboard() {
                 >
                   {user?.profile_picture ? (
                     <img 
-                      src={`http://localhost:5001${user.profile_picture}`} 
+                      src={getImageUrl(user.profile_picture)} 
                       alt={user.name}
                       className="w-8 h-8 rounded-full object-cover"
                     />

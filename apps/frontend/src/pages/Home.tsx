@@ -20,20 +20,12 @@ export default function Home() {
     const [showCalendar, setShowCalendar] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9)); // October 2025
     const [dateMode, setDateMode] = useState<'Dates' | 'Months' | 'Flexible'>('Dates');
+    const [hoveredDate, setHoveredDate] = useState<string | null>(null);
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
-    const [favorites, setFavorites] = useState<Set<number>>(() => {
-        try {
-            const raw = localStorage.getItem('favorites');
-            const arr: number[] = raw ? JSON.parse(raw) : [];
-            return new Set(arr);
-        } catch (e) {
-            return new Set();
-        }
-    
-    });
-    const laCarouselRef = useRef<HTMLDivElement>(null);
     const { user } = useAuth();
+    const [favorites, setFavorites] = useState<Set<number>>(new Set());
+    const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);
     const destinationDropdownRef = useRef<HTMLDivElement>(null);
     
@@ -128,6 +120,36 @@ export default function Home() {
         fetchProperties();
     }, []);
 
+    // Load user-specific favorites and migrate old global favorites
+    useEffect(() => {
+        if (user) {
+            try {
+                // Check for user-specific favorites
+                let userFavs = localStorage.getItem(`favorites_${user.id}`);
+                
+                // If user doesn't have favorites yet, migrate from old global key (one-time migration)
+                if (!userFavs) {
+                    const oldFavs = localStorage.getItem('favorites');
+                    if (oldFavs) {
+                        // Migrate old favorites to user-specific key
+                        localStorage.setItem(`favorites_${user.id}`, oldFavs);
+                        userFavs = oldFavs;
+                    }
+                }
+                
+                // Remove old global favorites key after migration
+                localStorage.removeItem('favorites');
+                
+                const arr: number[] = userFavs ? JSON.parse(userFavs) : [];
+                setFavorites(new Set(arr));
+            } catch (e) {
+                setFavorites(new Set());
+            }
+        } else {
+            setFavorites(new Set());
+        }
+    }, [user]);
+
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -208,11 +230,13 @@ export default function Home() {
         
         let filtered = [...allProperties];
 
-        // Filter by destination/city
+        // Filter by destination/city - check both city and combined city+state
         if (destination) {
-            filtered = filtered.filter(p => 
-                p.city.toLowerCase().includes(destination.toLowerCase())
-            );
+            filtered = filtered.filter(p => {
+                const cityMatch = p.city.toLowerCase().includes(destination.toLowerCase());
+                const cityStateMatch = `${p.city}, ${p.state}`.toLowerCase().includes(destination.toLowerCase());
+                return cityMatch || cityStateMatch;
+            });
         }
 
         // Filter properties based on guests
@@ -257,6 +281,8 @@ export default function Home() {
     };
 
     const toggleFavorite = (propertyId: number) => {
+        if (!user) return;
+        
         setFavorites(prev => {
             const newFavorites = new Set(prev);
             if (newFavorites.has(propertyId)) {
@@ -265,10 +291,10 @@ export default function Home() {
                 newFavorites.add(propertyId);
             }
 
-            // persist to localStorage as array of ids
+            // persist to user-specific localStorage as array of ids
             try {
                 const arr = Array.from(newFavorites.values());
-                localStorage.setItem('favorites', JSON.stringify(arr));
+                localStorage.setItem(`favorites_${user.id}`, JSON.stringify(arr));
                 // notify other listeners in the app
                 window.dispatchEvent(new Event('favoritesUpdated'));
             } catch (e) {
@@ -410,31 +436,45 @@ export default function Home() {
                                                     <div>S</div>
                                                 </div>
                                                 <div className="grid grid-cols-7 gap-2">
-                                                    {generateCalendarDays(currentMonth).map((day, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            type="button"
-                                                            onClick={() => day && handleDateSelect(day)}
-                                                            className={`p-2 text-sm rounded-lg transition-colors ${
-                                                                day === null 
-                                                                    ? 'text-gray-300' 
-                                                                    : checkInDate && checkOutDate
-                                                                    ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) >= new Date(checkInDate) &&
-                                                                      new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) <= new Date(checkOutDate)
-                                                                        ? 'bg-red-200 text-gray-900'
-                                                                        : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0] === checkInDate ||
-                                                                          new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0] === checkOutDate
+                                                    {generateCalendarDays(currentMonth).map((day, idx) => {
+                                                        const currentDate = day ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) : null;
+                                                        const currentDateString = currentDate?.toISOString().split('T')[0];
+                                                        
+                                                        // Determine if this date is in the hover range
+                                                        const isInHoverRange = checkInDate && !checkOutDate && hoveredDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(hoveredDate);
+                                                        
+                                                        // Determine if this date is in the selected range
+                                                        const isInSelectedRange = checkInDate && checkOutDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(checkOutDate);
+                                                        
+                                                        const isCheckInDate = currentDateString === checkInDate;
+                                                        const isCheckOutDate = currentDateString === checkOutDate;
+                                                        
+                                                        return (
+                                                            <button
+                                                                key={idx}
+                                                                type="button"
+                                                                onClick={() => day && handleDateSelect(day)}
+                                                                onMouseEnter={() => day && setHoveredDate(currentDateString || null)}
+                                                                onMouseLeave={() => setHoveredDate(null)}
+                                                                className={`p-2 text-sm rounded-lg transition-colors ${
+                                                                    day === null 
+                                                                        ? 'text-gray-300' 
+                                                                        : isCheckInDate || isCheckOutDate
                                                                         ? 'bg-gray-900 text-white'
+                                                                        : isInSelectedRange
+                                                                        ? 'bg-red-200 text-gray-900'
+                                                                        : isInHoverRange
+                                                                        ? 'bg-gray-200 text-gray-700'
                                                                         : 'hover:bg-gray-100'
-                                                                    : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0] === checkInDate
-                                                                    ? 'bg-gray-900 text-white'
-                                                                    : 'hover:bg-gray-100'
-                                                            }`}
-                                                            disabled={day === null}
-                                                        >
-                                                            {day}
-                                                        </button>
-                                                    ))}
+                                                                }`}
+                                                                disabled={day === null}
+                                                            >
+                                                                {day}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
 
@@ -453,31 +493,46 @@ export default function Home() {
                                                     <div>S</div>
                                                 </div>
                                                 <div className="grid grid-cols-7 gap-2">
-                                                    {generateCalendarDays(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)).map((day, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            type="button"
-                                                            onClick={() => day && handleDateSelect(day)}
-                                                            className={`p-2 text-sm rounded-lg transition-colors ${
-                                                                day === null 
-                                                                    ? 'text-gray-300' 
-                                                                    : checkInDate && checkOutDate
-                                                                    ? new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day) >= new Date(checkInDate) &&
-                                                                      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day) <= new Date(checkOutDate)
-                                                                        ? 'bg-red-200 text-gray-900'
-                                                                        : new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day).toISOString().split('T')[0] === checkInDate ||
-                                                                          new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day).toISOString().split('T')[0] === checkOutDate
+                                                    {generateCalendarDays(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)).map((day, idx) => {
+                                                        const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1);
+                                                        const currentDate = day ? new Date(nextMonth.getFullYear(), nextMonth.getMonth(), day) : null;
+                                                        const currentDateString = currentDate?.toISOString().split('T')[0];
+                                                        
+                                                        // Determine if this date is in the hover range
+                                                        const isInHoverRange = checkInDate && !checkOutDate && hoveredDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(hoveredDate);
+                                                        
+                                                        // Determine if this date is in the selected range
+                                                        const isInSelectedRange = checkInDate && checkOutDate && currentDate &&
+                                                            currentDate >= new Date(checkInDate) && currentDate <= new Date(checkOutDate);
+                                                        
+                                                        const isCheckInDate = currentDateString === checkInDate;
+                                                        const isCheckOutDate = currentDateString === checkOutDate;
+                                                        
+                                                        return (
+                                                            <button
+                                                                key={idx}
+                                                                type="button"
+                                                                onClick={() => day && handleDateSelect(day)}
+                                                                onMouseEnter={() => day && setHoveredDate(currentDateString || null)}
+                                                                onMouseLeave={() => setHoveredDate(null)}
+                                                                className={`p-2 text-sm rounded-lg transition-colors ${
+                                                                    day === null 
+                                                                        ? 'text-gray-300' 
+                                                                        : isCheckInDate || isCheckOutDate
                                                                         ? 'bg-gray-900 text-white'
+                                                                        : isInSelectedRange
+                                                                        ? 'bg-red-200 text-gray-900'
+                                                                        : isInHoverRange
+                                                                        ? 'bg-gray-200 text-gray-700'
                                                                         : 'hover:bg-gray-100'
-                                                                    : new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day).toISOString().split('T')[0] === checkInDate
-                                                                    ? 'bg-gray-900 text-white'
-                                                                    : 'hover:bg-gray-100'
-                                                            }`}
-                                                            disabled={day === null}
-                                                        >
-                                                            {day}
-                                                        </button>
-                                                    ))}
+                                                                }`}
+                                                                disabled={day === null}
+                                                            >
+                                                                {day}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
 
