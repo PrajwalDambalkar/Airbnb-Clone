@@ -13,6 +13,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import OwnerDashboard from './pages/OwnerDashboard';
 import OwnerBookings from './pages/OwnerBookings';
 import AddProperty from './pages/AddProperty';
+import EditProperty from './pages/EditProperty';
 import EditProfile from './pages/EditProfile';
 import { Moon, Sun, Heart, Home as HomeIcon, Calendar, Settings, LogOut, ChevronDown, Menu, X } from 'lucide-react';
 
@@ -384,6 +385,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AddProperty />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/owner/properties/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditProperty />
                 </ProtectedRoute>
               }
             />
