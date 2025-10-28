@@ -3,7 +3,7 @@
 ## 🐛 Issue Found
 The frontend was calling `/agent/plan` instead of `/api/agent/plan`, causing a **404 Not Found** error.
 
-## ✅ Fixes Applied
+## ✅ Fixes Applied!
 
 ### 1. **Frontend Service Route Fix** (`apps/frontend/src/services/agentService.ts`)
 - ❌ **Before**: `'/agent/plan'`
