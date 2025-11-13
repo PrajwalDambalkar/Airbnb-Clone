@@ -1,0 +1,3 @@
+# Booking Troubleshooting
+
+...existing content from original file...

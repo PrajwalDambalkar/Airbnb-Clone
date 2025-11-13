@@ -1,0 +1,3 @@
+# Booking Visibility Fix
+
+...existing content from original file...

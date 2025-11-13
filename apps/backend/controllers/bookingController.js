@@ -384,6 +384,7 @@ export const updateBookingStatus = async (req, res) => {
 export const cancelBooking = async (req, res) => {
   try {
     const { id } = req.params;
+    const { cancellation_reason } = req.body;
     const userId = req.session.user.id;
 
     const [bookings] = await db.query(
@@ -407,9 +408,18 @@ export const cancelBooking = async (req, res) => {
       });
     }
 
+    // Determine who is cancelling (traveler or owner)
+    const cancelledBy = booking.traveler_id === userId ? 'traveler' : 'owner';
+
     await db.query(
-      'UPDATE bookings SET status = ?, updated_at = NOW() WHERE id = ?',
-      ['CANCELLED', id]
+      `UPDATE bookings 
+       SET status = ?, 
+           cancelled_by = ?,
+           cancelled_at = NOW(),
+           cancellation_reason = ?,
+           updated_at = NOW() 
+       WHERE id = ?`,
+      ['CANCELLED', cancelledBy, cancellation_reason || null, id]
     );
 
     res.json({
