@@ -1,0 +1,3 @@
+# Booking History Guide
+
+...existing content from original file...

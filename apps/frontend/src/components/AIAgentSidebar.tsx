@@ -427,8 +427,26 @@ export default function AIAgentSidebar({ isOpen, onClose, bookingId }: AIAgentSi
               </div>
               
               {message.role === 'user' && (
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} flex items-center justify-center`}>
-                  <User size={18} className={isDark ? 'text-gray-400' : 'text-gray-600'} />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
+                  {user?.profile_picture ? (
+                    <img 
+                      src={`http://localhost:5001${user.profile_picture}`}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">${user?.name.charAt(0).toUpperCase()}</div>`;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
+                      {user?.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

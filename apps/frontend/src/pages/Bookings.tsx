@@ -6,7 +6,7 @@ import { useDarkMode } from '../App';
 import AIAgentSidebar from '../components/AIAgentSidebar';
 import { getImageUrl } from '../utils/imageUtils';
 
-type BookingStatus = 'all' | 'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'REJECTED' | 'HISTORY';
+type BookingStatus = 'all' | 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'CANCELLED' | 'REJECTED' | 'HISTORY';
 
 export default function Bookings() {
   const { isDark } = useDarkMode();
@@ -16,6 +16,11 @@ export default function Bookings() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<BookingStatus>('all');
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  
+  // Cancellation modal state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState<number | null>(null);
+  const [cancellationReason, setCancellationReason] = useState('');
   
   // AI Agent state
   const [agentOpen, setAgentOpen] = useState(false);
@@ -46,31 +51,53 @@ export default function Bookings() {
 
   const filterBookings = () => {
     if (activeTab === 'all') {
-      setFilteredBookings(bookings);
-    } else if (activeTab === 'HISTORY') {
-      // Show completed bookings (check_out date has passed, excluding CANCELLED)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Sort by priority: PENDING > ACCEPTED > CANCELLED > COMPLETED
+      const statusPriority: Record<string, number> = {
+        'PENDING': 1,
+        'ACCEPTED': 2,
+        'CANCELLED': 3,
+        'COMPLETED': 4,
+        'REJECTED': 3 // Same priority as CANCELLED
+      };
       
-      setFilteredBookings(
-        bookings.filter(b => {
-          const checkOut = new Date(b.check_out);
-          return checkOut < today && b.status !== 'CANCELLED' && b.status !== 'REJECTED';
-        })
-      );
+      const sorted = [...bookings].sort((a, b) => {
+        const priorityA = statusPriority[a.status] || 999;
+        const priorityB = statusPriority[b.status] || 999;
+        
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+        
+        // If same priority, sort by check-in date (upcoming first)
+        return new Date(a.check_in).getTime() - new Date(b.check_in).getTime();
+      });
+      
+      setFilteredBookings(sorted);
+    } else if (activeTab === 'HISTORY') {
+      // Show completed bookings only
+      setFilteredBookings(bookings.filter(b => b.status === 'COMPLETED'));
     } else {
       setFilteredBookings(bookings.filter(b => b.status === activeTab));
     }
   };
 
   const handleCancelBooking = async (bookingId: number) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    setBookingToCancel(bookingId);
+    setShowCancelModal(true);
+  };
+
+  const confirmCancellation = async () => {
+    if (!bookingToCancel) return;
 
     try {
-      setCancellingId(bookingId);
-      await bookingService.updateBookingStatus(bookingId, 'CANCELLED');
+      setCancellingId(bookingToCancel);
+      await bookingService.cancelBooking(bookingToCancel, cancellationReason);
       // Refresh bookings
       await fetchBookings();
+      // Close modal and reset
+      setShowCancelModal(false);
+      setBookingToCancel(null);
+      setCancellationReason('');
     } catch (err: any) {
       console.error('Error cancelling booking:', err);
       alert(err.response?.data?.message || 'Failed to cancel booking');
@@ -98,6 +125,8 @@ export default function Bookings() {
         return <Clock size={20} className="text-yellow-500" />;
       case 'ACCEPTED':
         return <CheckCircle size={20} className="text-green-500" />;
+      case 'COMPLETED':
+        return <CheckCircle size={20} className="text-blue-500" />;
       case 'CANCELLED':
       case 'REJECTED':
         return <XCircle size={20} className="text-red-500" />;
@@ -112,6 +141,8 @@ export default function Bookings() {
         return isDark ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500' : 'bg-yellow-50 text-yellow-700 border-yellow-300';
       case 'ACCEPTED':
         return isDark ? 'bg-green-900/30 text-green-400 border-green-500' : 'bg-green-50 text-green-700 border-green-300';
+      case 'COMPLETED':
+        return isDark ? 'bg-blue-900/30 text-blue-400 border-blue-500' : 'bg-blue-50 text-blue-700 border-blue-300';
       case 'CANCELLED':
       case 'REJECTED':
         return isDark ? 'bg-red-900/30 text-red-400 border-red-500' : 'bg-red-50 text-red-700 border-red-300';
@@ -157,7 +188,7 @@ export default function Bookings() {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gray-50'} transition-colors`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             My Bookings
@@ -192,14 +223,7 @@ export default function Bookings() {
                       : isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'
                   }`}>
                     {tab.key === 'HISTORY' 
-                      ? (() => {
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          return bookings.filter(b => {
-                            const checkOut = new Date(b.check_out);
-                            return checkOut < today && b.status !== 'CANCELLED' && b.status !== 'REJECTED';
-                          }).length;
-                        })()
+                      ? bookings.filter(b => b.status === 'COMPLETED').length
                       : bookings.filter(b => b.status === tab.key).length
                     }
                   </span>
@@ -213,7 +237,7 @@ export default function Bookings() {
         {filteredBookings.length === 0 ? (
           <div className={`text-center py-12 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             <Calendar size={64} className="mx-auto mb-4 opacity-50" />
-            <p className="text-xl mb-2">No bookings found</p>
+            <p className="mb-2 text-xl">No bookings found</p>
             <p className="mb-4">
               {activeTab === 'all' 
                 ? "You haven't made any bookings yet"
@@ -254,8 +278,8 @@ export default function Bookings() {
                     </div>
 
                     {/* Details */}
-                    <div className="md:w-2/3 p-6">
-                      <div className="flex justify-between items-start mb-4">
+                    <div className="p-6 md:w-2/3">
+                      <div className="flex items-start justify-between mb-4">
                         <div>
                           <h3 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             {booking.property_name}
@@ -310,7 +334,26 @@ export default function Bookings() {
                         )}
                       </div>
 
-                      <div className="flex gap-3 flex-wrap">
+                      {/* Cancellation Info */}
+                      {booking.status === 'CANCELLED' && booking.cancellation_reason && (
+                        <div className={`mb-4 p-4 rounded-lg border ${
+                          isDark 
+                            ? 'bg-red-900/20 border-red-800 text-red-400' 
+                            : 'bg-red-50 border-red-200 text-red-700'
+                        }`}>
+                          <p className="mb-1 font-semibold">
+                            Cancellation Reason {booking.cancelled_by && `(by ${booking.cancelled_by})`}:
+                          </p>
+                          <p>{booking.cancellation_reason}</p>
+                          {booking.cancelled_at && (
+                            <p className="mt-1 text-sm opacity-75">
+                              Cancelled on {formatDate(booking.cancelled_at)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-3">
                         <Link
                           to={`/property/${booking.property_id}`}
                           className={`px-4 py-2 rounded-lg transition ${
@@ -373,6 +416,59 @@ export default function Bookings() {
           number_of_guests: selectedBooking.number_of_guests
         } : undefined}
       />
+
+      {/* Cancellation Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className={`rounded-2xl max-w-md w-full p-6 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+            <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Cancel Booking
+            </h3>
+            
+            <p className={`mb-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              Please provide a reason for cancellation (optional):
+            </p>
+            
+            <textarea
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              placeholder="E.g., Change of plans, found another property, etc."
+              rows={4}
+              className={`w-full px-4 py-3 rounded-lg border mb-4 ${
+                isDark
+                  ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+              } focus:outline-none focus:ring-2 focus:ring-[#FF385C]`}
+            />
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setBookingToCancel(null);
+                  setCancellationReason('');
+                }}
+                disabled={cancellingId !== null}
+                className={`flex-1 px-4 py-3 rounded-lg transition ${
+                  isDark
+                    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                Keep Booking
+              </button>
+              
+              <button
+                onClick={confirmCancellation}
+                disabled={cancellingId !== null}
+                className="flex-1 px-4 py-3 text-white transition bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {cancellingId ? 'Cancelling...' : 'Cancel Booking'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

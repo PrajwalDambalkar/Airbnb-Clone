@@ -71,6 +71,25 @@ class TavilyService:
             # Parse and structure results
             parsed_data = self._parse_tavily_results(result, location, dates)
             
+            # If no weather found, do a dedicated weather search
+            if not parsed_data.get('weather'):
+                try:
+                    weather_query = f"weather forecast {location} {dates.get('check_in')} to {dates.get('check_out')}"
+                    weather_result = self.client.search(
+                        query=weather_query,
+                        search_depth="basic",
+                        max_results=2
+                    )
+                    
+                    if weather_result.get('results'):
+                        parsed_data['weather'] = {
+                            'summary': weather_result['results'][0].get('content', '')[:300],
+                            'source': weather_result['results'][0].get('url', '')
+                        }
+                        logger.info(f"✅ Weather data found for {location}")
+                except Exception as we:
+                    logger.warning(f"⚠️ Weather search failed: {we}")
+            
             logger.info(f"✅ Tavily search completed for {location}")
             return parsed_data
             

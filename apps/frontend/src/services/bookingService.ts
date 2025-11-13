@@ -10,7 +10,7 @@ export interface Booking {
   check_out: string;
   number_of_guests: number;
   total_price: string;
-  status: 'PENDING' | 'ACCEPTED' | 'CANCELLED' | 'REJECTED';
+  status: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'CANCELLED' | 'REJECTED';
   party_type?: string;
   cancelled_by?: string;
   cancelled_at?: string;
@@ -78,8 +78,8 @@ const bookingService = {
   },
 
   // Cancel booking
-  cancelBooking: async (id: number): Promise<BookingResponse> => {
-    const response = await api.put(`/api/bookings/${id}/cancel`);
+  cancelBooking: async (id: number, cancellation_reason?: string): Promise<BookingResponse> => {
+    const response = await api.put(`/api/bookings/${id}/cancel`, { cancellation_reason });
     return response.data;
   },
 
