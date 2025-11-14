@@ -1,0 +1,3 @@
+# Booking Tools Summary
+
+...existing content from original file...

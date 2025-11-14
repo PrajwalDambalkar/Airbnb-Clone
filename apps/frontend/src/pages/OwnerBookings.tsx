@@ -78,6 +78,29 @@ export default function OwnerBookings() {
         });
       }
       
+      // Sort by priority for 'all' tab: PENDING > ACCEPTED > CANCELLED > COMPLETED
+      if (activeTab === 'all') {
+        const statusPriority: Record<string, number> = {
+          'PENDING': 1,
+          'ACCEPTED': 2,
+          'CANCELLED': 3,
+          'COMPLETED': 4,
+          'REJECTED': 3 // Same priority as CANCELLED
+        };
+        
+        finalBookings = [...finalBookings].sort((a: OwnerBooking, b: OwnerBooking) => {
+          const priorityA = statusPriority[a.status] || 999;
+          const priorityB = statusPriority[b.status] || 999;
+          
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+          
+          // If same priority, sort by check-in date (upcoming first)
+          return new Date(a.check_in).getTime() - new Date(b.check_in).getTime();
+        });
+      }
+      
       setBookings(finalBookings);
       setStats(statsData.data);
     } catch (err: any) {

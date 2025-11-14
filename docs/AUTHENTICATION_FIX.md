@@ -1,0 +1,3 @@
+# Authentication Fix
+
+...existing content from original file...

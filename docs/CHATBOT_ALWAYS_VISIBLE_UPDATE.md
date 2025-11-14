@@ -1,0 +1,3 @@
+# Chatbot Always Visible Update
+
+...existing content from original file...
