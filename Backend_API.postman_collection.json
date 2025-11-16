@@ -1,0 +1,317 @@
+{
+  "info": {
+    "name": "Airbnb Clone - Backend API",
+    "description": "Complete backend API for Airbnb clone with authentication, properties, bookings, and AI agent",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john_traveler\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"full_name\": \"John Doe\",\n  \"role\": \"traveler\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/auth/signup", "host": ["{{base_url}}"], "path": ["api", "auth", "signup"]}
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"]}
+          }
+        },
+        {
+          "name": "Get Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/auth/session", "host": ["{{base_url}}"], "path": ["api", "auth", "session"]}
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/auth/logout", "host": ["{{base_url}}"], "path": ["api", "auth", "logout"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/profile", "host": ["{{base_url}}"], "path": ["api", "profile"]}
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Michael Doe\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Adventure seeker and travel enthusiast\",\n  \"location\": \"San Francisco, CA\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/profile", "host": ["{{base_url}}"], "path": ["api", "profile"]}
+          }
+        },
+        {
+          "name": "Upload Profile Picture",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{"key": "profile_picture", "type": "file", "src": []}]
+            },
+            "url": {"raw": "{{base_url}}/api/profile/picture", "host": ["{{base_url}}"], "path": ["api", "profile", "picture"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Properties",
+      "item": [
+        {
+          "name": "Get All Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/properties", "host": ["{{base_url}}"], "path": ["api", "properties"]}
+          }
+        },
+        {
+          "name": "Get Properties (Filtered)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/properties?city=Los Angeles&state=CA&min_price=100&max_price=500",
+              "host": ["{{base_url}}"],
+              "path": ["api", "properties"],
+              "query": [
+                {"key": "city", "value": "Los Angeles"},
+                {"key": "state", "value": "CA"},
+                {"key": "min_price", "value": "100"},
+                {"key": "max_price", "value": "500"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Property Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/properties/1", "host": ["{{base_url}}"], "path": ["api", "properties", "1"]}
+          }
+        },
+        {
+          "name": "Create Property",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cozy Mountain Cabin\",\n  \"description\": \"Peaceful retreat in the mountains\",\n  \"property_type\": \"Cabin\",\n  \"price_per_night\": 150,\n  \"address\": \"456 Mountain Road\",\n  \"city\": \"Aspen\",\n  \"state\": \"CO\",\n  \"country\": \"USA\",\n  \"zipcode\": \"81611\",\n  \"bedrooms\": 2,\n  \"bathrooms\": 1,\n  \"max_guests\": 4,\n  \"amenities\": [\"WiFi\", \"Fireplace\", \"Kitchen\"],\n  \"images\": [\"/uploads/cabin_1.jpg\"]\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/properties", "host": ["{{base_url}}"], "path": ["api", "properties"]}
+          }
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price_per_night\": 175,\n  \"description\": \"Updated description\",\n  \"available\": true\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/properties/1", "host": ["{{base_url}}"], "path": ["api", "properties", "1"]}
+          }
+        },
+        {
+          "name": "Get Booked Dates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/properties/1/booked-dates", "host": ["{{base_url}}"], "path": ["api", "properties", "1", "booked-dates"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"property_id\": 1,\n  \"check_in\": \"2025-12-01\",\n  \"check_out\": \"2025-12-05\",\n  \"number_of_guests\": 4,\n  \"party_type\": \"family\",\n  \"special_requests\": \"Late check-in preferred\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/bookings", "host": ["{{base_url}}"], "path": ["api", "bookings"]}
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/bookings", "host": ["{{base_url}}"], "path": ["api", "bookings"]}
+          }
+        },
+        {
+          "name": "Get My Bookings (Filtered)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings?status=ACCEPTED",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings"],
+              "query": [{"key": "status", "value": "ACCEPTED"}]
+            }
+          }
+        },
+        {
+          "name": "Get Owner Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/bookings/owner", "host": ["{{base_url}}"], "path": ["api", "bookings", "owner"]}
+          }
+        },
+        {
+          "name": "Accept Booking",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/bookings/23/status", "host": ["{{base_url}}"], "path": ["api", "bookings", "23", "status"]}
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\",\n  \"cancellation_reason\": \"Guest requested cancellation\"\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/bookings/23/status", "host": ["{{base_url}}"], "path": ["api", "bookings", "23", "status"]}
+          }
+        },
+        {
+          "name": "Get Booking History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/bookings/history", "host": ["{{base_url}}"], "path": ["api", "bookings", "history"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Favorites",
+      "item": [
+        {
+          "name": "Add to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"property_id\": 1\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/favorites", "host": ["{{base_url}}"], "path": ["api", "favorites"]}
+          }
+        },
+        {
+          "name": "Get Favorites",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/favorites", "host": ["{{base_url}}"], "path": ["api", "favorites"]}
+          }
+        },
+        {
+          "name": "Remove from Favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/favorites/45", "host": ["{{base_url}}"], "path": ["api", "favorites", "45"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. AI Agent",
+      "item": [
+        {
+          "name": "Chat - Show Bookings",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Show me my bookings\",\n  \"booking_id\": null,\n  \"conversation_history\": []\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/agent/chat", "host": ["{{base_url}}"], "path": ["api", "agent", "chat"]}
+          }
+        },
+        {
+          "name": "Chat - Request Itinerary",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Make itinerary for los angeles\",\n  \"booking_id\": 23,\n  \"conversation_history\": [\n    {\"role\": \"user\", \"content\": \"Show me my bookings\"},\n    {\"role\": \"assistant\", \"content\": \"You have 1 active booking!\"}\n  ]\n}"
+            },
+            "url": {"raw": "{{base_url}}/api/agent/chat", "host": ["{{base_url}}"], "path": ["api", "agent", "chat"]}
+          }
+        },
+        {
+          "name": "Agent Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/agent/health", "host": ["{{base_url}}"], "path": ["api", "agent", "health"]}
+          }
+        }
+      ]
+    }
+  ]
+}

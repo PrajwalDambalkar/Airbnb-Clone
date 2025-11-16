@@ -2,17 +2,17 @@
 import api from './api';
 
 export interface OwnerBooking {
-  id: number;
-  traveler_id: number;
-  property_id: number;
-  owner_id: number;
+  id: string; // MongoDB ObjectId
+  traveler_id: string; // MongoDB ObjectId
+  property_id: string; // MongoDB ObjectId
+  owner_id: string; // MongoDB ObjectId
   check_in: string;
   check_out: string;
   number_of_guests: number;
   total_price: number;
   status: 'PENDING' | 'ACCEPTED' | 'CANCELLED';
   party_type: string;
-  cancelled_by: number | null;
+  cancelled_by: string | null; // 'traveler' or 'owner'
   cancelled_at: string | null;
   cancellation_reason: string | null;
   created_at: string;
@@ -36,7 +36,7 @@ export interface BookingStats {
 
 export interface GetBookingsParams {
   status?: string;
-  propertyId?: number;
+  propertyId?: string; // MongoDB ObjectId
   search?: string;
   sortBy?: string;
   order?: 'ASC' | 'DESC';
@@ -55,25 +55,25 @@ export const getOwnerBookingStats = async () => {
 };
 
 // Get single booking details
-export const getBookingDetails = async (id: number) => {
+export const getBookingDetails = async (id: string) => {
   const response = await api.get(`/api/bookings/owner/${id}`);
   return response.data;
 };
 
 // Approve a pending booking
-export const approveBooking = async (id: number) => {
+export const approveBooking = async (id: string) => {
   const response = await api.put(`/api/bookings/owner/${id}/approve`);
   return response.data;
 };
 
 // Reject a pending booking
-export const rejectBooking = async (id: number, reason?: string) => {
+export const rejectBooking = async (id: string, reason?: string) => {
   const response = await api.put(`/api/bookings/owner/${id}/reject`, { reason });
   return response.data;
 };
 
 // Cancel a confirmed booking
-export const cancelBooking = async (id: number, reason: string) => {
+export const cancelBooking = async (id: string, reason: string) => {
   const response = await api.put(`/api/bookings/owner/${id}/cancel`, { reason });
   return response.data;
 };

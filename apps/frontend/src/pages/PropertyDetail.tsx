@@ -129,7 +129,7 @@ export default function PropertyDetail() {
       const totalPrice = calculateTotalPrice();
 
       await bookingService.createBooking({
-        property_id: parseInt(id),
+        property_id: id, // MongoDB ObjectId as string
         check_in_date: checkInDate.toISOString().split('T')[0],
         check_out_date: checkOutDate.toISOString().split('T')[0],
         guests: guests,

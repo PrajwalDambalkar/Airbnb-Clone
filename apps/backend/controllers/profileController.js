@@ -1,5 +1,5 @@
 // controllers/profileController.js
-import { promisePool } from '../config/db.js';
+import User from '../models/User.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,18 +12,13 @@ export const getProfile = async (req, res) => {
     }
 
     // Get user profile
-    const [users] = await promisePool.query(
-      `SELECT id, name, email, role, phone_number, about_me, city, state, 
-       country, languages, gender, profile_picture, created_at, updated_at 
-       FROM users WHERE id = ?`,
-      [req.session.userId]
-    );
+    const user = await User.findById(req.session.userId).select('-password');
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ profile: users[0] });
+    res.json({ profile: user.toObject() });
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({ error: 'Server error while fetching profile' });
@@ -59,22 +54,23 @@ export const updateProfile = async (req, res) => {
     }
 
     // Check if email is already taken by another user
-    const [existingUsers] = await promisePool.query(
-      'SELECT id FROM users WHERE email = ? AND id != ?',
-      [email, req.session.userId]
-    );
+    const existingUser = await User.findOne({ 
+      email, 
+      _id: { $ne: req.session.userId } 
+    });
 
-    if (existingUsers.length > 0) {
+    if (existingUser) {
       return res.status(409).json({ error: 'Email already in use' });
     }
 
     // Get current user to check for old profile picture
-    const [currentUser] = await promisePool.query(
-      'SELECT profile_picture FROM users WHERE id = ?',
-      [req.session.userId]
-    );
+    const currentUser = await User.findById(req.session.userId);
+    
+    if (!currentUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    let profilePicturePath = currentUser[0].profile_picture;
+    let profilePicturePath = currentUser.profile_picture;
 
     // Handle profile picture upload
     if (req.file) {
@@ -90,48 +86,28 @@ export const updateProfile = async (req, res) => {
     }
 
     // Update user profile
-    await promisePool.query(
-      `UPDATE users SET 
-        name = ?,
-        email = ?,
-        phone_number = ?,
-        about_me = ?,
-        city = ?,
-        state = ?,
-        country = ?,
-        languages = ?,
-        gender = ?,
-        profile_picture = ?
-      WHERE id = ?`,
-      [
-        name,
-        email,
-        phone_number || null,
-        about_me || null,
-        city || null,
-        state || null,
-        country || null,
-        languages || null,
-        gender || null,
-        profilePicturePath,
-        req.session.userId
-      ]
-    );
+    currentUser.name = name;
+    currentUser.email = email;
+    currentUser.phone_number = phone_number || null;
+    currentUser.about_me = about_me || null;
+    currentUser.city = city || null;
+    currentUser.state = state || null;
+    currentUser.country = country || null;
+    currentUser.languages = languages || null;
+    currentUser.gender = gender || null;
+    currentUser.profile_picture = profilePicturePath;
 
-    // Get updated user profile
-    const [updatedUser] = await promisePool.query(
-      `SELECT id, name, email, role, phone_number, about_me, city, state, 
-       country, languages, gender, profile_picture, created_at, updated_at 
-       FROM users WHERE id = ?`,
-      [req.session.userId]
-    );
+    await currentUser.save();
+
+    // Get updated user profile (without password)
+    const updatedUser = await User.findById(req.session.userId).select('-password');
 
     // Update session with new user data
-    req.session.user = updatedUser[0];
+    req.session.user = updatedUser.toObject();
 
     res.json({
       message: 'Profile updated successfully',
-      profile: updatedUser[0]
+      profile: updatedUser.toObject()
     });
   } catch (error) {
     console.error('Update profile error:', error);

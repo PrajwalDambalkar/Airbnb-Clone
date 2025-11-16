@@ -1,7 +1,8 @@
 // controllers/bookingController.js
-import { pool } from '../config/db.js';
-
-const db = pool.promise();
+import Booking from '../models/Booking.js';
+import Property from '../models/Property.js';
+import User from '../models/User.js';
+import mongoose from 'mongoose';
 
 // Create a new booking
 export const createBooking = async (req, res) => {
@@ -18,7 +19,7 @@ export const createBooking = async (req, res) => {
     }
 
     const { property_id, check_in_date, check_out_date, guests, total_price } = req.body;
-    const traveler_id = req.session.user.id;
+    const traveler_id = req.session.user._id || req.session.user.id;
 
     console.log('📝 Creating booking:', { property_id, check_in_date, check_out_date, guests, total_price, traveler_id });
 
@@ -27,6 +28,13 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(property_id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid property ID'
       });
     }
 
@@ -51,19 +59,14 @@ export const createBooking = async (req, res) => {
     }
 
     // Get property details and owner_id
-    const [propertyRows] = await db.query(
-      'SELECT owner_id, available, max_guests FROM properties WHERE id = ?',
-      [property_id]
-    );
+    const property = await Property.findById(property_id);
 
-    if (propertyRows.length === 0) {
+    if (!property) {
       return res.status(404).json({
         success: false,
         message: 'Property not found'
       });
     }
-
-    const property = propertyRows[0];
 
     // Check if property is available
     if (!property.available) {
@@ -82,17 +85,15 @@ export const createBooking = async (req, res) => {
     }
 
     // Check if property already has a booking for these dates
-    const [conflictingBookings] = await db.query(
-      `SELECT id FROM bookings 
-       WHERE property_id = ? 
-       AND status IN ('PENDING', 'ACCEPTED')
-       AND (
-         (check_in <= ? AND check_out > ?) OR
-         (check_in < ? AND check_out >= ?) OR
-         (check_in >= ? AND check_out <= ?)
-       )`,
-      [property_id, check_in_date, check_in_date, check_out_date, check_out_date, check_in_date, check_out_date]
-    );
+    const conflictingBookings = await Booking.find({
+      property_id: property_id,
+      status: { $in: ['PENDING', 'ACCEPTED'] },
+      $or: [
+        { check_in: { $lte: checkIn }, check_out: { $gt: checkIn } },
+        { check_in: { $lt: checkOut }, check_out: { $gte: checkOut } },
+        { check_in: { $gte: checkIn }, check_out: { $lte: checkOut } }
+      ]
+    });
 
     if (conflictingBookings.length > 0) {
       return res.status(400).json({
@@ -102,41 +103,41 @@ export const createBooking = async (req, res) => {
     }
 
     // Create booking
-    const [result] = await db.query(
-      `INSERT INTO bookings 
-       (property_id, traveler_id, owner_id, check_in, check_out, number_of_guests, total_price, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')`,
-      [property_id, traveler_id, property.owner_id, check_in_date, check_out_date, guests, total_price]
-    );
+    const newBooking = await Booking.create({
+      property_id: property_id,
+      traveler_id: traveler_id,
+      owner_id: property.owner_id,
+      check_in: checkIn,
+      check_out: checkOut,
+      number_of_guests: guests,
+      total_price: total_price,
+      status: 'PENDING'
+    });
 
-    console.log('✅ Booking created with ID:', result.insertId);
+    console.log('✅ Booking created with ID:', newBooking._id);
 
     // Fetch the created booking with property details
-    const [bookingRows] = await db.query(
-      `SELECT b.*, p.property_name, p.city, p.state, p.images,
-              u.name as owner_name, u.email as owner_email
-       FROM bookings b
-       JOIN properties p ON b.property_id = p.id
-       JOIN users u ON b.owner_id = u.id
-       WHERE b.id = ?`,
-      [result.insertId]
-    );
+    const booking = await Booking.findById(newBooking._id)
+      .populate('property_id', 'property_name city state images')
+      .populate('owner_id', 'name email');
 
-    const booking = bookingRows[0];
-    
-    // Parse JSON fields
-    if (booking.images && typeof booking.images === 'string') {
-      try {
-        booking.images = JSON.parse(booking.images);
-      } catch (e) {
-        booking.images = [];
-      }
+    // Format response
+    const bookingData = booking.toObject();
+    if (booking.property_id) {
+      bookingData.property_name = booking.property_id.property_name;
+      bookingData.city = booking.property_id.city;
+      bookingData.state = booking.property_id.state;
+      bookingData.images = booking.property_id.images;
+    }
+    if (booking.owner_id) {
+      bookingData.owner_name = booking.owner_id.name;
+      bookingData.owner_email = booking.owner_id.email;
     }
 
     res.status(201).json({
       success: true,
       message: 'Booking created successfully',
-      data: booking
+      data: bookingData
     });
   } catch (error) {
     console.error('Create booking error:', error);
@@ -151,56 +152,54 @@ export const createBooking = async (req, res) => {
 // Get all bookings for the logged-in user
 export const getBookings = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId = req.session.user._id || req.session.user.id;
     const userRole = req.session.user.role;
     const { status } = req.query;
 
     console.log('📋 [getBookings] User:', { userId, userRole, statusFilter: status });
 
-    let query = `
-      SELECT b.*, 
-             p.property_name, p.city, p.state, p.images, p.address,
-             t.name as traveler_name, t.email as traveler_email,
-             o.name as owner_name, o.email as owner_email
-      FROM bookings b
-      JOIN properties p ON b.property_id = p.id
-      JOIN users t ON b.traveler_id = t.id
-      JOIN users o ON b.owner_id = o.id
-      WHERE `;
-
-    const params = [];
-
-    // Always show bookings where user is EITHER traveler OR owner
-    // This allows owners to also make bookings as travelers
-    query += '(b.traveler_id = ? OR b.owner_id = ?)';
-    params.push(userId, userId);
+    // Build query - show bookings where user is EITHER traveler OR owner
+    let query = {
+      $or: [
+        { traveler_id: userId },
+        { owner_id: userId }
+      ]
+    };
 
     // Filter by status if provided
     if (status) {
-      query += ' AND b.status = ?';
-      params.push(status.toUpperCase());
+      query.status = status.toUpperCase();
     }
 
-    query += ' ORDER BY b.created_at DESC';
+    console.log('📋 [getBookings] Query:', JSON.stringify(query));
 
-    console.log('📋 [getBookings] Query:', query);
-    console.log('📋 [getBookings] Params:', params);
-
-    const [bookings] = await db.query(query, params);
+    const bookings = await Booking.find(query)
+      .populate('property_id', 'property_name city state images address')
+      .populate('traveler_id', 'name email')
+      .populate('owner_id', 'name email')
+      .sort({ createdAt: -1 });
     
     console.log('📋 [getBookings] Found bookings:', bookings.length);
 
-    // Parse JSON fields
+    // Format response
     const parsedBookings = bookings.map(booking => {
-      const copy = { ...booking };
-      if (copy.images && typeof copy.images === 'string') {
-        try {
-          copy.images = JSON.parse(copy.images);
-        } catch (e) {
-          copy.images = [];
-        }
+      const bookingData = booking.toObject();
+      if (booking.property_id) {
+        bookingData.property_name = booking.property_id.property_name;
+        bookingData.city = booking.property_id.city;
+        bookingData.state = booking.property_id.state;
+        bookingData.images = booking.property_id.images;
+        bookingData.address = booking.property_id.address;
       }
-      return copy;
+      if (booking.traveler_id) {
+        bookingData.traveler_name = booking.traveler_id.name;
+        bookingData.traveler_email = booking.traveler_id.email;
+      }
+      if (booking.owner_id) {
+        bookingData.owner_name = booking.owner_id.name;
+        bookingData.owner_email = booking.owner_id.email;
+      }
+      return bookingData;
     });
 
     res.json({
@@ -222,50 +221,60 @@ export const getBookings = async (req, res) => {
 export const getBookingById = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.session.user.id;
+    const userId = req.session.user._id || req.session.user.id;
 
-    const [bookings] = await db.query(
-      `SELECT b.*, 
-              p.property_name, p.property_type, p.city, p.state, p.images, p.address,
-              p.bedrooms, p.bathrooms, p.amenities,
-              t.name as traveler_name, t.email as traveler_email, t.phone as traveler_phone,
-              o.name as owner_name, o.email as owner_email, o.phone as owner_phone
-       FROM bookings b
-       JOIN properties p ON b.property_id = p.id
-       JOIN users t ON b.traveler_id = t.id
-       JOIN users o ON b.owner_id = o.id
-       WHERE b.id = ? AND (b.traveler_id = ? OR b.owner_id = ?)`,
-      [id, userId, userId]
-    );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
-    if (bookings.length === 0) {
+    const booking = await Booking.findOne({
+      _id: id,
+      $or: [
+        { traveler_id: userId },
+        { owner_id: userId }
+      ]
+    })
+      .populate('property_id', 'property_name property_type city state images address bedrooms bathrooms amenities')
+      .populate('traveler_id', 'name email phone_number')
+      .populate('owner_id', 'name email phone_number');
+
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found'
       });
     }
 
-    const booking = bookings[0];
-
-    // Parse JSON fields
-    if (booking.images && typeof booking.images === 'string') {
-      try {
-        booking.images = JSON.parse(booking.images);
-      } catch (e) {
-        booking.images = [];
-      }
+    // Format response
+    const bookingData = booking.toObject();
+    if (booking.property_id) {
+      bookingData.property_name = booking.property_id.property_name;
+      bookingData.property_type = booking.property_id.property_type;
+      bookingData.city = booking.property_id.city;
+      bookingData.state = booking.property_id.state;
+      bookingData.images = booking.property_id.images;
+      bookingData.address = booking.property_id.address;
+      bookingData.bedrooms = booking.property_id.bedrooms;
+      bookingData.bathrooms = booking.property_id.bathrooms;
+      bookingData.amenities = booking.property_id.amenities;
     }
-    if (booking.amenities && typeof booking.amenities === 'string') {
-      try {
-        booking.amenities = JSON.parse(booking.amenities);
-      } catch (e) {
-        booking.amenities = [];
-      }
+    if (booking.traveler_id) {
+      bookingData.traveler_name = booking.traveler_id.name;
+      bookingData.traveler_email = booking.traveler_id.email;
+      bookingData.traveler_phone = booking.traveler_id.phone_number;
+    }
+    if (booking.owner_id) {
+      bookingData.owner_name = booking.owner_id.name;
+      bookingData.owner_email = booking.owner_id.email;
+      bookingData.owner_phone = booking.owner_id.phone_number;
     }
 
     res.json({
       success: true,
-      data: booking
+      data: bookingData
     });
   } catch (error) {
     console.error('Get booking error:', error);
@@ -282,7 +291,14 @@ export const updateBookingStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    const userId = req.session.user.id;
+    const userId = req.session.user._id || req.session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
     // Validate status
     const validStatuses = ['ACCEPTED', 'REJECTED', 'CANCELLED'];
@@ -294,24 +310,19 @@ export const updateBookingStatus = async (req, res) => {
     }
 
     // Get booking details
-    const [bookings] = await db.query(
-      'SELECT * FROM bookings WHERE id = ?',
-      [id]
-    );
+    const booking = await Booking.findById(id);
 
-    if (bookings.length === 0) {
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found'
       });
     }
 
-    const booking = bookings[0];
-
     // Check permissions
     if (status.toUpperCase() === 'ACCEPTED' || status.toUpperCase() === 'REJECTED') {
       // Only owner can accept/reject
-      if (booking.owner_id !== userId) {
+      if (booking.owner_id.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Only property owner can accept or reject bookings'
@@ -319,7 +330,7 @@ export const updateBookingStatus = async (req, res) => {
       }
     } else if (status.toUpperCase() === 'CANCELLED') {
       // Both traveler and owner can cancel
-      if (booking.traveler_id !== userId && booking.owner_id !== userId) {
+      if (booking.traveler_id.toString() !== userId.toString() && booking.owner_id.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Unauthorized to cancel this booking'
@@ -336,39 +347,34 @@ export const updateBookingStatus = async (req, res) => {
     }
 
     // Update booking status
-    await db.query(
-      'UPDATE bookings SET status = ?, updated_at = NOW() WHERE id = ?',
-      [status.toUpperCase(), id]
-    );
+    booking.status = status.toUpperCase();
+    await booking.save();
 
     // Fetch updated booking
-    const [updatedBookings] = await db.query(
-      `SELECT b.*, 
-              p.property_name, p.city, p.state, p.images,
-              t.name as traveler_name, o.name as owner_name
-       FROM bookings b
-       JOIN properties p ON b.property_id = p.id
-       JOIN users t ON b.traveler_id = t.id
-       JOIN users o ON b.owner_id = o.id
-       WHERE b.id = ?`,
-      [id]
-    );
+    const updatedBooking = await Booking.findById(id)
+      .populate('property_id', 'property_name city state images')
+      .populate('traveler_id', 'name')
+      .populate('owner_id', 'name');
 
-    const updatedBooking = updatedBookings[0];
-
-    // Parse JSON fields
-    if (updatedBooking.images && typeof updatedBooking.images === 'string') {
-      try {
-        updatedBooking.images = JSON.parse(updatedBooking.images);
-      } catch (e) {
-        updatedBooking.images = [];
-      }
+    // Format response
+    const bookingData = updatedBooking.toObject();
+    if (updatedBooking.property_id) {
+      bookingData.property_name = updatedBooking.property_id.property_name;
+      bookingData.city = updatedBooking.property_id.city;
+      bookingData.state = updatedBooking.property_id.state;
+      bookingData.images = updatedBooking.property_id.images;
+    }
+    if (updatedBooking.traveler_id) {
+      bookingData.traveler_name = updatedBooking.traveler_id.name;
+    }
+    if (updatedBooking.owner_id) {
+      bookingData.owner_name = updatedBooking.owner_id.name;
     }
 
     res.json({
       success: true,
       message: `Booking ${status.toLowerCase()} successfully`,
-      data: updatedBooking
+      data: bookingData
     });
   } catch (error) {
     console.error('Update booking status error:', error);
@@ -385,21 +391,29 @@ export const cancelBooking = async (req, res) => {
   try {
     const { id } = req.params;
     const { cancellation_reason } = req.body;
-    const userId = req.session.user.id;
+    const userId = req.session.user._id || req.session.user.id;
 
-    const [bookings] = await db.query(
-      'SELECT * FROM bookings WHERE id = ? AND (traveler_id = ? OR owner_id = ?)',
-      [id, userId, userId]
-    );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
-    if (bookings.length === 0) {
+    const booking = await Booking.findOne({
+      _id: id,
+      $or: [
+        { traveler_id: userId },
+        { owner_id: userId }
+      ]
+    });
+
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found'
       });
     }
-
-    const booking = bookings[0];
 
     if (booking.status === 'CANCELLED') {
       return res.status(400).json({
@@ -409,18 +423,13 @@ export const cancelBooking = async (req, res) => {
     }
 
     // Determine who is cancelling (traveler or owner)
-    const cancelledBy = booking.traveler_id === userId ? 'traveler' : 'owner';
+    const cancelledBy = booking.traveler_id.toString() === userId.toString() ? 'traveler' : 'owner';
 
-    await db.query(
-      `UPDATE bookings 
-       SET status = ?, 
-           cancelled_by = ?,
-           cancelled_at = NOW(),
-           cancellation_reason = ?,
-           updated_at = NOW() 
-       WHERE id = ?`,
-      ['CANCELLED', cancelledBy, cancellation_reason || null, id]
-    );
+    booking.status = 'CANCELLED';
+    booking.cancelled_by = cancelledBy;
+    booking.cancelled_at = new Date();
+    booking.cancellation_reason = cancellation_reason || null;
+    await booking.save();
 
     res.json({
       success: true,
@@ -443,16 +452,19 @@ export const getPropertyBookedDates = async (req, res) => {
 
     console.log('📅 Fetching booked dates for property:', propertyId);
 
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid property ID'
+      });
+    }
+
     // Get all PENDING and ACCEPTED bookings for this property
-    const [bookings] = await db.query(
-      `SELECT check_in, check_out 
-       FROM bookings 
-       WHERE property_id = ? 
-       AND status IN ('PENDING', 'ACCEPTED')
-       AND check_out >= CURDATE()
-       ORDER BY check_in ASC`,
-      [propertyId]
-    );
+    const bookings = await Booking.find({
+      property_id: propertyId,
+      status: { $in: ['PENDING', 'ACCEPTED'] },
+      check_out: { $gte: new Date() }
+    }).sort({ check_in: 1 });
 
     console.log('📅 Found bookings:', bookings.length);
 

@@ -15,11 +15,11 @@ export default function Bookings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<BookingStatus>('all');
-  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   
   // Cancellation modal state
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [bookingToCancel, setBookingToCancel] = useState<number | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
   const [cancellationReason, setCancellationReason] = useState('');
   
   // AI Agent state
@@ -81,7 +81,7 @@ export default function Bookings() {
     }
   };
 
-  const handleCancelBooking = async (bookingId: number) => {
+  const handleCancelBooking = async (bookingId: string) => {
     setBookingToCancel(bookingId);
     setShowCancelModal(true);
   };
@@ -406,7 +406,7 @@ export default function Bookings() {
       <AIAgentSidebar
         isOpen={agentOpen}
         onClose={() => setAgentOpen(false)}
-        bookingId={selectedBooking?.id || 0}
+        bookingId={selectedBooking?.id}
         bookingDetails={selectedBooking ? {
           property_name: selectedBooking.property_name || '',
           city: selectedBooking.city || '',

@@ -1,60 +1,87 @@
 // apps/backend/controllers/ownerBookingController.js
-import { pool } from '../config/db.js';
-
-const db = pool.promise();
+import Booking from '../models/Booking.js';
+import Property from '../models/Property.js';
+import User from '../models/User.js';
+import mongoose from 'mongoose';
 
 // Get all bookings for owner's properties with statistics
 export const getOwnerBookings = async (req, res) => {
   try {
-    const ownerId = req.session.user.id;
-    const { status, propertyId, search, sortBy = 'created_at', order = 'DESC' } = req.query;
+    const ownerId = req.session.user._id || req.session.user.id;
+    const { status, propertyId, search, sortBy = 'createdAt', order = 'DESC' } = req.query;
 
     // Build query with filters
-    let query = `
-      SELECT 
-        b.*,
-        p.property_name,
-        p.city,
-        p.state,
-        p.images,
-        u.name as guest_name,
-        u.email as guest_email
-      FROM bookings b
-      JOIN properties p ON b.property_id = p.id
-      JOIN users u ON b.traveler_id = u.id
-      WHERE b.owner_id = ?
-    `;
-    
-    const params = [ownerId];
+    let query = { owner_id: ownerId };
 
     // Apply filters
     if (status) {
-      query += ' AND b.status = ?';
-      params.push(status);
+      query.status = status.toUpperCase();
     }
 
-    if (propertyId) {
-      query += ' AND b.property_id = ?';
-      params.push(propertyId);
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+      query.property_id = propertyId;
     }
 
+    // Fetch bookings
+    let bookingsQuery = Booking.find(query)
+      .populate('property_id', 'property_name city state images')
+      .populate('traveler_id', 'name email');
+
+    // Apply search if provided
     if (search) {
-      query += ' AND (u.name LIKE ? OR p.property_name LIKE ? OR u.email LIKE ?)';
-      const searchTerm = `%${search}%`;
-      params.push(searchTerm, searchTerm, searchTerm);
+      const searchRegex = new RegExp(search, 'i');
+      const users = await User.find({
+        $or: [
+          { name: searchRegex },
+          { email: searchRegex }
+        ]
+      }).select('_id');
+      
+      const properties = await Property.find({
+        property_name: searchRegex
+      }).select('_id');
+
+      const userIds = users.map(u => u._id);
+      const propertyIds = properties.map(p => p._id);
+
+      query.$or = [
+        { traveler_id: { $in: userIds } },
+        { property_id: { $in: propertyIds } }
+      ];
+
+      bookingsQuery = Booking.find(query)
+        .populate('property_id', 'property_name city state images')
+        .populate('traveler_id', 'name email');
     }
 
     // Add sorting
-    const allowedSortFields = ['created_at', 'check_in', 'check_out', 'total_price', 'status'];
-    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
-    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-    query += ` ORDER BY b.${sortField} ${sortOrder}`;
+    const allowedSortFields = ['createdAt', 'check_in', 'check_out', 'total_price', 'status'];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const sortOrder = order.toUpperCase() === 'ASC' ? 1 : -1;
+    
+    bookingsQuery = bookingsQuery.sort({ [sortField]: sortOrder });
 
-    const [bookings] = await db.query(query, params);
+    const bookings = await bookingsQuery;
+
+    // Format response
+    const formattedBookings = bookings.map(booking => {
+      const bookingData = booking.toObject();
+      if (booking.property_id) {
+        bookingData.property_name = booking.property_id.property_name;
+        bookingData.city = booking.property_id.city;
+        bookingData.state = booking.property_id.state;
+        bookingData.images = booking.property_id.images;
+      }
+      if (booking.traveler_id) {
+        bookingData.guest_name = booking.traveler_id.name;
+        bookingData.guest_email = booking.traveler_id.email;
+      }
+      return bookingData;
+    });
 
     res.json({
       success: true,
-      data: bookings
+      data: formattedBookings
     });
   } catch (error) {
     console.error('Get owner bookings error:', error);
@@ -69,23 +96,45 @@ export const getOwnerBookings = async (req, res) => {
 // Get booking statistics for owner
 export const getOwnerBookingStats = async (req, res) => {
   try {
-    const ownerId = req.session.user.id;
+    const ownerId = req.session.user._id || req.session.user.id;
 
-    const [stats] = await db.query(`
-      SELECT 
-        COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending_count,
-        COUNT(CASE WHEN status = 'ACCEPTED' THEN 1 END) as confirmed_count,
-        COUNT(CASE WHEN status = 'CANCELLED' THEN 1 END) as cancelled_count,
-        COUNT(*) as total_bookings,
-        COALESCE(SUM(CASE WHEN status = 'ACCEPTED' THEN total_price ELSE 0 END), 0) as total_revenue,
-        COALESCE(SUM(CASE WHEN status = 'PENDING' THEN total_price ELSE 0 END), 0) as pending_revenue
-      FROM bookings
-      WHERE owner_id = ?
-    `, [ownerId]);
+    const stats = await Booking.aggregate([
+      { $match: { owner_id: new mongoose.Types.ObjectId(ownerId) } },
+      {
+        $group: {
+          _id: null,
+          pending_count: {
+            $sum: { $cond: [{ $eq: ['$status', 'PENDING'] }, 1, 0] }
+          },
+          confirmed_count: {
+            $sum: { $cond: [{ $eq: ['$status', 'ACCEPTED'] }, 1, 0] }
+          },
+          cancelled_count: {
+            $sum: { $cond: [{ $eq: ['$status', 'CANCELLED'] }, 1, 0] }
+          },
+          total_bookings: { $sum: 1 },
+          total_revenue: {
+            $sum: { $cond: [{ $eq: ['$status', 'ACCEPTED'] }, '$total_price', 0] }
+          },
+          pending_revenue: {
+            $sum: { $cond: [{ $eq: ['$status', 'PENDING'] }, '$total_price', 0] }
+          }
+        }
+      }
+    ]);
+
+    const result = stats.length > 0 ? stats[0] : {
+      pending_count: 0,
+      confirmed_count: 0,
+      cancelled_count: 0,
+      total_bookings: 0,
+      total_revenue: 0,
+      pending_revenue: 0
+    };
 
     res.json({
       success: true,
-      data: stats[0]
+      data: result
     });
   } catch (error) {
     console.error('Get booking stats error:', error);
@@ -101,37 +150,49 @@ export const getOwnerBookingStats = async (req, res) => {
 export const getBookingDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.session.user.id;
+    const ownerId = req.session.user._id || req.session.user.id;
 
-    const [bookings] = await db.query(`
-      SELECT 
-        b.*,
-        p.property_name,
-        p.city,
-        p.state,
-        p.country,
-        p.images,
-        p.bedrooms,
-        p.bathrooms,
-        p.max_guests,
-        u.name as guest_name,
-        u.email as guest_email
-      FROM bookings b
-      JOIN properties p ON b.property_id = p.id
-      JOIN users u ON b.traveler_id = u.id
-      WHERE b.id = ? AND b.owner_id = ?
-    `, [id, ownerId]);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
-    if (bookings.length === 0) {
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId
+    })
+      .populate('property_id', 'property_name city state country images bedrooms bathrooms max_guests')
+      .populate('traveler_id', 'name email phone_number');
+
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found or unauthorized'
       });
     }
 
+    // Format response
+    const bookingData = booking.toObject();
+    if (booking.property_id) {
+      bookingData.property_name = booking.property_id.property_name;
+      bookingData.city = booking.property_id.city;
+      bookingData.state = booking.property_id.state;
+      bookingData.country = booking.property_id.country;
+      bookingData.images = booking.property_id.images;
+      bookingData.bedrooms = booking.property_id.bedrooms;
+      bookingData.bathrooms = booking.property_id.bathrooms;
+      bookingData.max_guests = booking.property_id.max_guests;
+    }
+    if (booking.traveler_id) {
+      bookingData.guest_name = booking.traveler_id.name;
+      bookingData.guest_email = booking.traveler_id.email;
+    }
+
     res.json({
       success: true,
-      data: bookings[0]
+      data: bookingData
     });
   } catch (error) {
     console.error('Get booking details error:', error);
@@ -147,15 +208,23 @@ export const getBookingDetails = async (req, res) => {
 export const approveBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.session.user.id;
+    const ownerId = req.session.user._id || req.session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
     // Verify booking belongs to owner and is pending
-    const [booking] = await db.query(
-      'SELECT * FROM bookings WHERE id = ? AND owner_id = ? AND status = "PENDING"',
-      [id, ownerId]
-    );
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'PENDING'
+    });
 
-    if (booking.length === 0) {
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found, unauthorized, or not in pending status'
@@ -163,10 +232,8 @@ export const approveBooking = async (req, res) => {
     }
 
     // Update booking status to ACCEPTED
-    await db.query(
-      'UPDATE bookings SET status = "ACCEPTED", updated_at = NOW() WHERE id = ?',
-      [id]
-    );
+    booking.status = 'ACCEPTED';
+    await booking.save();
 
     res.json({
       success: true,
@@ -186,16 +253,24 @@ export const approveBooking = async (req, res) => {
 export const rejectBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.session.user.id;
+    const ownerId = req.session.user._id || req.session.user.id;
     const { reason } = req.body;
 
-    // Verify booking belongs to owner and is pending
-    const [booking] = await db.query(
-      'SELECT * FROM bookings WHERE id = ? AND owner_id = ? AND status = "PENDING"',
-      [id, ownerId]
-    );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
-    if (booking.length === 0) {
+    // Verify booking belongs to owner and is pending
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'PENDING'
+    });
+
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found, unauthorized, or not in pending status'
@@ -203,16 +278,11 @@ export const rejectBooking = async (req, res) => {
     }
 
     // Update booking status to CANCELLED with reason
-    await db.query(
-      `UPDATE bookings 
-       SET status = "CANCELLED", 
-           cancelled_by = ?, 
-           cancelled_at = NOW(), 
-           cancellation_reason = ?,
-           updated_at = NOW() 
-       WHERE id = ?`,
-      [ownerId, reason || 'Rejected by owner', id]
-    );
+    booking.status = 'CANCELLED';
+    booking.cancelled_by = 'owner';
+    booking.cancelled_at = new Date();
+    booking.cancellation_reason = reason || 'Rejected by owner';
+    await booking.save();
 
     res.json({
       success: true,
@@ -232,16 +302,24 @@ export const rejectBooking = async (req, res) => {
 export const cancelBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.session.user.id;
+    const ownerId = req.session.user._id || req.session.user.id;
     const { reason } = req.body;
 
-    // Verify booking belongs to owner and is accepted
-    const [booking] = await db.query(
-      'SELECT * FROM bookings WHERE id = ? AND owner_id = ? AND status = "ACCEPTED"',
-      [id, ownerId]
-    );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
 
-    if (booking.length === 0) {
+    // Verify booking belongs to owner and is accepted
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'ACCEPTED'
+    });
+
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found, unauthorized, or not in accepted status'
@@ -256,16 +334,11 @@ export const cancelBooking = async (req, res) => {
     }
 
     // Update booking status to CANCELLED
-    await db.query(
-      `UPDATE bookings 
-       SET status = "CANCELLED", 
-           cancelled_by = ?, 
-           cancelled_at = NOW(), 
-           cancellation_reason = ?,
-           updated_at = NOW() 
-       WHERE id = ?`,
-      [ownerId, reason, id]
-    );
+    booking.status = 'CANCELLED';
+    booking.cancelled_by = 'owner';
+    booking.cancelled_at = new Date();
+    booking.cancellation_reason = reason;
+    await booking.save();
 
     res.json({
       success: true,

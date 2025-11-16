@@ -169,6 +169,110 @@ class AgentService:
         
         return response
     
+    def _format_itinerary_message(self, plan: Dict[str, Any]) -> str:
+        """
+        Format itinerary plan into a structured readable message
+        """
+        destination = plan.get('destination', 'your destination')
+        dates = plan.get('dates', {})
+        check_in = dates.get('check_in', '')
+        check_out = dates.get('check_out', '')
+        itinerary = plan.get('itinerary', [])
+        activities = plan.get('activities', [])
+        restaurants = plan.get('restaurants', [])
+        packing_list = plan.get('packing_list', [])
+        local_tips = plan.get('local_tips', [])
+        weather = plan.get('weather_summary', '')
+        
+        message_parts = [
+            f"🎉 **Your Personalized {destination} Itinerary**",
+            f"📅 {check_in} to {check_out}",
+            ""
+        ]
+        
+        # Day-by-day itinerary
+        if itinerary:
+            message_parts.append("📋 **DAILY ITINERARY**")
+            message_parts.append("")
+            
+            for day in itinerary:
+                day_num = day.get('day_number', '')
+                date = day.get('date', '')
+                message_parts.append(f"**Day {day_num} - {date}**")
+                
+                # Morning
+                morning = day.get('morning', {})
+                if morning:
+                    message_parts.append(f"  🌅 **Morning ({morning.get('time', '9:00 AM')})**")
+                    message_parts.append(f"     • {morning.get('activity', 'Free time')}")
+                    message_parts.append(f"     {morning.get('description', '')}")
+                
+                # Afternoon
+                afternoon = day.get('afternoon', {})
+                if afternoon:
+                    message_parts.append(f"  ☀️ **Afternoon ({afternoon.get('time', '2:00 PM')})**")
+                    message_parts.append(f"     • {afternoon.get('activity', 'Free time')}")
+                    message_parts.append(f"     {afternoon.get('description', '')}")
+                
+                # Evening
+                evening = day.get('evening', {})
+                if evening:
+                    message_parts.append(f"  🌙 **Evening ({evening.get('time', '7:00 PM')})**")
+                    message_parts.append(f"     • {evening.get('activity', 'Free time')}")
+                    message_parts.append(f"     {evening.get('description', '')}")
+                
+                message_parts.append("")
+        
+        # Top Activities
+        if activities:
+            message_parts.append("🎯 **RECOMMENDED ACTIVITIES**")
+            message_parts.append("")
+            for i, activity in enumerate(activities[:5], 1):
+                title = activity.get('title', 'Activity')
+                duration = activity.get('duration', 'varies')
+                price = activity.get('price_tier', '$')
+                message_parts.append(f"{i}. **{title}** ({price}, ~{duration})")
+                message_parts.append(f"   {activity.get('description', '')}")
+                message_parts.append("")
+        
+        # Restaurant Recommendations
+        if restaurants:
+            message_parts.append("🍽️ **RESTAURANT RECOMMENDATIONS**")
+            message_parts.append("")
+            for i, rest in enumerate(restaurants[:5], 1):
+                name = rest.get('name', 'Restaurant')
+                cuisine = rest.get('cuisine', 'Local cuisine')
+                price = rest.get('price_tier', '$$')
+                message_parts.append(f"{i}. **{name}** - {cuisine} ({price})")
+                message_parts.append(f"   {rest.get('description', '')}")
+                message_parts.append("")
+        
+        # Packing List
+        if packing_list:
+            message_parts.append("🎒 **PACKING LIST**")
+            message_parts.append("")
+            for item in packing_list[:8]:
+                message_parts.append(f"  ✓ {item}")
+            message_parts.append("")
+        
+        # Local Tips
+        if local_tips:
+            message_parts.append("💡 **LOCAL TIPS**")
+            message_parts.append("")
+            for tip in local_tips[:5]:
+                message_parts.append(f"  • {tip}")
+            message_parts.append("")
+        
+        # Weather
+        if weather:
+            message_parts.append(f"🌤️ **WEATHER**: {weather}")
+            message_parts.append("")
+        
+        message_parts.append("---")
+        message_parts.append("Need to adjust anything? Just let me know! 😊")
+        
+        return "\n".join(message_parts)
+    
     async def process_query(self, query: str, context: Dict[str, Any]) -> str:
         """
         Process natural language query
@@ -277,8 +381,11 @@ class AgentService:
                     plan = await self.generate_plan(request)
                     logger.info(f"✅ Plan generated successfully: {plan.get('destination')}")
                     
+                    # Format structured itinerary message
+                    structured_message = self._format_itinerary_message(plan)
+                    
                     return {
-                        "message": f"🎉 I've created a personalized travel plan for your trip to {plan['destination']}! Check out the detailed itinerary below with day-by-day activities, restaurant recommendations, packing list, and local tips.",
+                        "message": structured_message,
                         "data": {"plan": plan}
                     }
                 except Exception as e:

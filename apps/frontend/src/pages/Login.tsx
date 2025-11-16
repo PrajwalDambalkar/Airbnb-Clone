@@ -219,7 +219,7 @@ export default function Login() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFormData({ email: 'owner@test.com', password: 'Password123' })}
+                  onClick={() => setFormData({ email: 'owner@test.com', password: 'password123' })}
                   className={`px-2 py-1 text-xs rounded transition-colors ${isDark ? 'text-green-400 bg-green-950 hover:bg-green-900' : 'text-green-700 bg-green-100 hover:bg-green-200'}`}
                 >
                   Owner Account

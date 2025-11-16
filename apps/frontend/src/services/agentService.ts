@@ -2,7 +2,7 @@
 import api from './api';
 
 export interface AgentPlanRequest {
-  booking_id: number;
+  booking_id: string; // MongoDB ObjectId
   query?: string;
   preferences?: {
     budget?: string;
@@ -53,7 +53,7 @@ export interface Restaurant {
 }
 
 export interface AgentPlanResponse {
-  booking_id: number;
+  booking_id: string; // MongoDB ObjectId
   destination: string;
   dates: {
     check_in: string;
@@ -99,7 +99,7 @@ const agentService = {
   /**
    * Process a natural language query
    */
-  processQuery: async (query: string, bookingId: number): Promise<any> => {
+  processQuery: async (query: string, bookingId: string): Promise<any> => {
     try {
       const response = await api.post('/api/agent/query', {
         query,
@@ -118,7 +118,7 @@ const agentService = {
    */
   chat: async (request: { 
     message: string; 
-    booking_id?: number;
+    booking_id?: string; // MongoDB ObjectId
     conversation_history?: Array<{ role: string; content: string }>;
   }): Promise<{ message: string; data?: any }> => {
     try {

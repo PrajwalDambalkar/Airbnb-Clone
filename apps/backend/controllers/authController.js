@@ -1,6 +1,6 @@
 // controllers/authController.js
 import bcrypt from 'bcryptjs';
-import { promisePool } from '../config/db.js';
+import User from '../models/User.js';
 
 // SIGNUP - Register new user
 export const signup = async (req, res) => {
@@ -30,37 +30,34 @@ export const signup = async (req, res) => {
     }
 
     // Check if user already exists
-    const [existingUsers] = await promisePool.query(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
+    const existingUser = await User.findOne({ email });
 
-    if (existingUsers.length > 0) {
+    if (existingUser) {
       return res.status(409).json({ 
         error: 'Email already registered' 
       });
     }
 
     // Hash password
-    const saltRounds = 10; // Salt is generated internally by bcrypt
-    const hashedPassword = await bcrypt.hash(password, saltRounds); // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Insert new user
-    const [result] = await promisePool.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, role]
-    );
+    // Create new user
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role
+    });
 
-    // Get the newly created user (without password)
-    const [newUser] = await promisePool.query(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
-      [result.insertId]
-    );
+    // Convert to plain object and remove password
+    const userObject = newUser.toObject();
+    delete userObject.password;
 
     // Create session
-    req.session.userId = newUser[0].id;
-    req.session.userRole = newUser[0].role;
-    req.session.user = newUser[0]; // Add this for consistency
+    req.session.userId = newUser._id.toString();
+    req.session.userRole = newUser.role;
+    req.session.user = userObject;
 
     // Save session explicitly
     req.session.save((err) => {
@@ -71,7 +68,7 @@ export const signup = async (req, res) => {
       
       res.status(201).json({
         message: 'User registered successfully',
-        user: newUser[0]
+        user: userObject
       });
     });
 
@@ -96,18 +93,13 @@ export const login = async (req, res) => {
     }
 
     // Find user
-    const [users] = await promisePool.query(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
+    const user = await User.findOne({ email });
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(401).json({ 
         error: 'Invalid email or password' 
       });
     }
-
-    const user = users[0];
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -118,14 +110,14 @@ export const login = async (req, res) => {
       });
     }
 
+    // Convert to plain object and remove password
+    const userObject = user.toObject();
+    delete userObject.password;
+
     // Create session
-    req.session.userId = user.id;
+    req.session.userId = user._id.toString();
     req.session.userRole = user.role;
-    
-    // Remove password from response
-    delete user.password;
-    
-    req.session.user = user; // Add this for consistency
+    req.session.user = userObject;
 
     // Save session explicitly
     req.session.save((err) => {
@@ -136,7 +128,7 @@ export const login = async (req, res) => {
       
       res.json({
         message: 'Login successful',
-        user
+        user: userObject
       });
     });
 
@@ -156,7 +148,7 @@ export const logout = (req, res) => {
         error: 'Failed to logout' 
       });
     }
-    res.clearCookie('airbnb_session');
+    res.clearCookie('connect.sid'); // MongoDB session cookie name
     res.json({ message: 'Logout successful' });
   });
 };
@@ -170,21 +162,18 @@ export const getCurrentUser = async (req, res) => {
       });
     }
 
-    const [users] = await promisePool.query(
-      'SELECT id, name, email, role, phone_number, city, state, country, profile_picture, created_at FROM users WHERE id = ?',
-      [req.session.userId]
-    );
+    const user = await User.findById(req.session.userId).select('-password');
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(404).json({ 
         error: 'User not found' 
       });
     }
 
     // Ensure session.user is set for consistency
-    req.session.user = users[0];
+    req.session.user = user.toObject();
 
-    res.json({ user: users[0] });
+    res.json({ user: user.toObject() });
 
   } catch (error) {
     console.error('Get current user error:', error);
@@ -206,12 +195,9 @@ export const forgotPassword = async (req, res) => {
     }
 
     // Check if user exists
-    const [users] = await promisePool.query(
-      'SELECT id, name, email FROM users WHERE email = ?',
-      [email]
-    );
+    const user = await User.findOne({ email }).select('_id name email');
 
-    if (users.length === 0) {
+    if (!user) {
       // For security, don't reveal if email exists or not
       return res.json({ 
         message: 'If this email exists, you can now reset your password',
@@ -223,7 +209,7 @@ export const forgotPassword = async (req, res) => {
     res.json({ 
       message: 'Email verified. You can now reset your password.',
       emailExists: true,
-      userId: users[0].id
+      userId: user._id
     });
 
   } catch (error) {
@@ -252,12 +238,9 @@ export const resetPassword = async (req, res) => {
     }
 
     // Check if user exists
-    const [users] = await promisePool.query(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
+    const user = await User.findOne({ email });
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(404).json({ 
         error: 'User not found' 
       });
@@ -267,10 +250,8 @@ export const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update password
-    await promisePool.query(
-      'UPDATE users SET password = ?, updated_at = NOW() WHERE email = ?',
-      [hashedPassword, email]
-    );
+    user.password = hashedPassword;
+    await user.save();
 
     res.json({ 
       message: 'Password reset successfully. You can now login with your new password.' 

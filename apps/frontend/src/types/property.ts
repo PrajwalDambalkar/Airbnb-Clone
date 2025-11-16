@@ -1,6 +1,6 @@
 export interface Property {
-    id: number;
-    owner_id: number;
+    id: string; // MongoDB ObjectId
+    owner_id: string; // MongoDB ObjectId
     property_name: string;
     property_type: string;
     description: string;

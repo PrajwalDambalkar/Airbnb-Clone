@@ -1,8 +1,8 @@
 // controllers/agentController.js
-import { pool } from '../config/db.js';
+import Booking from '../models/Booking.js';
+import Property from '../models/Property.js';
 import axios from 'axios';
-
-const db = pool.promise();
+import mongoose from 'mongoose';
 
 // Agent service URL
 const AGENT_SERVICE_URL = process.env.AGENT_SERVICE_URL || 'http://localhost:8000';
@@ -37,15 +37,18 @@ export const createPlan = async (req, res) => {
 
     // First, let's check if the booking exists at all (for debugging)
     console.log('🔍 [Backend] Step 1: Check if booking exists...');
-    const [allBookings] = await db.query(
-      `SELECT b.*, p.property_name 
-       FROM bookings b 
-       JOIN properties p ON b.property_id = p.id 
-       WHERE b.id = ?`,
-      [booking_id]
-    );
     
-    if (allBookings.length === 0) {
+    if (!mongoose.Types.ObjectId.isValid(booking_id)) {
+      console.error('❌ [Backend] Invalid booking ID format:', booking_id);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID format'
+      });
+    }
+    
+    const allBooking = await Booking.findById(booking_id).populate('property_id', 'property_name');
+    
+    if (!allBooking) {
       console.error('❌ [Backend] Booking does not exist with ID:', booking_id);
       return res.status(404).json({
         success: false,
@@ -54,43 +57,36 @@ export const createPlan = async (req, res) => {
     }
     
     console.log('✅ [Backend] Booking exists:', {
-      id: allBookings[0].id,
-      traveler_id: allBookings[0].traveler_id,
-      property: allBookings[0].property_name,
-      status: allBookings[0].status
+      id: allBooking._id,
+      traveler_id: allBooking.traveler_id,
+      property: allBooking.property_id?.property_name,
+      status: allBooking.status
     });
     
     // Verify booking belongs to user
     console.log('🔍 [Backend] Step 2: Verify booking belongs to user...');
-    console.log('📊 [Backend] Checking: booking.traveler_id =', allBookings[0].traveler_id, 'vs session.userId =', userId);
+    console.log('📊 [Backend] Checking: booking.traveler_id =', allBooking.traveler_id, 'vs session.userId =', userId);
     
-    const [bookings] = await db.query(
-      `SELECT b.*, 
-              p.property_name, p.city, p.state, p.address, p.amenities,
-              p.bedrooms, p.bathrooms
-       FROM bookings b
-       JOIN properties p ON b.property_id = p.id
-       WHERE b.id = ? AND b.traveler_id = ?`,
-      [booking_id, userId]
-    );
+    const booking = await Booking.findOne({
+      _id: booking_id,
+      traveler_id: userId
+    }).populate('property_id', 'property_name city state address amenities bedrooms bathrooms');
 
-    console.log('📊 [Backend] Bookings found with traveler match:', bookings.length);
-    if (bookings.length > 0) {
+    console.log('📊 [Backend] Booking found with traveler match:', booking ? 'Yes' : 'No');
+    if (booking) {
       console.log('✅ [Backend] Booking belongs to user!');
     } else {
       console.error('❌ [Backend] Booking exists but does NOT belong to this user');
-      console.error('🔍 [Backend] Booking traveler_id:', allBookings[0].traveler_id);
+      console.error('🔍 [Backend] Booking traveler_id:', allBooking.traveler_id);
       console.error('🔍 [Backend] Session user_id:', userId);
     }
 
-    if (bookings.length === 0) {
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: 'Booking not found or unauthorized'
       });
     }
-
-    const booking = bookings[0];
 
     // Check booking status
     if (booking.status !== 'ACCEPTED' && booking.status !== 'PENDING') {

@@ -1,36 +1,71 @@
-// config/db.js
-import mysql from 'mysql2';
+// config/db.js - MongoDB Configuration
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create MySQL connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0
-});
+// MongoDB connection string from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Get promise-based connection
-const promisePool = pool.promise(); // Use promisePool for async/await queries
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not defined in environment variables');
+  console.error('Please create a .env file with your MongoDB connection string');
+  process.exit(1);
+}
 
-// Test connection
-const testConnection = async () => {
+const connectDB = async () => {
   try {
-    const connection = await promisePool.getConnection();
-    console.log('✅ MySQL Database Connected Successfully!');
-    connection.release();
+    const conn = await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`📊 Database: ${conn.connection.name}`);
+    
+    return conn;
   } catch (error) {
-    console.error('❌ MySQL Connection Error:', error.message);
-    process.exit(1);
+    console.error('❌ MongoDB Connection Error:', error.message);
+    throw error;
   }
 };
 
-export { pool, promisePool, testConnection };
+// Test connection function
+const testConnection = async () => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      console.log('✅ MongoDB Database Connected Successfully!');
+      return true;
+    } else {
+      await connectDB();
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ MongoDB Connection Error:', error.message);
+    throw error;
+  }
+};
+
+// Handle connection events
+mongoose.connection.on('connected', () => {
+  console.log('🔗 Mongoose connected to MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('📴 Mongoose disconnected from MongoDB');
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('MongoDB connection closed through app termination');
+  process.exit(0);
+});
+
+// Export for compatibility with existing code
+export { connectDB, testConnection };
+export default mongoose;

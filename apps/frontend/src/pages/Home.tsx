@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Heart, MessageCircle } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
@@ -10,11 +10,8 @@ import AIAgentSidebar from '../components/AIAgentSidebar';
 import bookingService, { type Booking } from '../services/bookingService';
 
 export default function Home() {
-    const location = useLocation();
-    const navigate = useNavigate();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
-    const [successMessage, setSuccessMessage] = useState('');
     const [guests, setGuests] = useState<string>('');
     const [checkInDate, setCheckInDate] = useState<string>('');
     const [checkOutDate, setCheckOutDate] = useState<string>('');
@@ -27,7 +24,7 @@ export default function Home() {
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
     const { user } = useAuth();
-    const [favorites, setFavorites] = useState<Set<number>>(new Set());
+    const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);
     const destinationDropdownRef = useRef<HTMLDivElement>(null);
@@ -143,7 +140,7 @@ export default function Home() {
                 // Remove old global favorites key after migration
                 localStorage.removeItem('favorites');
                 
-                const arr: number[] = userFavs ? JSON.parse(userFavs) : [];
+                const arr: string[] = userFavs ? JSON.parse(userFavs) : [];
                 setFavorites(new Set(arr));
             } catch (e) {
                 setFavorites(new Set());
@@ -283,7 +280,7 @@ export default function Home() {
         }
     };
 
-    const toggleFavorite = (propertyId: number) => {
+    const toggleFavorite = (propertyId: string) => {
         if (!user) return;
         
         setFavorites(prev => {
@@ -310,17 +307,6 @@ export default function Home() {
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gradient-to-b from-gray-50 to-white'} transition-colors`}>
-            {/* Fixed Success Toast */}
-            {successMessage && (
-                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[10002] animate-fade-in-down">
-                    <div className="px-6 py-4 text-white bg-green-500 rounded-lg shadow-xl flex items-center gap-3">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="font-medium">{successMessage}</span>
-                    </div>
-                </div>
-            )}
             
             {/* Welcome Section */}
             <section className="px-4 pt-6 sm:pt-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -999,7 +985,7 @@ export default function Home() {
                     <AIAgentSidebar
                         isOpen={showChatbot}
                         onClose={() => setShowChatbot(false)}
-                        bookingId={selectedBooking?.id || 0}
+                        bookingId={selectedBooking?.id}
                         bookingDetails={
                             selectedBooking && 
                             selectedBooking.property_name && 

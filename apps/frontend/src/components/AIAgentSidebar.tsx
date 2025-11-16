@@ -1,6 +1,6 @@
 // components/AIAgentSidebar.tsx
 import { useState, useRef, useEffect } from 'react';
-import { X, Sparkles, Send, Loader2, MapPin, Calendar, User, Bot, Sun, Utensils, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Sparkles, Send, Loader2, MapPin, Calendar, Bot, Sun, Utensils, ChevronDown, ChevronUp } from 'lucide-react';
 import { useDarkMode } from '../App';
 import { useAuth } from '../context/AuthContext';
 import agentService from '../services/agentService';
@@ -8,7 +8,7 @@ import agentService from '../services/agentService';
 interface AIAgentSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  bookingId?: number;
+  bookingId?: string; // MongoDB ObjectId
   bookingDetails?: {
     property_name: string;
     city: string;

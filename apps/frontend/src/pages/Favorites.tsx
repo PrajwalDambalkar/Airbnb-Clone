@@ -39,7 +39,7 @@ export default function Favorites() {
         // Remove old global favorites key after migration
         localStorage.removeItem('favorites');
         
-        const favArr: number[] = userFavs ? JSON.parse(userFavs) : [];
+        const favArr: string[] = userFavs ? JSON.parse(userFavs) : [];
         const res = await propertyService.getAllProperties();
         const all = res.data || [];
         const filtered = all.filter((p: Property) => favArr.includes(p.id));

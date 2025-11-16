@@ -188,7 +188,7 @@ export default function OwnerBookings() {
     }
   };
 
-  const handleApprove = async (id: number) => {
+  const handleApprove = async (id: string) => {
     try {
       await ownerBookingService.approveBooking(id);
       fetchData(); // Refresh data
@@ -197,7 +197,7 @@ export default function OwnerBookings() {
     }
   };
 
-  const handleReject = async (id: number) => {
+  const handleReject = async (id: string) => {
     const reason = prompt('Reason for rejection (optional):');
     try {
       await ownerBookingService.rejectBooking(id, reason || undefined);
@@ -207,7 +207,7 @@ export default function OwnerBookings() {
     }
   };
 
-  const handleCancel = async (id: number) => {
+  const handleCancel = async (id: string) => {
     const reason = prompt('Reason for cancellation (required):');
     if (!reason) {
       alert('Cancellation reason is required');

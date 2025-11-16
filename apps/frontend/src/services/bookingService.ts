@@ -2,10 +2,10 @@
 import api from './api';
 
 export interface Booking {
-  id: number;
-  property_id: number;
-  traveler_id: number;
-  owner_id: number;
+  id: string; // MongoDB ObjectId
+  property_id: string; // MongoDB ObjectId
+  traveler_id: string; // MongoDB ObjectId
+  owner_id: string; // MongoDB ObjectId
   check_in: string;
   check_out: string;
   number_of_guests: number;
@@ -31,7 +31,7 @@ export interface Booking {
 }
 
 export interface CreateBookingData {
-  property_id: number;
+  property_id: string; // MongoDB ObjectId
   check_in_date: string;
   check_out_date: string;
   guests: number;
@@ -66,19 +66,19 @@ const bookingService = {
   },
 
   // Get single booking by ID
-  getBookingById: async (id: number): Promise<BookingResponse> => {
+  getBookingById: async (id: string): Promise<BookingResponse> => {
     const response = await api.get(`/api/bookings/${id}`);
     return response.data;
   },
 
   // Update booking status (for owner to accept/reject)
-  updateBookingStatus: async (id: number, status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED'): Promise<BookingResponse> => {
+  updateBookingStatus: async (id: string, status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED'): Promise<BookingResponse> => {
     const response = await api.put(`/api/bookings/${id}/status`, { status });
     return response.data;
   },
 
   // Cancel booking
-  cancelBooking: async (id: number, cancellation_reason?: string): Promise<BookingResponse> => {
+  cancelBooking: async (id: string, cancellation_reason?: string): Promise<BookingResponse> => {
     const response = await api.put(`/api/bookings/${id}/cancel`, { cancellation_reason });
     return response.data;
   },

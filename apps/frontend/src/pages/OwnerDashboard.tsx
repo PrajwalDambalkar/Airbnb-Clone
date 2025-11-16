@@ -10,7 +10,7 @@ import * as ownerBookingService from '../services/ownerBookingService';
 import type { BookingStats } from '../services/ownerBookingService';
 
 interface Property {
-  id: number;
+  id: string; // MongoDB ObjectId
   property_name: string;
   property_type: string;
   description: string;
@@ -38,7 +38,7 @@ export default function OwnerDashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [bookingStats, setBookingStats] = useState<BookingStats | null>(null);
-  const [deleting, setDeleting] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
 
   const fetchMyProperties = async () => {
@@ -113,7 +113,7 @@ export default function OwnerDashboard() {
     }
   };
 
-  const handleDeleteProperty = async (propertyId: number, propertyName: string) => {
+  const handleDeleteProperty = async (propertyId: string, propertyName: string) => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "${propertyName}"?\n\nThis action cannot be undone and will delete all associated photos.`
     );

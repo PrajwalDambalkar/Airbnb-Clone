@@ -1,8 +1,11 @@
 // controllers/propertyController.js
-import { promisePool as pool } from '../config/db.js'; // Import the database connection
+import Property from '../models/Property.js';
+import User from '../models/User.js';
+import Booking from '../models/Booking.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,59 +13,36 @@ const __dirname = path.dirname(__filename);
 // GET all properties with optional filters
 export const getAllProperties = async (req, res) => {
     try {
-        const { city, min_price, max_price, guests } = req.query; // Extract query parameters
+        const { city, min_price, max_price, guests } = req.query;
 
-        // Base query
-        let query = 'SELECT * FROM properties WHERE available = 1';
-        const params = [];
+        // Build query object
+        let query = { available: true };
 
         // Add filters if provided
         if (city) {
-            query += ' AND city LIKE ?';
-            params.push(`%${city}%`);
+            query.city = { $regex: city, $options: 'i' }; // Case-insensitive search
         }
 
-        if (min_price) {
-            query += ' AND price_per_night >= ?';
-            params.push(parseFloat(min_price));
-        }
-
-        if (max_price) {
-            query += ' AND price_per_night <= ?';
-            params.push(parseFloat(max_price));
+        if (min_price || max_price) {
+            query.price_per_night = {};
+            if (min_price) {
+                query.price_per_night.$gte = parseFloat(min_price);
+            }
+            if (max_price) {
+                query.price_per_night.$lte = parseFloat(max_price);
+            }
         }
 
         if (guests) {
-            query += ' AND max_guests >= ?';
-            params.push(parseInt(guests));
+            query.max_guests = { $gte: parseInt(guests) };
         }
 
-        query += ' ORDER BY created_at DESC';
-
-        const [properties] = await pool.query(query, params);
-
-        // Parse JSON fields (images, amenities) returned as strings from MySQL
-        const parsed = properties.map(p => {
-            const copy = { ...p };
-            try {
-                if (copy.images && typeof copy.images === 'string') {
-                    copy.images = JSON.parse(copy.images);
-                }
-            } catch (err) {
-                // leave as-is if parsing fails
-            }
-            try {
-                if (copy.amenities && typeof copy.amenities === 'string') {
-                    copy.amenities = JSON.parse(copy.amenities);
-                }
-            } catch (err) {}
-            return copy;
-        });
+        const properties = await Property.find(query).sort({ createdAt: -1 });
 
         res.json({
             success: true,
-            count: parsed.length,
-            data: parsed
+            count: properties.length,
+            data: properties
         });
     } catch (error) {
         console.error('Error fetching properties:', error);
@@ -78,32 +58,34 @@ export const getPropertyById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const [properties] = await pool.query(
-            `SELECT p.*, u.name as owner_name, u.email as owner_email, u.created_at as owner_since, u.profile_picture as owner_profile_picture
-             FROM properties p
-             LEFT JOIN users u ON p.owner_id = u.id
-             WHERE p.id = ?`,
-            [id]
-        );
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid property ID'
+            });
+        }
 
-        if (properties.length === 0) {
+        const property = await Property.findById(id).populate('owner_id', 'name email createdAt profile_picture');
+
+        if (!property) {
             return res.status(404).json({
                 success: false,
                 message: 'Property not found'
             });
         }
 
-        const prop = { ...properties[0] };
-        try {
-            if (prop.images && typeof prop.images === 'string') prop.images = JSON.parse(prop.images);
-        } catch (e) {}
-        try {
-            if (prop.amenities && typeof prop.amenities === 'string') prop.amenities = JSON.parse(prop.amenities);
-        } catch (e) {}
+        // Format response to match MySQL structure
+        const propertyData = property.toObject();
+        if (property.owner_id) {
+            propertyData.owner_name = property.owner_id.name;
+            propertyData.owner_email = property.owner_id.email;
+            propertyData.owner_since = property.owner_id.createdAt;
+            propertyData.owner_profile_picture = property.owner_id.profile_picture;
+        }
 
         res.json({
             success: true,
-            data: prop
+            data: propertyData
         });
     } catch (error) {
         console.error('Error fetching property:', error);
@@ -134,31 +116,12 @@ export const getMyProperties = async (req, res) => {
         }
 
         // Fetch properties owned by this user
-        const [properties] = await pool.query(
-            'SELECT * FROM properties WHERE owner_id = ? ORDER BY created_at DESC',
-            [req.session.userId]
-        );
-
-        // Parse JSON fields
-        const parsed = properties.map(p => {
-            const copy = { ...p };
-            try {
-                if (copy.images && typeof copy.images === 'string') {
-                    copy.images = JSON.parse(copy.images);
-                }
-            } catch (err) {}
-            try {
-                if (copy.amenities && typeof copy.amenities === 'string') {
-                    copy.amenities = JSON.parse(copy.amenities);
-                }
-            } catch (err) {}
-            return copy;
-        });
+        const properties = await Property.find({ owner_id: req.session.userId }).sort({ createdAt: -1 });
 
         res.json({
             success: true,
-            count: parsed.length,
-            data: parsed
+            count: properties.length,
+            data: properties
         });
     } catch (error) {
         console.error('Error fetching owner properties:', error);
@@ -213,34 +176,38 @@ export const createProperty = async (req, res) => {
             }
         }
 
-        console.log('Inserting property with:', {
+        console.log('Creating property with:', {
             owner_id: req.session.userId,
             property_name,
             images: images.length,
             amenities: parsedAmenities
         });
 
-        const [result] = await pool.query(
-            `INSERT INTO properties (
-                owner_id, property_name, property_type, description,
-                address, city, state, zipcode, country,
-                price_per_night, bedrooms, bathrooms, max_guests,
-                images, amenities, available
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                req.session.userId, property_name, property_type, description,
-                address, city, state, zip_code, country,
-                price_per_night, bedrooms, bathrooms, max_guests,
-                JSON.stringify(images), JSON.stringify(parsedAmenities), available !== false ? 1 : 0
-            ]
-        );
+        const newProperty = await Property.create({
+            owner_id: req.session.userId,
+            property_name,
+            property_type,
+            description,
+            address,
+            city,
+            state,
+            zipcode: zip_code,
+            country,
+            price_per_night,
+            bedrooms,
+            bathrooms,
+            max_guests,
+            images,
+            amenities: parsedAmenities,
+            available: available !== false
+        });
 
-        console.log('Property created successfully with ID:', result.insertId);
+        console.log('Property created successfully with ID:', newProperty._id);
 
         res.status(201).json({
             success: true,
             message: 'Property created successfully',
-            propertyId: result.insertId
+            propertyId: newProperty._id
         });
     } catch (error) {
         console.error('Error creating property:', error);
@@ -265,6 +232,13 @@ export const updateProperty = async (req, res) => {
 
         const propertyId = req.params.id;
 
+        if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid property ID'
+            });
+        }
+
         // Check if user is logged in as owner
         if (!req.session.userId || req.session.userRole !== 'owner') {
             return res.status(403).json({
@@ -274,19 +248,17 @@ export const updateProperty = async (req, res) => {
         }
 
         // Verify property belongs to this owner
-        const [existing] = await pool.query(
-            'SELECT * FROM properties WHERE id = ? AND owner_id = ?',
-            [propertyId, req.session.userId]
-        );
+        const currentProperty = await Property.findOne({ 
+            _id: propertyId, 
+            owner_id: req.session.userId 
+        });
 
-        if (existing.length === 0) {
+        if (!currentProperty) {
             return res.status(404).json({
                 success: false,
                 message: 'Property not found or you do not have permission to edit it'
             });
         }
-
-        const currentProperty = existing[0];
 
         const {
             property_name, property_type, description,
@@ -359,44 +331,23 @@ export const updateProperty = async (req, res) => {
         });
 
         // Update the property
-        await pool.query(
-            `UPDATE properties SET
-                property_name = ?,
-                property_type = ?,
-                description = ?,
-                address = ?,
-                city = ?,
-                state = ?,
-                zipcode = ?,
-                country = ?,
-                price_per_night = ?,
-                bedrooms = ?,
-                bathrooms = ?,
-                max_guests = ?,
-                images = ?,
-                amenities = ?,
-                available = ?
-            WHERE id = ? AND owner_id = ?`,
-            [
-                property_name || currentProperty.property_name,
-                property_type || currentProperty.property_type,
-                description || currentProperty.description,
-                address || currentProperty.address,
-                city || currentProperty.city,
-                state || currentProperty.state,
-                zip_code || currentProperty.zipcode,
-                country || currentProperty.country,
-                price_per_night || currentProperty.price_per_night,
-                bedrooms || currentProperty.bedrooms,
-                bathrooms || currentProperty.bathrooms,
-                max_guests || currentProperty.max_guests,
-                JSON.stringify(finalImages),
-                JSON.stringify(parsedAmenities),
-                available !== undefined ? (available ? 1 : 0) : currentProperty.available,
-                propertyId,
-                req.session.userId
-            ]
-        );
+        currentProperty.property_name = property_name || currentProperty.property_name;
+        currentProperty.property_type = property_type || currentProperty.property_type;
+        currentProperty.description = description || currentProperty.description;
+        currentProperty.address = address || currentProperty.address;
+        currentProperty.city = city || currentProperty.city;
+        currentProperty.state = state || currentProperty.state;
+        currentProperty.zipcode = zip_code || currentProperty.zipcode;
+        currentProperty.country = country || currentProperty.country;
+        currentProperty.price_per_night = price_per_night || currentProperty.price_per_night;
+        currentProperty.bedrooms = bedrooms || currentProperty.bedrooms;
+        currentProperty.bathrooms = bathrooms || currentProperty.bathrooms;
+        currentProperty.max_guests = max_guests || currentProperty.max_guests;
+        currentProperty.images = finalImages;
+        currentProperty.amenities = parsedAmenities;
+        currentProperty.available = available !== undefined ? (available ? true : false) : currentProperty.available;
+
+        await currentProperty.save();
 
         console.log('Property updated successfully');
 
@@ -423,6 +374,13 @@ export const deleteProperty = async (req, res) => {
 
         const propertyId = req.params.id;
 
+        if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid property ID'
+            });
+        }
+
         // Check if user is logged in as owner
         if (!req.session.userId || req.session.userRole !== 'owner') {
             return res.status(403).json({
@@ -432,27 +390,26 @@ export const deleteProperty = async (req, res) => {
         }
 
         // Verify property belongs to this owner
-        const [existing] = await pool.query(
-            'SELECT * FROM properties WHERE id = ? AND owner_id = ?',
-            [propertyId, req.session.userId]
-        );
+        const property = await Property.findOne({ 
+            _id: propertyId, 
+            owner_id: req.session.userId 
+        });
 
-        if (existing.length === 0) {
+        if (!property) {
             return res.status(404).json({
                 success: false,
                 message: 'Property not found or you do not have permission to delete it'
             });
         }
 
-        const property = existing[0];
-
         // Check for active bookings
-        const [bookings] = await pool.query(
-            'SELECT COUNT(*) as count FROM bookings WHERE property_id = ? AND status IN ("pending", "confirmed") AND check_out >= CURDATE()',
-            [propertyId]
-        );
+        const activeBookingsCount = await Booking.countDocuments({
+            property_id: propertyId,
+            status: { $in: ['PENDING', 'ACCEPTED'] },
+            check_out: { $gte: new Date() }
+        });
 
-        if (bookings[0].count > 0) {
+        if (activeBookingsCount > 0) {
             return res.status(400).json({
                 success: false,
                 message: 'Cannot delete property with active or future bookings'
@@ -460,17 +417,8 @@ export const deleteProperty = async (req, res) => {
         }
 
         // Delete photos from filesystem
-        if (property.images) {
-            let imageList = [];
-            try {
-                imageList = typeof property.images === 'string' 
-                    ? JSON.parse(property.images) 
-                    : property.images;
-            } catch (err) {
-                console.error('Error parsing images:', err);
-            }
-
-            imageList.forEach(photoPath => {
+        if (property.images && property.images.length > 0) {
+            property.images.forEach(photoPath => {
                 try {
                     const fullPath = path.join(__dirname, '..', photoPath);
                     if (fs.existsSync(fullPath)) {
@@ -484,7 +432,7 @@ export const deleteProperty = async (req, res) => {
         }
 
         // Delete the property
-        await pool.query('DELETE FROM properties WHERE id = ? AND owner_id = ?', [propertyId, req.session.userId]);
+        await Property.findByIdAndDelete(propertyId);
 
         console.log('Property deleted successfully');
 

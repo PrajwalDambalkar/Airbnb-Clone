@@ -28,7 +28,7 @@ api.interceptors.response.use(
 
 // Types
 export interface User {
-  id: number;
+  id: string; // MongoDB ObjectId
   name: string;
   email: string;
   role: 'traveler' | 'owner';

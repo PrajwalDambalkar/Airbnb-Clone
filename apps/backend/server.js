@@ -2,48 +2,83 @@
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
-import MySQLStore from 'express-mysql-session';
+import MongoStore from 'connect-mongo';
 import dotenv from 'dotenv';
-import { pool, testConnection } from './config/db.js';
+import { connectDB, testConnection } from './config/db.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize MySQL session store
-const MySQLStoreSession = MySQLStore(session);
-const sessionStore = new MySQLStoreSession({
-  clearExpired: true,
-  checkExpirationInterval: 900000, // 15 minutes
-  expiration: 86400000 // 1 day
-}, pool);
+// MongoDB connection string from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Middleware
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not defined in environment variables');
+  console.error('Please create a .env file with your MongoDB connection string');
+  process.exit(1);
+}
+
+// Initialize MongoDB session store
+const sessionStore = MongoStore.create({
+  mongoUrl: MONGODB_URI,
+  collectionName: 'sessions',
+  ttl: 7 * 24 * 60 * 60, // 7 days
+  autoRemove: 'native'
+});
+
+// CORS Middleware - Must be first!
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Session configuration with MySQL
+// Session configuration with MongoDB
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+if (!SESSION_SECRET) {
+  console.error('❌ SESSION_SECRET is not defined in environment variables');
+  console.error('Please add SESSION_SECRET to your .env file');
+  process.exit(1);
+}
+
 app.use(session({
-  key: 'airbnb_session',
-  secret: process.env.SESSION_SECRET,
+  secret: SESSION_SECRET,
   store: sessionStore,
   resave: false,
   saveUninitialized: false,
+  name: 'connect.sid',
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
-  }
+    secure: false, // Set to false for localhost development
+    sameSite: 'lax',
+    path: '/'
+  },
+  proxy: false
 }));
+
+// Session debugging middleware
+app.use((req, res, next) => {
+  if (req.path.includes('/api/auth')) {
+    console.log(`📍 ${req.method} ${req.path}`);
+    console.log(`   Session ID: ${req.sessionID || 'none'}`);
+    console.log(`   User ID: ${req.session?.userId || 'none'}`);
+    console.log(`   Has Cookie Header: ${!!req.headers.cookie}`);
+  }
+  next();
+});
 
 // Static files for uploads
 app.use('/uploads', express.static('uploads'));
@@ -52,7 +87,7 @@ app.use('/uploads', express.static('uploads'));
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Airbnb Clone API is running!',
-    database: 'MySQL',
+    database: 'MongoDB Atlas',
     session: req.session.id ? 'Active' : 'Inactive',
     sessionData: {
       id: req.sessionID,
@@ -78,10 +113,12 @@ app.get('/api/debug/session', (req, res) => {
 // Health check route
 app.get('/api/health', async (req, res) => {
   try {
-    const [rows] = await pool.promise().query('SELECT 1');
+    const mongoose = await import('./config/db.js');
+    const dbStatus = mongoose.default.connection.readyState === 1 ? 'connected' : 'disconnected';
+    
     res.json({ 
       status: 'healthy',
-      database: 'connected',
+      database: dbStatus,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -92,7 +129,7 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// TODO: Import routes here (we'll add them next)
+// Import routes
 import authRoutes from './routes/auth.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
@@ -119,13 +156,13 @@ app.use((err, req, res, next) => {
 // Start server
 const startServer = async () => {
   try {
-    // Test database connection
-    await testConnection();
+    // Connect to MongoDB
+    await connectDB();
     
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📦 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🗄️  Database: MySQL (${process.env.DB_NAME})`);
+      console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🗄️  Database: MongoDB Atlas`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
