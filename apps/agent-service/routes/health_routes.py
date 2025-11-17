@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from fastapi import APIRouter, status
-from .schemas import HealthResponse
+from models.schemas import HealthResponse
 from utils.mysql_client import mysql_client
 from utils.llm_client import llm_client
 

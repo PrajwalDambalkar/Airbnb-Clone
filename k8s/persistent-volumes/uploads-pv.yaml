@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: uploads-pv
+  namespace: airbnb-clone
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany  # Multiple pods can read/write
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: uploads-storage
+  hostPath:
+    path: /data/uploads
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+  namespace: airbnb-clone
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: uploads-storage
+  resources:
+    requests:
+      storage: 50Gi
+

@@ -1,0 +1,8 @@
+# Secrets - DO NOT COMMIT
+secrets/app-secrets.yaml
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+

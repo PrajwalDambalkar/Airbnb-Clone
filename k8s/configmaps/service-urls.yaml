@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-urls
+  namespace: airbnb-clone
+data:
+  # Internal Kubernetes service URLs (using service names)
+  TRAVELER_SERVICE_URL: "http://traveler-service:5001"
+  OWNER_SERVICE_URL: "http://owner-service:5002"
+  PROPERTY_SERVICE_URL: "http://property-service:5003"
+  BOOKING_SERVICE_URL: "http://booking-service:5004"
+  AGENT_SERVICE_URL: "http://agent-service:8000"
+  
+  # Database URLs
+  MONGODB_SERVICE_URL: "mongodb-service"
+  MYSQL_SERVICE_URL: "mysql-service"
+
