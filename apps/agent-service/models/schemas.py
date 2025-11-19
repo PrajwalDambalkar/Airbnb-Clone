@@ -16,8 +16,8 @@ class UserPreferences(BaseModel):
 
 class AgentRequest(BaseModel):
     """Request to generate travel plan"""
-    booking_id: int
-    user_id: int
+    booking_id: str
+    user_id: str
     query: Optional[str] = Field(default="", description="Natural language query")
     preferences: Optional[UserPreferences] = Field(default_factory=UserPreferences)
     secret: str = Field(..., description="Secret token from backend")
@@ -62,7 +62,7 @@ class Restaurant(BaseModel):
 
 class AgentResponse(BaseModel):
     """Complete travel plan response"""
-    booking_id: int
+    booking_id: str
     destination: str
     dates: Dict[str, str]  # {"check_in": "2025-11-01", "check_out": "2025-11-05"}
     itinerary: List[DayPlan]
@@ -77,8 +77,8 @@ class AgentResponse(BaseModel):
 # ============================================
 
 class BookingData(BaseModel):
-    """Booking details from MySQL"""
-    booking_id: int
+    """Booking details from MongoDB"""
+    booking_id: str
     property_name: str
     city: str
     state: str

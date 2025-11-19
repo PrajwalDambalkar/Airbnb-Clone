@@ -4,7 +4,7 @@ from typing import Dict, Any
 from datetime import datetime
 
 from models.schemas import AgentRequest, AgentResponse, DayPlan, ActivityCard, Restaurant, TimeBlock
-from utils.mysql_client import mysql_client
+from utils.mongo_client import mongo_client
 from utils.llm_client import llm_client
 from services.tavily_service import tavily_service
 from rag.retriever import rag_retriever
@@ -15,7 +15,7 @@ class AgentService:
     """Main orchestration service for travel planning"""
     
     def __init__(self):
-        self.mysql = mysql_client
+        self.mongo = mongo_client
         self.llm = llm_client
         self.tavily = tavily_service
         self.rag = rag_retriever
@@ -25,7 +25,7 @@ class AgentService:
         Main workflow to generate personalized travel plan
         
         Steps:
-        1. Fetch booking details from MySQL
+        1. Fetch booking details from MongoDB
         2. Optionally search RAG for similar trips
         3. Search web for POIs, restaurants, events, weather
         4. Combine all context
@@ -37,11 +37,11 @@ class AgentService:
         
         try:
             # ============================================
-            # STEP 1: Fetch from MySQL
+            # STEP 1: Fetch from MongoDB
             # ============================================
             logger.info("📊 STEP 1: Fetching booking details...")
             
-            booking_data = self.mysql.get_booking_details(request.booking_id)
+            booking_data = self.mongo.get_booking_details(request.booking_id)
             
             if not booking_data:
                 raise ValueError(f"Booking {request.booking_id} not found")
@@ -52,7 +52,7 @@ class AgentService:
             logger.info(f"✅ Booking fetched: {booking_data['city']}, {booking_data['state']}")
             
             # Get user history (for context)
-            booking_history = self.mysql.get_user_booking_history(request.user_id, limit=3)
+            booking_history = self.mongo.get_user_booking_history(request.user_id, limit=3)
             
             # ============================================
             # STEP 2: RAG Retrieval (Optional)
@@ -142,7 +142,7 @@ class AgentService:
     
     def _format_response(
         self,
-        booking_id: int,
+        booking_id: str,
         booking_data: Dict[str, Any],
         itinerary_data: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -281,7 +281,7 @@ class AgentService:
         # For now, just return the query
         return query
     
-    async def process_chat(self, user_id: int, message: str, booking_id: int = None, conversation_history: list = None) -> Dict[str, Any]:
+    async def process_chat(self, user_id: str, message: str, booking_id: str = None, conversation_history: list = None) -> Dict[str, Any]:
         """
         Process conversational chat message
         
@@ -321,8 +321,8 @@ class AgentService:
             if is_booking_query and not is_plan_query:
                 logger.info("🎯 Intent: Show bookings")
                 
-                # Fetch user's bookings from MySQL
-                bookings = self.mysql.get_user_bookings(user_id)
+                # Fetch user's bookings from MongoDB
+                bookings = self.mongo.get_user_bookings(user_id)
                 
                 if not bookings or len(bookings) == 0:
                     return {
@@ -400,7 +400,7 @@ class AgentService:
                 logger.info("🎯 Intent: Plan trip (but no booking specified)")
                 
                 # Fetch bookings
-                bookings = self.mysql.get_user_bookings(user_id)
+                bookings = self.mongo.get_user_bookings(user_id)
                 active_bookings = [b for b in bookings if b['status'] == 'ACCEPTED']
                 
                 if len(active_bookings) == 0:

@@ -32,7 +32,7 @@
   "status": "healthy",
   "services": {
     "api": "healthy",
-    "mysql": "connected",
+    "mongodb": "connected",
     "ollama": "connected",
     "tavily": "configured"
   },
@@ -42,18 +42,18 @@
 
 ---
 
-### 2. Test MySQL Connection
+### 2. Test MongoDB Connection
 **Method:** `GET`  
-**URL:** `http://localhost:8000/test-mysql`  
-**Description:** Test MySQL database connection
+**URL:** `http://localhost:8000/test-mongodb`  
+**Description:** Test MongoDB database connection
 
 **Request:** No body required
 
 **Response Example:**
 ```json
 {
-  "mysql": "connected",
-  "message": "Successfully connected to MySQL"
+  "mongodb": "connected",
+  "message": "MongoDB connection successful"
 }
 ```
 
@@ -92,7 +92,7 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-  "user_id": 1,
+  "user_id": "665c1f2a9b1e4f4c8d2a1b23",
   "message": "Show me my bookings",
   "booking_id": null,
   "conversation_history": [],
@@ -186,8 +186,8 @@ Content-Type: application/json
 **Request Body (Minimal):**
 ```json
 {
-  "booking_id": 23,
-  "user_id": 1,
+  "booking_id": "665c1f2a9b1e4f4c8d2a1b45",
+  "user_id": "665c1f2a9b1e4f4c8d2a1b23",
   "query": "Create a travel plan for my Los Angeles trip",
   "secret": "change-this-secret-in-production"
 }

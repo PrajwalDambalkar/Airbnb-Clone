@@ -9,7 +9,7 @@ import { connectDB, testConnection } from './config/db.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // MongoDB connection string from environment variables
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -85,7 +85,7 @@ app.use('/uploads', express.static('uploads'));
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Airbnb Clone API is running!',
     database: 'MongoDB Atlas',
     session: req.session.id ? 'Active' : 'Inactive',
@@ -115,14 +115,14 @@ app.get('/api/health', async (req, res) => {
   try {
     const mongoose = await import('./config/db.js');
     const dbStatus = mongoose.default.connection.readyState === 1 ? 'connected' : 'disconnected';
-    
-    res.json({ 
+
+    res.json({
       status: 'healthy',
       database: dbStatus,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'unhealthy',
       error: error.message
     });
@@ -147,7 +147,7 @@ app.use('/api/profile', profileRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
@@ -158,7 +158,7 @@ const startServer = async () => {
   try {
     // Connect to MongoDB
     await connectDB();
-    
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);

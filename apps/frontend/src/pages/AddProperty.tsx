@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../App';
-import api from '../services/api';
+import { propertyAPI as api } from '../services/api';
 import { ArrowLeft, ArrowRight, Check, Upload, X } from 'lucide-react';
 
 const PROPERTY_TYPES = ['apartment', 'house', 'condo', 'villa', 'cabin', 'cottage', 'loft', 'other'];

@@ -4,9 +4,8 @@ uvicorn[standard]>=0.24.0
 python-dotenv>=1.0.0
 pydantic>=2.5.0
 
-# Database - MySQL (FIXED: was MongoDB)
-mysql-connector-python>=8.2.0
-# Alternative: pymysql>=1.1.0
+# Database - MongoDB
+pymongo>=4.6.0
 
 # LangChain
 langchain>=0.3.0

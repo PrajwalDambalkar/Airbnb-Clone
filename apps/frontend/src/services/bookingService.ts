@@ -1,5 +1,5 @@
 // services/bookingService.ts
-import api from './api';
+import { bookingAPI as api } from './api';
 
 export interface Booking {
   id: string; // MongoDB ObjectId

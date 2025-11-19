@@ -269,7 +269,7 @@
 |--------|----------|-------------|---------------|
 | `GET` | `/` | Root endpoint | ❌ No |
 | `GET` | `/health` | Health check (all services) | ❌ No |
-| `GET` | `/test-mysql` | Test MySQL connection | ❌ No |
+| `GET` | `/test-mongodb` | Test MongoDB connection | ❌ No |
 | `GET` | `/test-ollama` | Test Ollama LLM connection | ❌ No |
 
 ---
@@ -285,7 +285,7 @@
 **Request Body Example (Chat):**
 ```json
 {
-  "user_id": 1,
+  "user_id": "665c1f2a9b1e4f4c8d2a1b23",
   "message": "Show me my bookings",
   "booking_id": null,
   "conversation_history": [],
@@ -296,8 +296,8 @@
 **Request Body Example (Plan):**
 ```json
 {
-  "booking_id": 23,
-  "user_id": 1,
+  "booking_id": "665c1f2a9b1e4f4c8d2a1b45",
+  "user_id": "665c1f2a9b1e4f4c8d2a1b23",
   "query": "Create a travel plan for Los Angeles",
   "preferences": {
     "budget": "low",
@@ -403,7 +403,7 @@ http://localhost:5000/api/agent/chat
 #### Agent Service
 ```
 http://localhost:8000/health
-http://localhost:8000/test-mysql
+http://localhost:8000/test-mongodb
 http://localhost:8000/test-ollama
 http://localhost:8000/agent/chat
 http://localhost:8000/agent/plan
@@ -421,7 +421,7 @@ http://localhost:8000/admin/policy-stats
 Frontend:        http://localhost:5173
 Backend:         http://localhost:5000
 Agent Service:   http://localhost:8000
-MySQL:           localhost:3306
+MongoDB:         mongodb://localhost:27017 (airbnb_backend)
 Ollama:          http://localhost:11434
 ```
 
@@ -429,7 +429,7 @@ Ollama:          http://localhost:11434
 ```bash
 ✅ Node.js (v16+)      - Frontend & Backend
 ✅ Python (v3.9+)      - Agent Service
-✅ MySQL (v8.0+)       - Database
+✅ MongoDB (v6+)       - Database
 ✅ Ollama              - LLM Service
 ```
 

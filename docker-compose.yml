@@ -1,0 +1,141 @@
+version: "3.9"
+
+services:
+  # Using MongoDB Atlas - local MongoDB container disabled
+  # mongodb:
+  #   image: mongo:6
+  #   container_name: mongodb
+  #   restart: unless-stopped
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME:-admin}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:-Somalwar1!}
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    image: backend:latest
+    container_name: backend
+    # depends_on:
+    #   - mongodb
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5001
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
+      MONGODB_URI: ${MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_db?retryWrites=true&w=majority}
+    ports:
+      - "5001:5001"
+
+  traveler-service:
+    build:
+      context: ./apps/traveler-service
+      dockerfile: Dockerfile
+    image: traveler-service:latest
+    container_name: traveler-service
+    # depends_on:
+    #   - mongodb
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5005
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
+      MONGODB_URI: ${TRAVELER_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_travelers?retryWrites=true&w=majority}
+    ports:
+      - "5005:5005"
+
+  owner-service:
+    build:
+      context: ./apps/owner-service
+      dockerfile: Dockerfile
+    image: owner-service:latest
+    container_name: owner-service
+    # depends_on:
+    #   - mongodb
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5002
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
+      MONGODB_URI: ${OWNER_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_owners?retryWrites=true&w=majority}
+    ports:
+      - "5002:5002"
+
+  property-service:
+    build:
+      context: ./apps/property-service
+      dockerfile: Dockerfile
+    image: property-service:latest
+    container_name: property-service
+    # depends_on:
+    #   - mongodb
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5003
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
+      MONGODB_URI: ${PROPERTY_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_properties?retryWrites=true&w=majority}
+    ports:
+      - "5003:5003"
+
+  booking-service:
+    build:
+      context: ./apps/booking-service
+      dockerfile: Dockerfile
+    image: booking-service:latest
+    container_name: booking-service
+    # depends_on:
+    #   - mongodb
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5004
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
+      MONGODB_URI: ${BOOKING_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_bookings?retryWrites=true&w=majority}
+    ports:
+      - "5004:5004"
+
+  agent-service:
+    build:
+      context: ./apps/agent-service
+      dockerfile: Dockerfile
+    image: agent-service:latest
+    container_name: agent-service
+    depends_on:
+      # - mongodb
+      - ollama
+    environment:
+      MONGODB_URI: ${AGENT_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_db?retryWrites=true&w=majority}
+      MONGODB_DB_NAME: ${AGENT_MONGODB_DB_NAME:-airbnb_db}
+      AGENT_SERVICE_SECRET: ${AGENT_SERVICE_SECRET:-change-this-agent-secret}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+    ports:
+      - "8000:8000"
+
+  ollama:
+    image: ollama/ollama:0.3.14
+    container_name: ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_KEEP_ALIVE: "24h"
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mongo-data:
+  ollama-data:
+
+

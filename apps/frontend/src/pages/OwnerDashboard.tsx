@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
-import api from '../services/api';
+import { propertyAPI as api } from '../services/api';
 import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
 import { getFirstImage, getImageUrl } from '../utils/imageUtils';
 import * as ownerBookingService from '../services/ownerBookingService';

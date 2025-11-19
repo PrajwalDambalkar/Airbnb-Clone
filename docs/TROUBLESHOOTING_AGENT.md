@@ -19,7 +19,7 @@ curl http://localhost:8000/health
   "status": "healthy",
   "services": {
     "api": "healthy",
-    "mysql": "connected",
+    "mongodb": "connected",
     "ollama": "connected"
   }
 }
@@ -38,39 +38,40 @@ python main.py
 
 ---
 
-## ✅ Step 2: Check MySQL Connection
+## ✅ Step 2: Check MongoDB Connection
 
 ### Test Command:
 ```bash
-curl http://localhost:8000/test-mysql
+curl http://localhost:8000/test-mongodb
 ```
 
 ### Expected Response:
 ```json
 {
   "status": "success",
-  "message": "MySQL connection successful"
+  "message": "MongoDB connection successful"
 }
 ```
 
-### If MySQL fails:
+### If MongoDB fails:
 
-**Check 1: Is MySQL running?**
+**Check 1: Is MongoDB reachable from the agent container?**
 ```bash
-mysql -u root -p
+docker compose exec agent-service python - <<'PY'
+from utils.mongo_client import mongo_client
+print("connected" if mongo_client.test_connection() else "failed")
+PY
 ```
 
 **Check 2: Are credentials correct in .env?**
 ```bash
-cat apps/agent-service/.env | grep DB_
+grep MONGODB apps/agent-service/.env
 ```
 
 Should show:
 ```
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=airbnb_db
+MONGODB_URI=mongodb://admin:Somalwar1!@localhost:27017/airbnb_backend?authSource=admin
+MONGODB_DB_NAME=airbnb_backend
 ```
 
 **Fix**:
@@ -78,7 +79,7 @@ DB_NAME=airbnb_db
 # Update .env file
 nano apps/agent-service/.env
 
-# Make sure DB_PASSWORD matches your MySQL password
+# Make sure MONGODB_URI points to the correct database
 ```
 
 ---
@@ -157,20 +158,21 @@ echo "AGENT_SERVICE_SECRET=my-secret-123" >> apps/agent-service/.env
 
 ## ✅ Step 5: Check Booking Exists
 
-### In MySQL:
+### In MongoDB:
 ```bash
-mysql -u root -p airbnb_db
+mongosh "mongodb://admin:Somalwar1!@localhost:27017/airbnb_backend?authSource=admin"
 ```
 
-```sql
--- Check your bookings
-SELECT b.id, b.status, p.property_name, p.city, p.state
-FROM bookings b
-JOIN properties p ON b.property_id = p.id
-WHERE b.traveler_id = YOUR_USER_ID;
+```javascript
+// Check your bookings
+db.bookings.aggregate([
+  { $match: { traveler_id: ObjectId("YOUR_USER_ID") } },
+  { $lookup: { from: "properties", localField: "property_id", foreignField: "_id", as: "property" } },
+  { $unwind: "$property" },
+  { $project: { status: 1, "property.property_name": 1, "property.city": 1, "property.state": 1 } }
+]).pretty()
 
--- Make sure status is ACCEPTED or PENDING
--- Note the booking ID
+// Ensure status is ACCEPTED or PENDING and note the booking _id
 ```
 
 ---
@@ -198,7 +200,7 @@ Look for:
 ```
 
 **Errors to look for:**
-- `❌ MySQL connection error` → Database issue
+- `❌ MongoDB connection error` → Database issue
 - `❌ Error fetching booking` → Booking doesn't exist
 - `Booking X not found` → Wrong booking ID
 
@@ -273,14 +275,14 @@ curl -s http://localhost:8000/health > /dev/null && echo "✅ Running" || echo "
 echo "3. Ollama (Port 11434):"
 curl -s http://localhost:11434/api/tags > /dev/null && echo "✅ Running" || echo "❌ Not running"
 
-echo "4. MySQL:"
-mysql -u root -p -e "SELECT 1" 2>/dev/null && echo "✅ Connected" || echo "❌ Not connected"
+echo "4. MongoDB:"
+mongosh --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1 && echo "✅ Connected" || echo "❌ Not connected"
 
 echo ""
 echo "5. Environment Variables:"
 echo "   Backend AGENT_SERVICE_URL: $(grep AGENT_SERVICE_URL apps/backend/.env | cut -d'=' -f2)"
-echo "   Agent DB_HOST: $(grep DB_HOST apps/agent-service/.env | cut -d'=' -f2)"
-echo "   Agent DB_NAME: $(grep DB_NAME apps/agent-service/.env | cut -d'=' -f2)"
+echo "   Agent MONGODB_URI: $(grep MONGODB_URI apps/agent-service/.env | cut -d'=' -f2)"
+echo "   Agent MONGODB_DB_NAME: $(grep MONGODB_DB_NAME apps/agent-service/.env | cut -d'=' -f2)"
 
 echo ""
 echo "6. Secrets Match:"
@@ -319,7 +321,7 @@ Copy the exact error message and check:
 - `"Agent service timed out"` → Ollama taking too long (first request)
 - `"Booking not found"` → Wrong booking ID or not your booking
 - `"Invalid authentication token"` → Secrets don't match
-- `"MySQL connection error"` → Database issue
+- `"MongoDB connection error"` → Database issue
 
 ---
 
@@ -331,7 +333,7 @@ Copy the exact error message and check:
 2. **Ollama not running** (25%)
    - Solution: `ollama serve` + `ollama pull llama3`
 
-3. **MySQL credentials wrong** (15%)
+3. **MongoDB URI incorrect** (15%)
    - Solution: Fix `DB_PASSWORD` in `.env`
 
 4. **Secrets don't match** (10%)
@@ -346,7 +348,7 @@ Copy the exact error message and check:
 
 - [ ] Agent service running on port 8000
 - [ ] `/health` returns "healthy"
-- [ ] MySQL connection works
+- [ ] MongoDB connection works
 - [ ] Ollama running with llama3 model
 - [ ] Backend and Agent secrets match
 - [ ] Valid booking exists for your user

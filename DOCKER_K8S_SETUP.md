@@ -64,7 +64,7 @@ export IMAGE_TAG=v1.0.0
 ```bash
 # Run Traveler Service
 docker run -p 5001:5001 \
-  -e MONGODB_URI="mongodb://admin:password@host.docker.internal:27017/airbnb_travelers?authSource=admin" \
+  -e MONGODB_URI="mongodb://admin:Somalwar1!@host.docker.internal:27017/airbnb_travelers?authSource=admin" \
   -e SESSION_SECRET="your-secret" \
   traveler-service:latest
 

@@ -79,6 +79,15 @@ app.get('/health', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Booking Service is running',
+    service: 'booking-service',
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/bookings/owner', ownerBookingRoutes);
 

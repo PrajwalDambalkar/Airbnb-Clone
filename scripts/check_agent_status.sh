@@ -29,10 +29,10 @@ if curl -s http://localhost:8000/health > /dev/null 2>&1; then
     
     # Check health details
     HEALTH=$(curl -s http://localhost:8000/health)
-    MYSQL_STATUS=$(echo $HEALTH | grep -o '"mysql":"[^"]*"' | cut -d'"' -f4)
-    OLLAMA_STATUS=$(echo $HEALTH | grep -o '"ollama":"[^"]*"' | cut -d'"' -f4)
+    MONGODB_STATUS=$(echo "$HEALTH" | grep -o '"mongodb":"[^"]*"' | cut -d'"' -f4)
+    OLLAMA_STATUS=$(echo "$HEALTH" | grep -o '"ollama":"[^"]*"' | cut -d'"' -f4)
     
-    echo "   MySQL: $MYSQL_STATUS"
+    echo "   MongoDB: $MONGODB_STATUS"
     echo "   Ollama: $OLLAMA_STATUS"
 else
     echo -e "${RED}❌ Not running${NC}"
@@ -56,21 +56,20 @@ else
     echo "   → Start with: ollama serve"
 fi
 
-# Check 4: MySQL
-echo -n "4. MySQL Connection: "
-if command -v mysql > /dev/null 2>&1; then
-    # Try to connect (will prompt for password if needed)
-    mysql -u root -e "SELECT 1" airbnb_db 2>/dev/null && echo -e "${GREEN}✅ Connected${NC}" || echo -e "${RED}❌ Cannot connect${NC}"
+# Check 4: MongoDB
+echo -n "4. MongoDB Connection: "
+if command -v mongosh > /dev/null 2>&1; then
+    mongosh --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1 && echo -e "${GREEN}✅ Connected${NC}" || echo -e "${RED}❌ Cannot connect${NC}"
 else
-    echo -e "${YELLOW}⚠️  MySQL client not found${NC}"
+    echo -e "${YELLOW}⚠️  mongosh client not found${NC}"
 fi
 
 echo ""
 echo "5. Environment Variables:"
 if [ -f "apps/agent-service/.env" ]; then
     echo "   Agent .env exists: ✅"
-    echo "   DB_HOST: $(grep DB_HOST apps/agent-service/.env 2>/dev/null | cut -d'=' -f2)"
-    echo "   DB_NAME: $(grep DB_NAME apps/agent-service/.env 2>/dev/null | cut -d'=' -f2)"
+    echo "   MONGODB_URI: $(grep MONGODB_URI apps/agent-service/.env 2>/dev/null | cut -d'=' -f2)"
+    echo "   MONGODB_DB_NAME: $(grep MONGODB_DB_NAME apps/agent-service/.env 2>/dev/null | cut -d'=' -f2)"
     echo "   OLLAMA_MODEL: $(grep OLLAMA_MODEL apps/agent-service/.env 2>/dev/null | cut -d'=' -f2)"
 else
     echo -e "   ${RED}❌ apps/agent-service/.env not found${NC}"
@@ -128,7 +127,7 @@ if [ $ISSUES -eq 0 ]; then
     echo ""
     echo "If you're still getting errors, check:"
     echo "  1. Browser console (F12) for detailed error messages"
-    echo "  2. Agent service logs for MySQL/Ollama errors"
+    echo "  2. Agent service logs for MongoDB/Ollama errors"
     echo "  3. TROUBLESHOOTING_AGENT.md for detailed guide"
 else
     echo -e "${RED}❌ Found $ISSUES issue(s)${NC}"

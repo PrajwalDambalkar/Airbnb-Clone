@@ -53,15 +53,15 @@ const propertySchema = new mongoose.Schema({
     required: true
   },
   price_per_night: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed, // Support both String and Number
     required: true
   },
   cleaning_fee: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed, // Support both String and Number
     default: 0
   },
   service_fee: {
-    type: Number,
+    type: mongoose.Schema.Types.Mixed, // Support both String and Number
     default: 0
   },
   amenities: {

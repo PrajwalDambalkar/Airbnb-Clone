@@ -23,16 +23,13 @@ fi
 if [ ! -f .env ]; then
     echo "⚠️  Warning: .env file not found"
     echo "Creating .env from example..."
-    cat > .env << 'EOF'
-# Database
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=airbnb_db
-DB_PORT=3306
-
+cat > .env << 'EOF'
 # Agent Service Secret (must match backend)
 AGENT_SERVICE_SECRET=change-this-secret-in-production
+
+# MongoDB
+MONGODB_URI=mongodb://admin:Somalwar1!@localhost:27017/airbnb_backend?authSource=admin
+MONGODB_DB_NAME=airbnb_backend
 
 # Ollama
 OLLAMA_BASE_URL=http://localhost:11434
@@ -42,7 +39,7 @@ OLLAMA_MODEL=llama3
 TAVILY_API_KEY=your_tavily_api_key_here
 
 # ChromaDB
-CHROMA_PATH=./chroma_db
+CHROMA_PERSIST_DIR=./chroma_db
 
 # Environment
 ENVIRONMENT=development

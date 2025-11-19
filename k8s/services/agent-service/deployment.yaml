@@ -28,28 +28,25 @@ spec:
             configMapKeyRef:
               name: app-config
               key: AGENT_SERVICE_PORT
-        - name: MYSQL_HOST
-          value: "mysql-service"
-        - name: MYSQL_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: MYSQL_PORT
-        - name: MYSQL_USER
+        - name: AGENT_SERVICE_SECRET
           valueFrom:
             secretKeyRef:
               name: app-secrets
-              key: MYSQL_USER
-        - name: MYSQL_PASSWORD
+              key: AGENT_SERVICE_SECRET
+        - name: MONGODB_USERNAME
           valueFrom:
             secretKeyRef:
               name: app-secrets
-              key: MYSQL_PASSWORD
-        - name: MYSQL_DATABASE
+              key: MONGODB_USERNAME
+        - name: MONGODB_PASSWORD
           valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: MYSQL_DATABASE
+            secretKeyRef:
+              name: app-secrets
+              key: MONGODB_PASSWORD
+        - name: MONGODB_URI
+          value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb-service:27017/airbnb_backend?authSource=admin"
+        - name: MONGODB_DB_NAME
+          value: "airbnb_backend"
         - name: OLLAMA_BASE_URL
           valueFrom:
             configMapKeyRef:

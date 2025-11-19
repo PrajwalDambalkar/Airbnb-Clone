@@ -66,25 +66,34 @@ app.get('/health', async (req, res) => {
   try {
     const mongoose = await import('./src/config/db.js');
     const dbStatus = mongoose.default.connection.readyState === 1 ? 'connected' : 'disconnected';
-    res.json({ 
+    res.json({
       status: 'healthy',
       service: 'property-service',
       database: dbStatus,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'unhealthy',
       error: error.message
     });
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Property Service is running',
+    service: 'property-service',
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/properties', propertyRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });

@@ -10,7 +10,7 @@ import profileRoutes from './src/routes/profileRoutes.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5005;
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -67,18 +67,27 @@ app.get('/health', async (req, res) => {
   try {
     const mongoose = await import('./src/config/db.js');
     const dbStatus = mongoose.default.connection.readyState === 1 ? 'connected' : 'disconnected';
-    res.json({ 
+    res.json({
       status: 'healthy',
       service: 'traveler-service',
       database: dbStatus,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'unhealthy',
       error: error.message
     });
   }
+});
+
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Traveler Service is running',
+    service: 'traveler-service',
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use('/api/travelers', travelerRoutes);
@@ -86,7 +95,7 @@ app.use('/api/profile', profileRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });

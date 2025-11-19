@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from fastapi import APIRouter, status
 from models.schemas import HealthResponse
-from utils.mysql_client import mysql_client
+from utils.mongo_client import mongo_client
 from utils.llm_client import llm_client
 
 logger = logging.getLogger(__name__)
@@ -26,20 +26,20 @@ async def health_check():
     
     services = {
         "api": "healthy",
-        "mysql": "unknown",
+        "mongodb": "unknown",
         "ollama": "unknown",
         "tavily": "configured" if llm_client.llm else "not_configured"
     }
     
-    # Test MySQL
+    # Test MongoDB
     try:
-        if mysql_client.test_connection():
-            services["mysql"] = "connected"
+        if mongo_client.test_connection():
+            services["mongodb"] = "connected"
         else:
-            services["mysql"] = "disconnected"
+            services["mongodb"] = "disconnected"
     except Exception as e:
-        logger.error(f"MySQL health check failed: {e}")
-        services["mysql"] = "error"
+        logger.error(f"MongoDB health check failed: {e}")
+        services["mongodb"] = "error"
     
     # Test Ollama
     try:
@@ -53,7 +53,7 @@ async def health_check():
     
     # Overall status
     overall_status = "healthy"
-    if services["mysql"] != "connected":
+    if services["mongodb"] != "connected":
         overall_status = "degraded"
     if services["ollama"] != "connected":
         overall_status = "degraded"
@@ -90,24 +90,24 @@ async def test_ollama():
             "message": str(e)
         }
 
-@router.get("/test-mysql")
-async def test_mysql():
+@router.get("/test-mongodb")
+async def test_mongodb():
     """
-    Test MySQL connection
+    Test MongoDB connection
     """
     try:
-        if mysql_client.test_connection():
+        if mongo_client.test_connection():
             return {
                 "status": "success",
-                "message": "MySQL connection successful"
+                "message": "MongoDB connection successful"
             }
         else:
             return {
                 "status": "error",
-                "message": "MySQL connection failed"
+                "message": "MongoDB connection failed"
             }
     except Exception as e:
-        logger.error(f"MySQL test failed: {e}")
+        logger.error(f"MongoDB test failed: {e}")
         return {
             "status": "error",
             "message": str(e)

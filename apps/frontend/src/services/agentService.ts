@@ -1,5 +1,5 @@
 // services/agentService.ts
-import api from './api';
+import { backendAPI as api } from './api';
 
 export interface AgentPlanRequest {
   booking_id: string; // MongoDB ObjectId

@@ -1,13 +1,15 @@
 import { Router } from 'express';
+import upload from '../config/multer.js';
+import * as propertyController from '../controllers/propertyController.js';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
-  res.json([]);
-});
+router.get('/my/properties', propertyController.getMyProperties);
+router.post('/', upload.array('images', 10), propertyController.createProperty);
+router.put('/:id', upload.array('images', 10), propertyController.updateProperty);
+router.delete('/:id', propertyController.deleteProperty);
 
-router.post('/', async (req, res) => {
-  res.status(501).json({ message: 'Not implemented in this environment.' });
-});
+router.get('/', propertyController.getAllProperties);
+router.get('/:id', propertyController.getPropertyById);
 
 export default router;

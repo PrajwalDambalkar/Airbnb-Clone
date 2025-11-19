@@ -1,16 +1,5 @@
 // src/services/profileService.ts
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import { travelerAPI as api } from './api';
 
 // Profile interface
 export interface Profile {

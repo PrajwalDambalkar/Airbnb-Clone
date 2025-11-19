@@ -1,5 +1,5 @@
 // src/services/ownerBookingService.ts
-import api from './api';
+import { bookingAPI as api } from './api';
 
 export interface OwnerBooking {
   id: string; // MongoDB ObjectId

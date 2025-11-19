@@ -13,5 +13,4 @@ data:
   
   # Database URLs
   MONGODB_SERVICE_URL: "mongodb-service"
-  MYSQL_SERVICE_URL: "mysql-service"
 

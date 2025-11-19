@@ -25,12 +25,12 @@ app = FastAPI(
 )
 
 # CORS configuration
+raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5000")
+allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Frontend
-        "http://localhost:5000",  # Backend
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,13 +54,13 @@ async def startup_event():
     
     # Test connections
     try:
-        from utils.mysql_client import mysql_client
-        if mysql_client.test_connection():
-            logger.info("✅ MySQL connection successful")
+        from utils.mongo_client import mongo_client
+        if mongo_client.test_connection():
+            logger.info("✅ MongoDB connection successful")
         else:
-            logger.warning("⚠️ MySQL connection failed")
+            logger.warning("⚠️ MongoDB connection failed")
     except Exception as e:
-        logger.error(f"❌ MySQL connection error: {e}")
+        logger.error(f"❌ MongoDB connection error: {e}")
     
     try:
         from utils.llm_client import llm_client

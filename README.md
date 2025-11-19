@@ -171,60 +171,71 @@ Before you begin, ensure you have the following installed:
 ## 🔧 Environment Setup
 
 ### Frontend (.env)
-Create `apps/frontend/.env`:
+Copy the template and adjust if needed:
+```bash
+cp apps/frontend/env.example apps/frontend/.env
+```
+
+Key setting:
 ```env
-VITE_API_URL=http://localhost:5001
+VITE_API_URL=http://localhost:5000
 ```
 
 ### Backend (.env)
-Create `apps/backend/.env`:
-```env
-# Database
-DB_HOST=localhost
-DB_USER=your_mysql_user
-DB_PASSWORD=your_mysql_password
-DB_NAME=airbnb_db
-DB_PORT=3306
-
-# Session
-SESSION_SECRET=your-secret-key-here
-
-# Agent Service
-AGENT_SERVICE_URL=http://localhost:8000
-AGENT_SERVICE_SECRET=your-secret-key-here
-
-# Server
-PORT=5001
+```bash
+cp apps/backend/env.example apps/backend/.env
 ```
+
+Essential values:
+```env
+NODE_ENV=development
+PORT=5000
+CORS_ORIGIN=http://localhost:5173
+MONGODB_URI=mongodb://admin:Somalwar1!@localhost:27017/airbnb_backend?authSource=admin
+SESSION_SECRET=change-this-session-secret
+AGENT_SERVICE_URL=http://localhost:8000
+AGENT_SERVICE_SECRET=replace-with-agent-secret
+```
+
+### Microservices (.env)
+Each Node microservice ships with its own template; copy them before starting the service:
+```bash
+cp apps/booking-service/env.example apps/booking-service/.env
+cp apps/property-service/env.example apps/property-service/.env
+cp apps/owner-service/env.example apps/owner-service/.env
+cp apps/traveler-service/env.example apps/traveler-service/.env
+```
+
+All four services require:
+- `MONGODB_URI` pointing to their database (`airbnb_bookings`, `airbnb_properties`, etc.)
+- `SESSION_SECRET` matching the backend/session configuration
+- `CORS_ORIGIN` set to the frontend origin
 
 ### AI Agent Service (.env)
-Create `apps/agent-service/.env`:
-```env
-# Database
-DB_HOST=localhost
-DB_USER=your_mysql_user
-DB_PASSWORD=your_mysql_password
-DB_NAME=airbnb_db
-DB_PORT=3306
-
-# Agent Service Secret (must match backend)
-AGENT_SERVICE_SECRET=your-secret-key-here
-
-# Ollama Configuration
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3
-
-# Tavily API for Web Search (Optional but recommended)
-# Get free API key from: https://tavily.com/
-TAVILY_API_KEY=your_tavily_api_key_here
-
-# ChromaDB
-CHROMA_PATH=./chroma_db
-
-# Environment
-ENVIRONMENT=development
-LOG_LEVEL=INFO
+```bash
+cp apps/agent-service/env.example apps/agent-service/.env
 ```
+
+Important values:
+```env
+AGENT_PORT=8000
+NODE_ENV=development
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5000
+AGENT_SERVICE_SECRET=replace-with-agent-secret
+MONGODB_URI=mongodb://admin:Somalwar1!@localhost:27017/airbnb_backend?authSource=admin
+MONGODB_DB_NAME=airbnb_backend
+OLLAMA_BASE_URL=http://ollama:11434
+OLLAMA_MODEL=llama3
+TAVILY_API_KEY=
+CHROMA_PERSIST_DIR=./chroma_db
+```
+
+### Root `.env` for Docker Compose
+```bash
+cp env.example .env
+```
+
+This file wires the shared credentials (MongoDB root user, session secret, AI agent settings) into `docker-compose.yml` and the Kubernetes manifests.
 
 ## ▶️ Running the Application
 
@@ -235,7 +246,7 @@ LOG_LEVEL=INFO
    cd apps/backend
    npm run dev
    ```
-   Backend runs on: http://localhost:5001
+   Backend runs on: http://localhost:5000
 
 2. **Start the frontend** (Terminal 2)
    ```bash

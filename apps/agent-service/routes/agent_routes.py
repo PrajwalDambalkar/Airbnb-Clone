@@ -51,7 +51,7 @@ async def create_travel_plan(request: AgentRequest):
 @router.post("/query")
 async def process_natural_language_query(
     query: str,
-    booking_id: int,
+    booking_id: str,
     secret: str
 ):
     """

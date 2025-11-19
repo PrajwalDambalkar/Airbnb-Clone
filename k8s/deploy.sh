@@ -76,14 +76,12 @@ echo -e "${YELLOW}💾 Applying Persistent Volumes...${NC}"
 kubectl apply -f persistent-volumes/
 
 # Deploy Databases
-echo -e "${YELLOW}🗄️  Deploying Databases...${NC}"
+echo -e "${YELLOW}🗄️  Deploying MongoDB...${NC}"
 kubectl apply -f databases/mongodb/
-kubectl apply -f databases/mysql/
 
-# Wait for databases to be ready
-echo -e "${YELLOW}⏳ Waiting for databases to be ready...${NC}"
+# Wait for database to be ready
+echo -e "${YELLOW}⏳ Waiting for MongoDB to be ready...${NC}"
 kubectl wait --for=condition=ready pod -l app=mongodb -n airbnb-clone --timeout=120s || echo -e "${YELLOW}⚠️  MongoDB not ready yet, continuing...${NC}"
-kubectl wait --for=condition=ready pod -l app=mysql -n airbnb-clone --timeout=120s || echo -e "${YELLOW}⚠️  MySQL not ready yet, continuing...${NC}"
 
 # Deploy Services
 echo -e "${YELLOW}🚀 Deploying Services...${NC}"
