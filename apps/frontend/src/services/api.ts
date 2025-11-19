@@ -61,25 +61,31 @@ export interface AuthResponse {
 export const authAPI = {
   // Signup
   signup: async (data: SignupData): Promise<AuthResponse> => {
-    const response = await api.post('/api/auth/signup', data);
+    const endpoint = data.role === 'traveler' ? '/api/travelers/signup' : '/api/owners/signup';
+    const response = await api.post(endpoint, data);
     return response.data;
   },
 
   // Login
-  login: async (data: LoginData): Promise<AuthResponse> => {
-    const response = await api.post('/api/auth/login', data);
+  login: async (data: LoginData & { role?: 'traveler' | 'owner' }): Promise<AuthResponse> => {
+    // Default to traveler if no role specified
+    const role = data.role || 'traveler';
+    const endpoint = role === 'traveler' ? '/api/travelers/login' : '/api/owners/login';
+    const response = await api.post(endpoint, data);
     return response.data;
   },
 
   // Logout
-  logout: async (): Promise<{ message: string }> => {
-    const response = await api.post('/api/auth/logout');
+  logout: async (role: 'traveler' | 'owner' = 'traveler'): Promise<{ message: string }> => {
+    const endpoint = role === 'traveler' ? '/api/travelers/logout' : '/api/owners/logout';
+    const response = await api.post(endpoint);
     return response.data;
   },
 
   // Get current user
-  getCurrentUser: async (): Promise<{ user: User }> => {
-    const response = await api.get('/api/auth/me');
+  getCurrentUser: async (role: 'traveler' | 'owner' = 'traveler'): Promise<{ user: User }> => {
+    const endpoint = role === 'traveler' ? '/api/travelers/me' : '/api/owners/me';
+    const response = await api.get(endpoint);
     return response.data;
   },
 };

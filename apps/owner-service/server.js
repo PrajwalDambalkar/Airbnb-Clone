@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './src/config/db.js';
 import ownerRoutes from './src/routes/ownerRoutes.js';
 import profileRoutes from './src/routes/profileRoutes.js';
+import propertyProxyRoutes from './src/routes/propertyProxyRoutes.js';
 
 dotenv.config();
 
@@ -83,6 +84,7 @@ app.get('/health', async (req, res) => {
 
 app.use('/api/owners', ownerRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/properties', propertyProxyRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

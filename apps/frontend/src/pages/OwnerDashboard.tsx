@@ -3,11 +3,20 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../App';
-import api from '../services/api';
+import axios from 'axios';
 import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
 import { getFirstImage, getImageUrl } from '../utils/imageUtils';
 import * as ownerBookingService from '../services/ownerBookingService';
 import type { BookingStats } from '../services/ownerBookingService';
+
+// Create axios instance for owner service
+const ownerApi = axios.create({
+  baseURL: import.meta.env.VITE_OWNER_SERVICE_URL || 'http://localhost:5002',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 interface Property {
   id: string; // MongoDB ObjectId
@@ -44,7 +53,7 @@ export default function OwnerDashboard() {
   const fetchMyProperties = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/api/properties/my/properties');
+      const { data } = await ownerApi.get('/api/properties/my/properties');
       setProperties(data.data || []);
     } catch (err: any) {
       console.error('Error fetching properties:', err);
@@ -122,7 +131,7 @@ export default function OwnerDashboard() {
 
     try {
       setDeleting(propertyId);
-      await api.delete(`/api/properties/${propertyId}`);
+      await ownerApi.delete(`/api/properties/${propertyId}`);
       
       // Remove from local state
       setProperties(properties.filter(p => p.id !== propertyId));
@@ -142,7 +151,7 @@ export default function OwnerDashboard() {
       {/* Fixed Success Toast */}
       {successMessage && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[10002] animate-fade-in-down">
-          <div className="px-6 py-4 text-white bg-green-500 rounded-lg shadow-xl flex items-center gap-3">
+          <div className="flex items-center gap-3 px-6 py-4 text-white bg-green-500 rounded-lg shadow-xl">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -233,7 +242,7 @@ export default function OwnerDashboard() {
                     <img 
                       src={getImageUrl(user.profile_picture)} 
                       alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="object-cover w-8 h-8 rounded-full"
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF385C] to-[#E31C5F] flex items-center justify-center text-white font-semibold text-sm">
@@ -543,7 +552,7 @@ export default function OwnerDashboard() {
                         } ${isDark ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
                       >
                         {deleting === property.id ? (
-                          <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 rounded-full border-t-transparent animate-spin"></div>
                         ) : (
                           <Trash2 className="w-4 h-4" />
                         )}
