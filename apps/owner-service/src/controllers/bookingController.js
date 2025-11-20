@@ -1,0 +1,262 @@
+// controllers/bookingController.js - Owner Service (Consumer & Producer)
+import Booking from '../models/Booking.js';
+import Property from '../models/Property.js';
+import mongoose from 'mongoose';
+import { sendBookingUpdate } from '../kafka/producer.js';
+
+// Get all bookings for owner's properties
+export const getOwnerBookings = async (req, res) => {
+  try {
+    const ownerId = req.session.user._id || req.session.user.id;
+    const { status, propertyId, search, sortBy = 'createdAt', order = 'DESC' } = req.query;
+
+    // Build query with filters
+    let query = { owner_id: ownerId };
+
+    // Apply filters
+    if (status) {
+      query.status = status.toUpperCase();
+    }
+
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+      query.property_id = propertyId;
+    }
+
+    // Fetch bookings
+    let bookingsQuery = Booking.find(query)
+      .populate('property_id', 'property_name city state images')
+      .populate('traveler_id', 'name email');
+
+    // Add sorting
+    const allowedSortFields = ['createdAt', 'check_in', 'check_out', 'total_price', 'status'];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const sortOrder = order.toUpperCase() === 'ASC' ? 1 : -1;
+    
+    bookingsQuery = bookingsQuery.sort({ [sortField]: sortOrder });
+
+    const bookings = await bookingsQuery;
+
+    // Format response
+    const formattedBookings = bookings.map(booking => {
+      const bookingData = booking.toObject();
+      if (booking.property_id) {
+        bookingData.property_name = booking.property_id.property_name;
+        bookingData.city = booking.property_id.city;
+        bookingData.state = booking.property_id.state;
+        bookingData.images = booking.property_id.images;
+      }
+      if (booking.traveler_id) {
+        bookingData.guest_name = booking.traveler_id.name;
+        bookingData.guest_email = booking.traveler_id.email;
+      }
+      return bookingData;
+    });
+
+    res.json({
+      success: true,
+      data: formattedBookings
+    });
+  } catch (error) {
+    console.error('Get owner bookings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch bookings',
+      error: error.message
+    });
+  }
+};
+
+// Approve/Accept a booking (Backend Service - Consumer)
+export const approveBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ownerId = req.session.user._id || req.session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
+
+    // Verify booking belongs to owner and is pending
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'PENDING'
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found, unauthorized, or not in pending status'
+      });
+    }
+
+    // Update booking status to ACCEPTED
+    booking.status = 'ACCEPTED';
+    await booking.save();
+
+    // ========== KAFKA INTEGRATION: Publish status update ==========
+    const updateData = {
+      type: 'booking-status-updated',
+      bookingId: id,
+      status: 'ACCEPTED',
+      travelerId: booking.traveler_id.toString(),
+      ownerId: ownerId.toString(),
+      timestamp: new Date().toISOString(),
+    };
+
+    await sendBookingUpdate(updateData);
+    console.log('📤 Booking ACCEPTED update published to Kafka:', id);
+    // ================================================================
+
+    res.json({
+      success: true,
+      message: 'Booking approved successfully'
+    });
+  } catch (error) {
+    console.error('Approve booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to approve booking',
+      error: error.message
+    });
+  }
+};
+
+// Reject/Decline a booking (Backend Service - Consumer)
+export const rejectBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ownerId = req.session.user._id || req.session.user.id;
+    const { reason } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
+
+    // Verify booking belongs to owner and is pending
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'PENDING'
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found, unauthorized, or not in pending status'
+      });
+    }
+
+    // Update booking status to CANCELLED with reason
+    booking.status = 'CANCELLED';
+    booking.cancelled_by = 'owner';
+    booking.cancelled_at = new Date();
+    booking.cancellation_reason = reason || 'Rejected by owner';
+    await booking.save();
+
+    // ========== KAFKA INTEGRATION: Publish status update ==========
+    const updateData = {
+      type: 'booking-status-updated',
+      bookingId: id,
+      status: 'CANCELLED',
+      reason: reason || 'Rejected by owner',
+      travelerId: booking.traveler_id.toString(),
+      ownerId: ownerId.toString(),
+      timestamp: new Date().toISOString(),
+    };
+
+    await sendBookingUpdate(updateData);
+    console.log('📤 Booking REJECTED update published to Kafka:', id);
+    // ================================================================
+
+    res.json({
+      success: true,
+      message: 'Booking rejected successfully'
+    });
+  } catch (error) {
+    console.error('Reject booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject booking',
+      error: error.message
+    });
+  }
+};
+
+// Cancel a confirmed booking
+export const cancelBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ownerId = req.session.user._id || req.session.user.id;
+    const { reason } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
+
+    // Verify booking belongs to owner and is accepted
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'ACCEPTED'
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found, unauthorized, or not in accepted status'
+      });
+    }
+
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cancellation reason is required'
+      });
+    }
+
+    // Update booking status to CANCELLED
+    booking.status = 'CANCELLED';
+    booking.cancelled_by = 'owner';
+    booking.cancelled_at = new Date();
+    booking.cancellation_reason = reason;
+    await booking.save();
+
+    // ========== KAFKA INTEGRATION: Publish status update ==========
+    const updateData = {
+      type: 'booking-status-updated',
+      bookingId: id,
+      status: 'CANCELLED',
+      reason: reason,
+      travelerId: booking.traveler_id.toString(),
+      ownerId: ownerId.toString(),
+      timestamp: new Date().toISOString(),
+    };
+
+    await sendBookingUpdate(updateData);
+    console.log('📤 Booking CANCELLED update published to Kafka:', id);
+    // ================================================================
+
+    res.json({
+      success: true,
+      message: 'Booking cancelled successfully'
+    });
+  } catch (error) {
+    console.error('Cancel booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cancel booking',
+      error: error.message
+    });
+  }
+};
+

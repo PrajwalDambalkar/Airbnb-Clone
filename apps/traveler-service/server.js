@@ -6,6 +6,10 @@ import dotenv from 'dotenv';
 import { connectDB } from './src/config/db.js';
 import travelerRoutes from './src/routes/travelerRoutes.js';
 import profileRoutes from './src/routes/profileRoutes.js';
+import bookingRoutes from './src/routes/bookingRoutes.js';
+import { connectProducer, disconnectProducer } from './src/kafka/producer.js';
+import { connectUpdateConsumer, disconnectConsumer } from './src/kafka/consumer.js';
+import { handleBookingUpdate } from './src/services/notificationService.js';
 
 dotenv.config();
 
@@ -92,6 +96,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/travelers', travelerRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/travelers', bookingRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -104,15 +109,39 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
+    
+    // Connect Kafka Producer (for publishing booking requests)
+    await connectProducer();
+    
+    // Connect Kafka Consumer (for receiving booking status updates)
+    await connectUpdateConsumer(handleBookingUpdate);
+    
     app.listen(PORT, () => {
       console.log(`🚀 Traveler Service running on http://localhost:${PORT}`);
       console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`📤 Kafka Producer: Ready to publish booking requests`);
+      console.log(`📥 Kafka Consumer: Listening for booking updates`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await disconnectProducer();
+  await disconnectConsumer();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await disconnectProducer();
+  await disconnectConsumer();
+  process.exit(0);
+});
 
 startServer();
 

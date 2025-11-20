@@ -37,14 +37,17 @@ services:
       dockerfile: Dockerfile
     image: traveler-service:latest
     container_name: traveler-service
-    # depends_on:
-    #   - mongodb
+    depends_on:
+      - kafka
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 5005
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
-      MONGODB_URI: ${TRAVELER_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_travelers?retryWrites=true&w=majority}
+      MONGODB_URI: ${TRAVELER_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_db?retryWrites=true&w=majority}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_REQUEST_TOPIC: booking-requests
+      KAFKA_RESPONSE_TOPIC: booking-updates
     ports:
       - "5005:5005"
 
@@ -54,14 +57,17 @@ services:
       dockerfile: Dockerfile
     image: owner-service:latest
     container_name: owner-service
-    # depends_on:
-    #   - mongodb
+    depends_on:
+      - kafka
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 5002
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
-      MONGODB_URI: ${OWNER_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_owners?retryWrites=true&w=majority}
+      MONGODB_URI: ${OWNER_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_db?retryWrites=true&w=majority}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_REQUEST_TOPIC: booking-requests
+      KAFKA_RESPONSE_TOPIC: booking-updates
     ports:
       - "5002:5002"
 
@@ -88,14 +94,17 @@ services:
       dockerfile: Dockerfile
     image: booking-service:latest
     container_name: booking-service
-    # depends_on:
-    #   - mongodb
+    depends_on:
+      - kafka
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 5004
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret}
-      MONGODB_URI: ${BOOKING_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_bookings?retryWrites=true&w=majority}
+      MONGODB_URI: ${BOOKING_MONGODB_URI:-mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_db?retryWrites=true&w=majority}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_REQUEST_TOPIC: booking-requests
+      KAFKA_RESPONSE_TOPIC: booking-updates
     ports:
       - "5004:5004"
 
@@ -134,8 +143,51 @@ services:
       timeout: 10s
       retries: 5
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    restart: unless-stopped
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   mongo-data:
   ollama-data:
+  zookeeper-data:
+  kafka-data:
 
 
