@@ -19,7 +19,7 @@ class LLMClient:
     """Ollama LLM client for generating itineraries"""
     
     def __init__(self):
-        self.model = os.getenv("OLLAMA_MODEL", "llama3")
+        self.model = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         
         if OLLAMA_AVAILABLE:

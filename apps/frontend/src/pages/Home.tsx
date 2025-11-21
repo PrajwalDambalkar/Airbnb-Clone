@@ -5,7 +5,8 @@ import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
 import { getFirstImage } from '../utils/imageUtils';
-import { useAuth } from '../context/AuthContext';
+import { useAppSelector } from '../store/hooks';
+import { selectUser } from '../store/slices/authSlice';
 import AIAgentSidebar from '../components/AIAgentSidebar';
 import bookingService, { type Booking } from '../services/bookingService';
 
@@ -23,7 +24,7 @@ export default function Home() {
     const [hoveredDate, setHoveredDate] = useState<string | null>(null);
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
-    const { user } = useAuth();
+    const user = useAppSelector(selectUser);
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);

@@ -1,7 +1,8 @@
 // src/pages/OwnerBookings.tsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectUser, logout as logoutAction } from '../store/slices/authSlice';
 import { useDarkMode } from '../App';
 import { 
   Calendar, 
@@ -29,9 +30,14 @@ import type { OwnerBooking, BookingStats } from '../services/ownerBookingService
 import { getImageUrl } from '../utils/imageUtils';
 
 export default function OwnerBookings() {
-  const { user, logout } = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
   const { isDark, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
+  
+  const logout = () => {
+    dispatch(logoutAction());
+  };
   
   const [bookings, setBookings] = useState<OwnerBooking[]>([]);
   const [stats, setStats] = useState<BookingStats | null>(null);

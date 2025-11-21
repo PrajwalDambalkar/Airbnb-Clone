@@ -1,7 +1,8 @@
 // src/pages/OwnerDashboard.tsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectUser, logout as logoutAction } from '../store/slices/authSlice';
 import { useDarkMode } from '../App';
 import { propertyAPI as api } from '../services/api';
 import { Home, Plus, Calendar, DollarSign, Eye, Edit, Trash2, ChevronDown, Settings, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
@@ -28,9 +29,14 @@ interface Property {
 }
 
 export default function OwnerDashboard() {
-  const { user, logout } = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
   const { isDark, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
+  
+  const logout = () => {
+    dispatch(logoutAction());
+  };
   const location = useLocation();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);

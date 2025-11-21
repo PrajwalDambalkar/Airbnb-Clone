@@ -104,3 +104,5 @@ const Property = mongoose.model('Property', propertySchema);
 
 export default Property;
 
+
+

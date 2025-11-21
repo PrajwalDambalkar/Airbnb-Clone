@@ -63,8 +63,8 @@ class MongoBookingClient:
     """MongoDB client used by the agent service."""
 
     def __init__(self):
-        uri = os.getenv("MONGODB_URI", "mongodb://admin:Somalwar1!@localhost:27017/airbnb_backend?authSource=admin")
-        db_name = os.getenv("MONGODB_DB_NAME", "airbnb_backend")
+        uri = os.getenv("MONGODB_URI", "mongodb+srv://pprathkanthiwar_db_user:Somalwar1!@cluster0.y1r5ijv.mongodb.net/airbnb_db?retryWrites=true&w=majority")
+        db_name = os.getenv("MONGODB_DB_NAME", "airbnb_db")
         self._client = MongoClient(uri, serverSelectionTimeoutMS=5000)
         self._db = self._client[db_name]
         self._bookings = self._db["bookings"]

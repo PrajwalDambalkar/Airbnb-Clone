@@ -1,13 +1,16 @@
 // src/pages/Signup.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { signup as signupAction, clearError, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector(selectAuthLoading);
+  const reduxError = useAppSelector(selectAuthError);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -16,12 +19,15 @@ export default function Signup() {
     role: 'traveler' as 'traveler' | 'owner',
   });
 
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [nameError, setNameError] = useState('');
+
+  // Clear Redux error on mount
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   // Email validation function
   const validateEmail = (email: string): boolean => {
@@ -80,7 +86,7 @@ export default function Signup() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    dispatch(clearError());
     
     // Validate all fields
     const isNameValid = validateName(formData.name);
@@ -91,15 +97,12 @@ export default function Signup() {
       return;
     }
 
-    setLoading(true);
-
     try {
-      await signup(formData);
+      await dispatch(signupAction(formData)).unwrap();
       navigate('/'); // Redirect to home after signup
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed. Please try again.');
-    } finally {
-      setLoading(false);
+      // Error is handled by Redux state
+      console.error('Signup failed:', err);
     }
   };
 
@@ -122,9 +125,9 @@ export default function Signup() {
         <div className="px-4 py-8 bg-white border border-gray-200 shadow-lg sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Error Message */}
-            {error && (
+            {reduxError && (
               <div className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50">
-                {error}
+                {reduxError}
               </div>
             )}
 

@@ -2,7 +2,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Sparkles, Send, Loader2, MapPin, Calendar, Bot, Sun, Utensils, ChevronDown, ChevronUp } from 'lucide-react';
 import { useDarkMode } from '../App';
-import { useAuth } from '../context/AuthContext';
+import { useAppSelector } from '../store/hooks';
+import { selectUser } from '../store/slices/authSlice';
 import agentService from '../services/agentService';
 
 interface AIAgentSidebarProps {
@@ -29,7 +30,7 @@ interface ChatMessage {
 
 export default function AIAgentSidebar({ isOpen, onClose, bookingId }: AIAgentSidebarProps) {
   const { isDark } = useDarkMode();
-  const { user } = useAuth();
+  const user = useAppSelector(selectUser);
   
   // State
   const [query, setQuery] = useState('');

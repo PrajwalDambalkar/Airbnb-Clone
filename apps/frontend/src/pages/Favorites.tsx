@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
-import { useAuth } from '../context/AuthContext';
+import { useAppSelector } from '../store/hooks';
+import { selectUser } from '../store/slices/authSlice';
 import type { Property } from '../types/property';
 import { getFirstImage } from '../utils/imageUtils';
 
@@ -11,7 +12,7 @@ export default function Favorites() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const { isDark } = useDarkMode();
-  const { user } = useAuth();
+  const user = useAppSelector(selectUser);
 
   useEffect(() => {
     const fetchFavs = async () => {

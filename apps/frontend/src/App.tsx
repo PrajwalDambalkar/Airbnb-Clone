@@ -2,7 +2,9 @@
 import type { ReactNode } from 'react';
 import { useState, createContext, useContext, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { checkAuth, logout as logoutAction, selectUser, selectAuthLoading } from './store/slices/authSlice';
+import { loadFavorites, selectFavorites } from './store/slices/bookingsSlice';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
@@ -35,47 +37,27 @@ export const useDarkMode = () => {
 
 // Header Component
 function Header() {
-  const { user, logout } = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
+  const favorites = useAppSelector(selectFavorites);
   const { isDark, toggleDarkMode } = useDarkMode();
-  const [favCount, setFavCount] = useState<number>(0);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  // Load favourites count from localStorage
+  // Load favorites from Redux when user changes
   useEffect(() => {
-    const loadFavs = () => {
-      if (!user) {
-        setFavCount(0);
-        return;
-      }
-      try {
-        // Check for user-specific favorites
-        let userFavs = localStorage.getItem(`favorites_${user.id}`);
-        
-        // If user doesn't have favorites yet, migrate from old global key (one-time migration)
-        if (!userFavs) {
-          const oldFavs = localStorage.getItem('favorites');
-          if (oldFavs) {
-            // Migrate old favorites to user-specific key
-            localStorage.setItem(`favorites_${user.id}`, oldFavs);
-            userFavs = oldFavs;
-          }
-        }
-        
-        // Remove old global favorites key after migration
-        localStorage.removeItem('favorites');
-        
-        const arr = userFavs ? JSON.parse(userFavs) : [];
-        setFavCount(Array.isArray(arr) ? arr.length : 0);
-      } catch (e) {
-        setFavCount(0);
+    if (user) {
+      dispatch(loadFavorites(user.id));
+    }
+  }, [user, dispatch]);
+
+  // Listen for favorites updates
+  useEffect(() => {
+    const handler = () => {
+      if (user) {
+        dispatch(loadFavorites(user.id));
       }
     };
-
-    loadFavs();
-
-    // Listen for cross-tab or app-level updates
-    const handler = () => loadFavs();
     window.addEventListener('storage', handler);
     window.addEventListener('favoritesUpdated', handler as EventListener);
 
@@ -83,7 +65,9 @@ function Header() {
       window.removeEventListener('storage', handler);
       window.removeEventListener('favoritesUpdated', handler as EventListener);
     };
-  }, [user]);
+  }, [user, dispatch]);
+
+  const favCount = favorites.length;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -224,7 +208,7 @@ function Header() {
                   <button
                     onClick={() => {
                       setShowProfileMenu(false);
-                      logout();
+                      dispatch(logoutAction());
                     }}
                     className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'}`}
                   >
@@ -298,7 +282,7 @@ function Header() {
             <button
               onClick={() => {
                 setShowMobileMenu(false);
-                logout();
+                dispatch(logoutAction());
               }}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-colors ${isDark ? 'text-red-400 hover:bg-gray-800' : 'text-red-600 hover:bg-red-50'}`}
             >
@@ -314,7 +298,8 @@ function Header() {
 
 // Protected Route wrapper
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const user = useAppSelector(selectUser);
+  const loading = useAppSelector(selectAuthLoading);
   const { isDark } = useDarkMode();
   const location = window.location.pathname;
   const isOwnerRoute = location.startsWith('/owner');
@@ -371,96 +356,101 @@ function DarkModeProvider({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  const dispatch = useAppDispatch();
+
+  // Check authentication on app load
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
   return (
     <DarkModeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            
-            {/* Profile Route - Available for both travelers and owners */}
-            <Route
-              path="/profile/edit"
-              element={
-                <ProtectedRoute>
-                  <EditProfile />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Owner Routes */}
-            <Route
-              path="/owner/dashboard"
-              element={
-                <ProtectedRoute>
-                  <OwnerDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/owner/properties/new"
-              element={
-                <ProtectedRoute>
-                  <AddProperty />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/owner/properties/:id/edit"
-              element={
-                <ProtectedRoute>
-                  <EditProperty />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/owner/bookings"
-              element={
-                <ProtectedRoute>
-                  <OwnerBookings />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Traveler/Public Routes */}
-            <Route
-              path="/favorites"
-              element={
-                <ProtectedRoute>
-                  <Favorites />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bookings"
-              element={
-                <ProtectedRoute>
-                  <Bookings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/:id"
-              element={
-                <ProtectedRoute>
-                  <PropertyDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          
+          {/* Profile Route - Available for both travelers and owners */}
+          <Route
+            path="/profile/edit"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Owner Routes */}
+          <Route
+            path="/owner/dashboard"
+            element={
+              <ProtectedRoute>
+                <OwnerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner/properties/new"
+            element={
+              <ProtectedRoute>
+                <AddProperty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner/properties/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditProperty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner/bookings"
+            element={
+              <ProtectedRoute>
+                <OwnerBookings />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Traveler/Public Routes */}
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute>
+                <Favorites />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <Bookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property/:id"
+            element={
+              <ProtectedRoute>
+                <PropertyDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
     </DarkModeProvider>
   );
 }

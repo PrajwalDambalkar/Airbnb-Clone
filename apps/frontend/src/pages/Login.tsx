@@ -3,12 +3,16 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { login as loginAction, clearError, selectUser, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
 import { useDarkMode } from '../App';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
+  const loading = useAppSelector(selectAuthLoading);
+  const reduxError = useAppSelector(selectAuthError);
   const { isDark } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -17,10 +21,13 @@ export default function Login() {
     password: '',
   });
 
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  // Clear Redux error on mount
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   // Redirect based on role after login
   useEffect(() => {
@@ -35,7 +42,7 @@ export default function Login() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    dispatch(clearError());
     setEmailError('');
     setPasswordError('');
     
@@ -63,14 +70,12 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
-
     try {
-      await login(formData);
+      await dispatch(loginAction(formData)).unwrap();
       // Redirect will happen in useEffect above
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
-      setLoading(false);
+      // Error is handled by Redux state
+      console.error('Login failed:', err);
     }
   };
 
@@ -93,9 +98,9 @@ export default function Login() {
         <div className={`px-4 py-8 shadow-lg sm:rounded-lg sm:px-10 border ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Error Message */}
-            {error && (
+            {reduxError && (
               <div className={`px-4 py-3 border rounded-lg ${isDark ? 'text-red-400 border-red-900 bg-red-950' : 'text-red-700 border-red-200 bg-red-50'}`}>
-                {error}
+                {reduxError}
               </div>
             )}
 

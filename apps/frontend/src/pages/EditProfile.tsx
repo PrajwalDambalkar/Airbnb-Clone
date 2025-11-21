@@ -1,7 +1,8 @@
 // src/pages/EditProfile.tsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectUser, refreshUser } from '../store/slices/authSlice';
 import { useDarkMode } from '../App';
 import { Camera, Save, X, User, Mail, Phone, MapPin, Globe, Languages, Users } from 'lucide-react';
 import { profileAPI } from '../services/profileService';
@@ -46,9 +47,14 @@ const GENDER_OPTIONS = [
 ];
 
 export default function EditProfile() {
-  const { user, refreshUser } = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
   const { isDark } = useDarkMode();
   const navigate = useNavigate();
+  
+  const handleRefreshUser = () => {
+    dispatch(refreshUser());
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
@@ -219,7 +225,7 @@ export default function EditProfile() {
       }
 
       await profileAPI.updateProfile(data);
-      await refreshUser(); // Refresh user data to update profile picture in header
+      await dispatch(refreshUser()).unwrap(); // Refresh user data to update profile picture in header
       setSuccess('Profile updated successfully!');
       
       // Navigate with success message after 2 seconds

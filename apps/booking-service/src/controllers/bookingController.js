@@ -502,3 +502,5 @@ export const getPropertyBookedDates = async (req, res) => {
   }
 };
 
+
+
