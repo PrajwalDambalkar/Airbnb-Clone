@@ -1,0 +1,801 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1763858679242,764,Login,200,OK,Users 1-2,text,true,,948,237,12,12,http://localhost:5001/api/auth/login,761,0,24
+1763858680008,302,Get Properties,200,OK,Users 1-2,text,true,,85540,130,16,16,http://localhost:5003/api/properties,301,0,1
+1763858679386,1115,Login,200,OK,Users 1-4,text,true,,946,237,17,17,http://localhost:5001/api/auth/login,1115,0,1
+1763858679242,1259,Login,200,OK,Users 1-1,text,true,,944,237,17,17,http://localhost:5001/api/auth/login,1259,0,24
+1763858679308,1193,Login,200,OK,Users 1-3,text,true,,944,237,17,17,http://localhost:5001/api/auth/login,1193,0,1
+1763858680502,197,Get Properties,200,OK,Users 1-3,text,true,,85540,130,20,20,http://localhost:5003/api/properties,195,0,1
+1763858680501,279,Get Properties,200,OK,Users 1-4,text,true,,85540,130,20,20,http://localhost:5003/api/properties,278,0,2
+1763858680502,292,Get Properties,200,OK,Users 1-1,text,true,,85540,130,19,19,http://localhost:5003/api/properties,292,0,1
+1763858679461,1463,Login,200,OK,Users 1-5,text,true,,948,237,20,20,http://localhost:5001/api/auth/login,1463,0,1
+1763858679681,1301,Login,200,OK,Users 1-8,text,true,,946,237,21,21,http://localhost:5001/api/auth/login,1301,0,1
+1763858679611,1372,Login,200,OK,Users 1-7,text,true,,944,237,21,21,http://localhost:5001/api/auth/login,1371,0,1
+1763858679761,1222,Login,200,OK,Users 1-9,text,true,,942,237,21,21,http://localhost:5001/api/auth/login,1222,0,1
+1763858679536,1447,Login,200,OK,Users 1-6,text,true,,942,237,21,21,http://localhost:5001/api/auth/login,1447,0,1
+1763858680925,256,Get Properties,200,OK,Users 1-5,text,true,,85540,130,23,23,http://localhost:5003/api/properties,251,0,1
+1763858680983,219,Get Properties,200,OK,Users 1-7,text,true,,85540,130,23,23,http://localhost:5003/api/properties,216,0,1
+1763858680983,241,Get Properties,200,OK,Users 1-8,text,true,,85540,130,22,22,http://localhost:5003/api/properties,240,0,1
+1763858680984,267,Get Properties,200,OK,Users 1-9,text,true,,85540,130,21,21,http://localhost:5003/api/properties,266,0,0
+1763858680984,274,Get Properties,200,OK,Users 1-6,text,true,,85540,130,20,20,http://localhost:5003/api/properties,274,0,0
+1763858680057,1667,Login,200,OK,Users 1-13,text,true,,942,237,26,26,http://localhost:5001/api/auth/login,1667,0,1
+1763858679909,1815,Login,200,OK,Users 1-11,text,true,,942,237,26,26,http://localhost:5001/api/auth/login,1815,0,1
+1763858679833,1967,Login,200,OK,Users 1-10,text,true,,944,237,27,27,http://localhost:5001/api/auth/login,1967,0,1
+1763858679985,1817,Login,200,OK,Users 1-12,text,true,,944,237,27,27,http://localhost:5001/api/auth/login,1817,0,1
+1763858681724,172,Get Properties,200,OK,Users 1-13,text,true,,85540,130,28,28,http://localhost:5003/api/properties,171,0,1
+1763858681724,177,Get Properties,200,OK,Users 1-11,text,true,,85540,130,27,27,http://localhost:5003/api/properties,176,0,1
+1763858681802,309,Get Properties,200,OK,Users 1-12,text,true,,85540,130,29,29,http://localhost:5003/api/properties,309,0,1
+1763858681802,320,Get Properties,200,OK,Users 1-10,text,true,,85540,130,28,28,http://localhost:5003/api/properties,318,0,1
+1763858680957,1171,Login,200,OK,Users 1-25,text,true,,942,237,27,27,http://localhost:5001/api/auth/login,1171,0,1
+1763858680807,1399,Login,200,OK,Users 1-23,text,true,,942,237,28,28,http://localhost:5001/api/auth/login,1399,0,0
+1763858680439,1770,Login,200,OK,Users 1-18,text,true,,946,237,28,28,http://localhost:5001/api/auth/login,1770,0,1
+1763858680884,1328,Login,200,OK,Users 1-24,text,true,,946,237,28,28,http://localhost:5001/api/auth/login,1328,0,0
+1763858680357,1856,Login,200,OK,Users 1-17,text,true,,942,237,28,28,http://localhost:5001/api/auth/login,1856,0,1
+1763858680731,1484,Login,200,OK,Users 1-22,text,true,,944,237,28,28,http://localhost:5001/api/auth/login,1484,0,1
+1763858680589,1626,Login,200,OK,Users 1-20,text,true,,948,237,28,28,http://localhost:5001/api/auth/login,1626,0,5
+1763858680282,1933,Login,200,OK,Users 1-16,text,true,,946,237,28,28,http://localhost:5001/api/auth/login,1933,0,1
+1763858680658,1560,Login,200,OK,Users 1-21,text,true,,952,237,28,28,http://localhost:5001/api/auth/login,1560,0,0
+1763858680134,2084,Login,200,OK,Users 1-14,text,true,,946,237,28,28,http://localhost:5001/api/auth/login,2084,0,1
+1763858680211,2007,Login,200,OK,Users 1-15,text,true,,944,237,28,28,http://localhost:5001/api/auth/login,2007,0,0
+1763858680506,1714,Login,200,OK,Users 1-19,text,true,,942,237,28,28,http://localhost:5001/api/auth/login,1714,0,0
+1763858682129,112,Get Properties,200,OK,Users 1-25,text,true,,85540,130,29,29,http://localhost:5003/api/properties,111,0,1
+1763858682207,111,Get Properties,200,OK,Users 1-23,text,true,,85540,130,29,29,http://localhost:5003/api/properties,109,0,1
+1763858682210,207,Get Properties,200,OK,Users 1-18,text,true,,85540,130,29,29,http://localhost:5003/api/properties,206,0,1
+1763858682214,212,Get Properties,200,OK,Users 1-17,text,true,,85540,130,28,28,http://localhost:5003/api/properties,212,0,1
+1763858682212,354,Get Properties,200,OK,Users 1-24,text,true,,85540,130,29,29,http://localhost:5003/api/properties,352,0,1
+1763858682219,351,Get Properties,200,OK,Users 1-15,text,true,,85540,130,28,28,http://localhost:5003/api/properties,351,0,1
+1763858682216,364,Get Properties,200,OK,Users 1-20,text,true,,85540,130,27,27,http://localhost:5003/api/properties,364,0,1
+1763858682220,365,Get Properties,200,OK,Users 1-19,text,true,,85540,130,26,26,http://localhost:5003/api/properties,365,0,1
+1763858682216,378,Get Properties,200,OK,Users 1-16,text,true,,85540,130,25,25,http://localhost:5003/api/properties,377,0,1
+1763858682216,387,Get Properties,200,OK,Users 1-22,text,true,,85540,130,24,24,http://localhost:5003/api/properties,386,0,1
+1763858682218,394,Get Properties,200,OK,Users 1-21,text,true,,85540,130,24,24,http://localhost:5003/api/properties,393,0,1
+1763858682218,399,Get Properties,200,OK,Users 1-14,text,true,,85540,130,23,23,http://localhost:5003/api/properties,398,0,1
+1763858681107,2093,Login,200,OK,Users 1-27,text,true,,948,237,29,29,http://localhost:5001/api/auth/login,2093,0,1
+1763858681406,1869,Login,200,OK,Users 1-31,text,true,,944,237,30,30,http://localhost:5001/api/auth/login,1869,0,1
+1763858681486,1789,Login,200,OK,Users 1-32,text,true,,950,237,30,30,http://localhost:5001/api/auth/login,1789,0,1
+1763858682007,1269,Login,200,OK,Users 1-39,text,true,,944,237,30,30,http://localhost:5001/api/auth/login,1269,0,1
+1763858681711,1567,Login,200,OK,Users 1-35,text,true,,942,237,30,30,http://localhost:5001/api/auth/login,1567,0,1
+1763858681187,2091,Login,200,OK,Users 1-28,text,true,,944,237,30,30,http://localhost:5001/api/auth/login,2091,0,2
+1763858681635,1644,Login,200,OK,Users 1-34,text,true,,950,237,31,31,http://localhost:5001/api/auth/login,1644,0,1
+1763858681787,1494,Login,200,OK,Users 1-36,text,true,,946,237,31,31,http://localhost:5001/api/auth/login,1494,0,1
+1763858681336,1945,Login,200,OK,Users 1-30,text,true,,944,237,31,31,http://localhost:5001/api/auth/login,1945,0,2
+1763858681857,1424,Login,200,OK,Users 1-37,text,true,,948,237,31,31,http://localhost:5001/api/auth/login,1424,0,1
+1763858681559,1723,Login,200,OK,Users 1-33,text,true,,944,237,31,31,http://localhost:5001/api/auth/login,1723,0,1
+1763858681260,2022,Login,200,OK,Users 1-29,text,true,,948,237,31,31,http://localhost:5001/api/auth/login,2021,0,0
+1763858683201,271,Get Properties,200,OK,Users 1-27,text,true,,85540,130,33,33,http://localhost:5003/api/properties,271,0,1
+1763858683276,335,Get Properties,200,OK,Users 1-31,text,true,,85540,130,34,34,http://localhost:5003/api/properties,335,0,0
+1763858683281,336,Get Properties,200,OK,Users 1-36,text,true,,85540,130,33,33,http://localhost:5003/api/properties,335,0,1
+1763858683277,348,Get Properties,200,OK,Users 1-39,text,true,,85540,130,32,32,http://localhost:5003/api/properties,347,0,0
+1763858683278,352,Get Properties,200,OK,Users 1-28,text,true,,85540,130,31,31,http://localhost:5003/api/properties,351,0,1
+1763858683282,354,Get Properties,200,OK,Users 1-29,text,true,,85540,130,30,30,http://localhost:5003/api/properties,353,0,1
+1763858683276,365,Get Properties,200,OK,Users 1-32,text,true,,85540,130,29,29,http://localhost:5003/api/properties,364,0,0
+1763858683280,375,Get Properties,200,OK,Users 1-34,text,true,,85540,130,28,28,http://localhost:5003/api/properties,374,0,1
+1763858683282,378,Get Properties,200,OK,Users 1-30,text,true,,85540,130,28,28,http://localhost:5003/api/properties,377,0,1
+1763858683278,392,Get Properties,200,OK,Users 1-35,text,true,,85540,130,27,27,http://localhost:5003/api/properties,391,0,0
+1763858683282,394,Get Properties,200,OK,Users 1-37,text,true,,85540,130,26,26,http://localhost:5003/api/properties,393,0,0
+1763858683282,400,Get Properties,200,OK,Users 1-33,text,true,,85540,130,25,25,http://localhost:5003/api/properties,398,0,1
+1763858682306,2133,Login,200,OK,Users 1-43,text,true,,944,237,34,34,http://localhost:5001/api/auth/login,2133,0,1
+1763858682834,1648,Login,200,OK,Users 1-50,text,true,,942,237,34,34,http://localhost:5001/api/auth/login,1648,0,0
+1763858682384,2098,Login,200,OK,Users 1-44,text,true,,944,237,34,34,http://localhost:5001/api/auth/login,2098,0,1
+1763858682683,1799,Login,200,OK,Users 1-48,text,true,,946,237,34,34,http://localhost:5001/api/auth/login,1799,0,1
+1763858682756,1726,Login,200,OK,Users 1-49,text,true,,944,237,34,34,http://localhost:5001/api/auth/login,1726,0,0
+1763858682235,2252,Login,200,OK,Users 1-42,text,true,,946,237,35,35,http://localhost:5001/api/auth/login,2252,0,1
+1763858682908,1579,Login,200,OK,Users 1-51,text,true,,944,237,35,35,http://localhost:5001/api/auth/login,1579,0,1
+1763858682611,1876,Login,200,OK,Users 1-47,text,true,,942,237,35,35,http://localhost:5001/api/auth/login,1876,0,1
+1763858682983,1509,Login,200,OK,Users 1-52,text,true,,946,237,35,35,http://localhost:5001/api/auth/login,1508,0,1
+1763858682459,2038,Login,200,OK,Users 1-45,text,true,,948,237,35,35,http://localhost:5001/api/auth/login,2038,0,1
+1763858683060,1437,Login,200,OK,Users 1-53,text,true,,944,237,35,35,http://localhost:5001/api/auth/login,1437,0,1
+1763858682535,1962,Login,200,OK,Users 1-46,text,true,,944,237,35,35,http://localhost:5001/api/auth/login,1962,0,1
+1763858683136,1392,Login,200,OK,Users 1-54,text,true,,946,237,35,35,http://localhost:5001/api/auth/login,1392,0,1
+1763858684440,355,Get Properties,200,OK,Users 1-43,text,true,,85540,130,39,39,http://localhost:5003/api/properties,350,0,1
+1763858684483,358,Get Properties,200,OK,Users 1-48,text,true,,85540,130,38,38,http://localhost:5003/api/properties,354,0,1
+1763858684498,369,Get Properties,200,OK,Users 1-46,text,true,,85540,130,38,38,http://localhost:5003/api/properties,367,0,1
+1763858684489,392,Get Properties,200,OK,Users 1-51,text,true,,85540,130,37,37,http://localhost:5003/api/properties,390,0,1
+1763858684484,417,Get Properties,200,OK,Users 1-50,text,true,,85540,130,36,36,http://localhost:5003/api/properties,410,0,2
+1763858684488,427,Get Properties,200,OK,Users 1-47,text,true,,85540,130,35,35,http://localhost:5003/api/properties,425,0,2
+1763858684498,439,Get Properties,200,OK,Users 1-45,text,true,,85540,130,35,35,http://localhost:5003/api/properties,437,0,1
+1763858684489,459,Get Properties,200,OK,Users 1-42,text,true,,85540,130,34,34,http://localhost:5003/api/properties,457,0,1
+1763858684492,464,Get Properties,200,OK,Users 1-52,text,true,,85540,130,33,33,http://localhost:5003/api/properties,463,0,1
+1763858684498,468,Get Properties,200,OK,Users 1-53,text,true,,85540,130,32,32,http://localhost:5003/api/properties,466,0,0
+1763858684483,490,Get Properties,200,OK,Users 1-44,text,true,,85540,130,31,31,http://localhost:5003/api/properties,489,0,3
+1763858684530,453,Get Properties,200,OK,Users 1-54,text,true,,85540,130,30,30,http://localhost:5003/api/properties,450,0,0
+1763858684484,526,Get Properties,200,OK,Users 1-49,text,true,,85540,130,30,30,http://localhost:5003/api/properties,524,0,2
+1763858683210,2515,Login,200,OK,Users 1-55,text,true,,946,237,38,38,http://localhost:5001/api/auth/login,2515,0,1
+1763858683279,2446,Login,200,OK,Users 1-56,text,true,,942,237,38,38,http://localhost:5001/api/auth/login,2446,0,0
+1763858683359,2440,Login,200,OK,Users 1-57,text,true,,944,237,39,39,http://localhost:5001/api/auth/login,2440,0,1
+1763858684031,1796,Login,200,OK,Users 1-66,text,true,,948,237,39,39,http://localhost:5001/api/auth/login,1796,0,1
+1763858684182,1646,Login,200,OK,Users 1-68,text,true,,944,237,39,39,http://localhost:5001/api/auth/login,1646,0,1
+1763858681034,4795,Login,200,OK,Users 1-26,text,true,,944,237,39,39,http://localhost:5001/api/auth/login,4795,0,2
+1763858683586,2379,Login,200,OK,Users 1-60,text,true,,946,237,41,41,http://localhost:5001/api/auth/login,2379,0,1
+1763858683808,2161,Login,200,OK,Users 1-63,text,true,,944,237,41,41,http://localhost:5001/api/auth/login,2161,0,1
+1763858684111,1871,Login,200,OK,Users 1-67,text,true,,946,237,41,41,http://localhost:5001/api/auth/login,1871,0,1
+1763858683885,2101,Login,200,OK,Users 1-64,text,true,,942,237,42,42,http://localhost:5001/api/auth/login,2101,0,0
+1763858683660,2328,Login,200,OK,Users 1-61,text,true,,942,237,42,42,http://localhost:5001/api/auth/login,2328,0,1
+1763858683958,2030,Login,200,OK,Users 1-65,text,true,,944,237,42,42,http://localhost:5001/api/auth/login,2030,0,1
+1763858683508,2480,Login,200,OK,Users 1-59,text,true,,944,237,42,42,http://localhost:5001/api/auth/login,2480,0,1
+1763858683436,2555,Login,200,OK,Users 1-58,text,true,,942,237,42,42,http://localhost:5001/api/auth/login,2555,0,1
+1763858683731,2260,Login,200,OK,Users 1-62,text,true,,942,237,42,42,http://localhost:5001/api/auth/login,2260,0,1
+1763858685726,333,Get Properties,200,OK,Users 1-56,text,true,,85540,130,43,43,http://localhost:5003/api/properties,332,0,1
+1763858684258,1811,Login,200,OK,Users 1-69,text,true,,944,237,42,42,http://localhost:5001/api/auth/login,1811,0,0
+1763858684335,1737,Login,200,OK,Users 1-70,text,true,,948,237,42,42,http://localhost:5001/api/auth/login,1737,0,1
+1763858685726,385,Get Properties,200,OK,Users 1-55,text,true,,85540,130,42,42,http://localhost:5003/api/properties,383,0,1
+1763858685800,353,Get Properties,200,OK,Users 1-57,text,true,,85540,130,42,42,http://localhost:5003/api/properties,351,0,1
+1763858685829,354,Get Properties,200,OK,Users 1-68,text,true,,85540,130,41,41,http://localhost:5003/api/properties,350,0,0
+1763858685828,375,Get Properties,200,OK,Users 1-66,text,true,,85540,130,40,40,http://localhost:5003/api/properties,373,0,1
+1763858685830,397,Get Properties,200,OK,Users 1-26,text,true,,85540,130,40,40,http://localhost:5003/api/properties,390,0,1
+1763858685966,352,Get Properties,200,OK,Users 1-60,text,true,,85540,130,40,40,http://localhost:5003/api/properties,351,0,1
+1763858685987,339,Get Properties,200,OK,Users 1-64,text,true,,85540,130,39,39,http://localhost:5003/api/properties,338,0,0
+1763858685970,374,Get Properties,200,OK,Users 1-63,text,true,,85540,130,38,38,http://localhost:5003/api/properties,371,0,1
+1763858685983,388,Get Properties,200,OK,Users 1-67,text,true,,85540,130,38,38,http://localhost:5003/api/properties,387,0,1
+1763858685991,390,Get Properties,200,OK,Users 1-58,text,true,,85540,130,37,37,http://localhost:5003/api/properties,388,0,1
+1763858685989,421,Get Properties,200,OK,Users 1-61,text,true,,85540,130,36,36,http://localhost:5003/api/properties,416,0,0
+1763858685991,434,Get Properties,200,OK,Users 1-62,text,true,,85540,130,35,35,http://localhost:5003/api/properties,432,0,1
+1763858685989,441,Get Properties,200,OK,Users 1-59,text,true,,85540,130,35,35,http://localhost:5003/api/properties,440,0,0
+1763858685990,504,Get Properties,200,OK,Users 1-65,text,true,,85540,130,34,34,http://localhost:5003/api/properties,503,0,0
+1763858686072,439,Get Properties,200,OK,Users 1-70,text,true,,85540,130,34,34,http://localhost:5003/api/properties,436,0,0
+1763858686070,447,Get Properties,200,OK,Users 1-69,text,true,,85540,130,33,33,http://localhost:5003/api/properties,446,0,1
+1763858684411,2791,Login,200,OK,Users 1-71,text,true,,944,237,41,41,http://localhost:5001/api/auth/login,2791,0,1
+1763858687204,337,Get Properties,200,OK,Users 1-71,text,true,,85540,130,45,45,http://localhost:5003/api/properties,336,0,1
+1763858681934,5636,Login,200,OK,Users 1-38,text,true,,946,237,45,45,http://localhost:5001/api/auth/login,5636,0,1
+1763858684706,2864,Login,200,OK,Users 1-75,text,true,,944,237,45,45,http://localhost:5001/api/auth/login,2864,0,1
+1763858687570,117,Get Properties,200,OK,Users 1-38,text,true,,85540,130,46,46,http://localhost:5003/api/properties,116,0,1
+1763858682081,5719,Login,200,OK,Users 1-40,text,true,,950,237,47,47,http://localhost:5001/api/auth/login,5719,0,1
+1763858687571,325,Get Properties,200,OK,Users 1-75,text,true,,85540,130,48,48,http://localhost:5003/api/properties,323,0,0
+1763858687801,120,Get Properties,200,OK,Users 1-40,text,true,,85540,130,47,47,http://localhost:5003/api/properties,118,0,1
+1763858684633,3337,Login,200,OK,Users 1-74,text,true,,946,237,47,47,http://localhost:5001/api/auth/login,3337,0,1
+1763858685007,2964,Login,200,OK,Users 1-79,text,true,,944,237,47,47,http://localhost:5001/api/auth/login,2964,0,1
+1763858685233,2739,Login,200,OK,Users 1-82,text,true,,942,237,47,47,http://localhost:5001/api/auth/login,2739,0,1
+1763858684781,3191,Login,200,OK,Users 1-76,text,true,,946,237,47,47,http://localhost:5001/api/auth/login,3191,0,1
+1763858685456,2517,Login,200,OK,Users 1-85,text,true,,948,237,47,47,http://localhost:5001/api/auth/login,2517,0,1
+1763858685083,2891,Login,200,OK,Users 1-80,text,true,,944,237,47,47,http://localhost:5001/api/auth/login,2891,0,1
+1763858685306,2670,Login,200,OK,Users 1-83,text,true,,944,237,47,47,http://localhost:5001/api/auth/login,2670,0,0
+1763858687972,116,Get Properties,200,OK,Users 1-82,text,true,,85540,130,49,49,http://localhost:5003/api/properties,115,0,0
+1763858687971,146,Get Properties,200,OK,Users 1-74,text,true,,85540,130,48,48,http://localhost:5003/api/properties,123,0,0
+1763858687971,361,Get Properties,200,OK,Users 1-79,text,true,,85540,130,50,50,http://localhost:5003/api/properties,360,0,0
+1763858687972,376,Get Properties,200,OK,Users 1-76,text,true,,85540,130,49,49,http://localhost:5003/api/properties,375,0,0
+1763858687977,388,Get Properties,200,OK,Users 1-83,text,true,,85540,130,48,48,http://localhost:5003/api/properties,387,0,0
+1763858687974,405,Get Properties,200,OK,Users 1-85,text,true,,85540,130,47,47,http://localhost:5003/api/properties,403,0,0
+1763858687974,413,Get Properties,200,OK,Users 1-80,text,true,,85540,130,47,47,http://localhost:5003/api/properties,412,0,1
+1763858685608,2851,Login,200,OK,Users 1-87,text,true,,948,237,47,47,http://localhost:5001/api/auth/login,2851,0,1
+1763858682158,6302,Login,200,OK,Users 1-41,text,true,,942,237,47,47,http://localhost:5001/api/auth/login,6302,0,1
+1763858684933,3527,Login,200,OK,Users 1-78,text,true,,942,237,47,47,http://localhost:5001/api/auth/login,3527,0,1
+1763858685532,2929,Login,200,OK,Users 1-86,text,true,,944,237,47,47,http://localhost:5001/api/auth/login,2929,0,1
+1763858684855,3606,Login,200,OK,Users 1-77,text,true,,946,237,47,47,http://localhost:5001/api/auth/login,3606,0,1
+1763858684556,3906,Login,200,OK,Users 1-73,text,true,,942,237,47,47,http://localhost:5001/api/auth/login,3906,0,1
+1763858685384,3078,Login,200,OK,Users 1-84,text,true,,944,237,47,47,http://localhost:5001/api/auth/login,3078,0,1
+1763858685682,2781,Login,200,OK,Users 1-88,text,true,,942,237,47,47,http://localhost:5001/api/auth/login,2781,0,1
+1763858685161,3302,Login,200,OK,Users 1-81,text,true,,942,237,47,47,http://localhost:5001/api/auth/login,3302,0,1
+1763858685835,2629,Login,200,OK,Users 1-90,text,true,,946,237,47,47,http://localhost:5001/api/auth/login,2629,0,1
+1763858688460,98,Get Properties,200,OK,Users 1-41,text,true,,85540,130,48,48,http://localhost:5003/api/properties,97,0,1
+1763858688460,103,Get Properties,200,OK,Users 1-87,text,true,,85540,130,47,47,http://localhost:5003/api/properties,102,0,1
+1763858688462,109,Get Properties,200,OK,Users 1-77,text,true,,85540,130,46,46,http://localhost:5003/api/properties,108,0,3
+1763858688460,122,Get Properties,200,OK,Users 1-78,text,true,,85540,130,45,45,http://localhost:5003/api/properties,121,0,2
+1763858688463,125,Get Properties,200,OK,Users 1-84,text,true,,85540,130,44,44,http://localhost:5003/api/properties,124,0,2
+1763858688461,192,Get Properties,200,OK,Users 1-86,text,true,,85540,130,44,44,http://localhost:5003/api/properties,192,0,3
+1763858688462,202,Get Properties,200,OK,Users 1-73,text,true,,85540,130,43,43,http://localhost:5003/api/properties,201,0,2
+1763858688465,295,Get Properties,200,OK,Users 1-90,text,true,,85540,130,44,44,http://localhost:5003/api/properties,293,0,1
+1763858688465,303,Get Properties,200,OK,Users 1-81,text,true,,85540,130,43,43,http://localhost:5003/api/properties,302,0,1
+1763858688464,313,Get Properties,200,OK,Users 1-88,text,true,,85540,130,42,42,http://localhost:5003/api/properties,312,0,2
+1763858685920,4501,Login,200,OK,Users 1-91,text,true,,944,237,63,63,http://localhost:5001/api/auth/login,4501,0,5
+1763858686058,4369,Login,200,OK,Users 1-93,text,true,,948,237,63,63,http://localhost:5001/api/auth/login,4369,0,1
+1763858685985,4445,Login,200,OK,Users 1-92,text,true,,942,237,63,63,http://localhost:5001/api/auth/login,4445,0,1
+1763858686882,3677,Login,200,OK,Users 1-104,text,true,,944,237,65,65,http://localhost:5001/api/auth/login,3676,0,1
+1763858686961,3598,Login,200,OK,Users 1-105,text,true,,942,237,65,65,http://localhost:5001/api/auth/login,3598,0,1
+1763858686359,4210,Login,200,OK,Users 1-97,text,true,,948,237,65,65,http://localhost:5001/api/auth/login,4210,0,1
+1763858686211,4358,Login,200,OK,Users 1-95,text,true,,944,237,65,65,http://localhost:5001/api/auth/login,4358,0,1
+1763858686281,4289,Login,200,OK,Users 1-96,text,true,,942,237,65,65,http://localhost:5001/api/auth/login,4289,0,1
+1763858686583,3987,Login,200,OK,Users 1-100,text,true,,944,237,65,65,http://localhost:5001/api/auth/login,3987,0,1
+1763858686507,4065,Login,200,OK,Users 1-99,text,true,,942,237,65,65,http://localhost:5001/api/auth/login,4065,0,1
+1763858686659,3913,Login,200,OK,Users 1-101,text,true,,944,237,65,65,http://localhost:5001/api/auth/login,3913,0,12
+1763858687183,3389,Login,200,OK,Users 1-108,text,true,,944,237,65,65,http://localhost:5001/api/auth/login,3389,0,1
+1763858686130,4442,Login,200,OK,Users 1-94,text,true,,948,237,65,65,http://localhost:5001/api/auth/login,4442,0,1
+1763858686733,3841,Login,200,OK,Users 1-102,text,true,,948,237,65,65,http://localhost:5001/api/auth/login,3841,0,1
+1763858686431,4143,Login,200,OK,Users 1-98,text,true,,946,237,65,65,http://localhost:5001/api/auth/login,4143,0,0
+1763858686808,3766,Login,200,OK,Users 1-103,text,true,,942,237,65,65,http://localhost:5001/api/auth/login,3766,0,1
+1763858690422,302,Get Properties,200,OK,Users 1-91,text,true,,85540,130,67,67,http://localhost:5003/api/properties,300,0,1
+1763858690428,305,Get Properties,200,OK,Users 1-93,text,true,,85540,130,66,66,http://localhost:5003/api/properties,304,0,1
+1763858690431,339,Get Properties,200,OK,Users 1-92,text,true,,85540,130,65,65,http://localhost:5003/api/properties,338,0,1
+1763858690573,266,Get Properties,200,OK,Users 1-94,text,true,,85540,130,65,65,http://localhost:5003/api/properties,260,0,0
+1763858690559,285,Get Properties,200,OK,Users 1-104,text,true,,85540,130,64,64,http://localhost:5003/api/properties,283,0,1
+1763858690559,317,Get Properties,200,OK,Users 1-105,text,true,,85540,130,64,64,http://localhost:5003/api/properties,314,0,1
+1763858690572,337,Get Properties,200,OK,Users 1-101,text,true,,85540,130,63,63,http://localhost:5003/api/properties,334,0,1
+1763858690575,345,Get Properties,200,OK,Users 1-102,text,true,,85540,130,62,62,http://localhost:5003/api/properties,344,0,0
+1763858690570,359,Get Properties,200,OK,Users 1-96,text,true,,85540,130,61,61,http://localhost:5003/api/properties,358,0,1
+1763858690575,365,Get Properties,200,OK,Users 1-98,text,true,,85540,130,61,61,http://localhost:5003/api/properties,363,0,0
+1763858690573,371,Get Properties,200,OK,Users 1-108,text,true,,85540,130,60,60,http://localhost:5003/api/properties,370,0,0
+1763858690570,387,Get Properties,200,OK,Users 1-97,text,true,,85540,130,59,59,http://localhost:5003/api/properties,386,0,1
+1763858690570,392,Get Properties,200,OK,Users 1-100,text,true,,85540,130,58,58,http://localhost:5003/api/properties,391,0,1
+1763858690570,477,Get Properties,200,OK,Users 1-95,text,true,,85540,130,58,58,http://localhost:5003/api/properties,476,0,1
+1763858690575,897,Get Properties,200,OK,Users 1-103,text,true,,85540,130,63,63,http://localhost:5003/api/properties,896,0,0
+1763858690572,983,Get Properties,200,OK,Users 1-99,text,true,,85540,130,63,63,http://localhost:5003/api/properties,983,0,1
+1763858687632,4494,Login,200,OK,Users 1-114,text,true,,944,237,69,69,http://localhost:5001/api/auth/login,4494,0,1
+1763858687781,4347,Login,200,OK,Users 1-116,text,true,,950,237,69,69,http://localhost:5001/api/auth/login,4347,0,1
+1763858687860,4271,Login,200,OK,Users 1-117,text,true,,948,237,69,69,http://localhost:5001/api/auth/login,4271,0,1
+1763858687934,4203,Login,200,OK,Users 1-118,text,true,,946,237,70,70,http://localhost:5001/api/auth/login,4203,0,1
+1763858687256,4884,Login,200,OK,Users 1-109,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,4884,0,1
+1763858687407,4738,Login,200,OK,Users 1-111,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,4738,0,1
+1763858687482,4664,Login,200,OK,Users 1-112,text,true,,948,237,70,70,http://localhost:5001/api/auth/login,4664,0,0
+1763858688010,4143,Login,200,OK,Users 1-119,text,true,,946,237,70,70,http://localhost:5001/api/auth/login,4143,0,1
+1763858687333,4823,Login,200,OK,Users 1-110,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,4823,0,1
+1763858687557,4602,Login,200,OK,Users 1-113,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,4602,0,0
+1763858687710,4451,Login,200,OK,Users 1-115,text,true,,942,237,70,70,http://localhost:5001/api/auth/login,4451,0,0
+1763858692129,287,Get Properties,200,OK,Users 1-116,text,true,,85540,130,73,73,http://localhost:5003/api/properties,286,0,0
+1763858688910,3507,Login,200,OK,Users 1-131,text,true,,946,237,72,72,http://localhost:5001/api/auth/login,3507,0,1
+1763858688533,3887,Login,200,OK,Users 1-126,text,true,,946,237,72,72,http://localhost:5001/api/auth/login,3887,0,1
+1763858688835,3586,Login,200,OK,Users 1-130,text,true,,944,237,72,72,http://localhost:5001/api/auth/login,3586,0,1
+1763858688610,3813,Login,200,OK,Users 1-127,text,true,,942,237,72,72,http://localhost:5001/api/auth/login,3813,0,1
+1763858688685,3738,Login,200,OK,Users 1-128,text,true,,942,237,72,72,http://localhost:5001/api/auth/login,3738,0,1
+1763858688381,4042,Login,200,OK,Users 1-124,text,true,,942,237,72,72,http://localhost:5001/api/auth/login,4042,0,0
+1763858689060,3364,Login,200,OK,Users 1-133,text,true,,942,237,72,72,http://localhost:5001/api/auth/login,3364,0,1
+1763858688159,4268,Login,200,OK,Users 1-121,text,true,,944,237,72,72,http://localhost:5001/api/auth/login,4268,0,1
+1763858688758,3669,Login,200,OK,Users 1-129,text,true,,944,237,72,72,http://localhost:5001/api/auth/login,3669,0,1
+1763858692140,302,Get Properties,200,OK,Users 1-109,text,true,,85540,130,73,73,http://localhost:5003/api/properties,300,0,0
+1763858692137,319,Get Properties,200,OK,Users 1-118,text,true,,85540,130,72,72,http://localhost:5003/api/properties,318,0,1
+1763858692127,357,Get Properties,200,OK,Users 1-114,text,true,,85540,130,71,71,http://localhost:5003/api/properties,353,0,1
+1763858692131,359,Get Properties,200,OK,Users 1-117,text,true,,85540,130,70,70,http://localhost:5003/api/properties,358,0,1
+1763858692145,353,Get Properties,200,OK,Users 1-111,text,true,,85540,130,69,69,http://localhost:5003/api/properties,352,0,1
+1763858692147,358,Get Properties,200,OK,Users 1-112,text,true,,85540,130,68,68,http://localhost:5003/api/properties,357,0,0
+1763858692159,361,Get Properties,200,OK,Users 1-113,text,true,,85540,130,68,68,http://localhost:5003/api/properties,360,0,1
+1763858692156,370,Get Properties,200,OK,Users 1-110,text,true,,85540,130,67,67,http://localhost:5003/api/properties,369,0,1
+1763858692154,396,Get Properties,200,OK,Users 1-119,text,true,,85540,130,66,66,http://localhost:5003/api/properties,395,0,1
+1763858692161,395,Get Properties,200,OK,Users 1-115,text,true,,85540,130,65,65,http://localhost:5003/api/properties,394,0,1
+1763858692418,232,Get Properties,200,OK,Users 1-131,text,true,,85540,130,65,65,http://localhost:5003/api/properties,229,0,1
+1763858692422,244,Get Properties,200,OK,Users 1-130,text,true,,85540,130,65,65,http://localhost:5003/api/properties,243,0,0
+1763858692424,248,Get Properties,200,OK,Users 1-128,text,true,,85540,130,64,64,http://localhost:5003/api/properties,248,0,1
+1763858692421,256,Get Properties,200,OK,Users 1-126,text,true,,85540,130,63,63,http://localhost:5003/api/properties,256,0,1
+1763858692425,275,Get Properties,200,OK,Users 1-133,text,true,,85540,130,62,62,http://localhost:5003/api/properties,266,0,0
+1763858692424,279,Get Properties,200,OK,Users 1-124,text,true,,85540,130,61,61,http://localhost:5003/api/properties,277,0,1
+1763858692428,282,Get Properties,200,OK,Users 1-129,text,true,,85540,130,60,60,http://localhost:5003/api/properties,281,0,0
+1763858692428,291,Get Properties,200,OK,Users 1-121,text,true,,85540,130,59,59,http://localhost:5003/api/properties,289,0,0
+1763858692424,304,Get Properties,200,OK,Users 1-127,text,true,,85540,130,58,58,http://localhost:5003/api/properties,303,0,1
+1763858688082,5056,Login,200,OK,Users 1-120,text,true,,946,237,63,63,http://localhost:5001/api/auth/login,5056,0,1
+1763858688233,4906,Login,200,OK,Users 1-122,text,true,,942,237,63,63,http://localhost:5001/api/auth/login,4906,0,1
+1763858693140,110,Get Properties,200,OK,Users 1-120,text,true,,85540,130,64,64,http://localhost:5003/api/properties,106,0,0
+1763858693139,120,Get Properties,200,OK,Users 1-122,text,true,,85540,130,63,63,http://localhost:5003/api/properties,120,0,1
+1763858688459,5137,Login,200,OK,Users 1-125,text,true,,944,237,67,67,http://localhost:5001/api/auth/login,5137,0,1
+1763858684486,9111,Login,200,OK,Users 1-72,text,true,,942,237,67,67,http://localhost:5001/api/auth/login,9111,0,2
+1763858688981,4626,Login,200,OK,Users 1-132,text,true,,946,237,67,67,http://localhost:5001/api/auth/login,4626,0,1
+1763858688308,5299,Login,200,OK,Users 1-123,text,true,,944,237,67,67,http://localhost:5001/api/auth/login,5299,0,0
+1763858689131,4476,Login,200,OK,Users 1-134,text,true,,942,237,67,67,http://localhost:5001/api/auth/login,4476,0,1
+1763858693598,109,Get Properties,200,OK,Users 1-72,text,true,,85540,130,69,69,http://localhost:5003/api/properties,108,0,9
+1763858693599,114,Get Properties,200,OK,Users 1-125,text,true,,85540,130,68,68,http://localhost:5003/api/properties,113,0,8
+1763858689810,3942,Login,200,OK,Users 1-143,text,true,,944,237,67,67,http://localhost:5001/api/auth/login,3942,0,0
+1763858689507,4246,Login,200,OK,Users 1-139,text,true,,944,237,67,67,http://localhost:5001/api/auth/login,4246,0,1
+1763858690406,3347,Login,200,OK,Users 1-151,text,true,,944,237,67,67,http://localhost:5001/api/auth/login,3347,0,1
+1763858689881,3872,Login,200,OK,Users 1-144,text,true,,948,237,67,67,http://localhost:5001/api/auth/login,3872,0,1
+1763858689957,3797,Login,200,OK,Users 1-145,text,true,,942,237,67,67,http://localhost:5001/api/auth/login,3797,0,1
+1763858689281,4473,Login,200,OK,Users 1-136,text,true,,948,237,67,67,http://localhost:5001/api/auth/login,4473,0,1
+1763858689207,4547,Login,200,OK,Users 1-135,text,true,,942,237,67,67,http://localhost:5001/api/auth/login,4547,0,0
+1763858690331,3424,Login,200,OK,Users 1-150,text,true,,942,237,67,67,http://localhost:5001/api/auth/login,3424,0,1
+1763858689586,4169,Login,200,OK,Users 1-140,text,true,,944,237,67,67,http://localhost:5001/api/auth/login,4169,0,1
+1763858693753,106,Get Properties,200,OK,Users 1-143,text,true,,85540,130,69,69,http://localhost:5003/api/properties,105,0,0
+1763858693754,113,Get Properties,200,OK,Users 1-145,text,true,,85540,130,68,68,http://localhost:5003/api/properties,111,0,0
+1763858693608,266,Get Properties,200,OK,Users 1-132,text,true,,85540,130,67,67,http://localhost:5003/api/properties,265,0,0
+1763858693608,274,Get Properties,200,OK,Users 1-134,text,true,,85540,130,66,66,http://localhost:5003/api/properties,272,0,1
+1763858693608,283,Get Properties,200,OK,Users 1-123,text,true,,85540,130,65,65,http://localhost:5003/api/properties,282,0,0
+1763858689736,4179,Login,200,OK,Users 1-142,text,true,,946,237,64,64,http://localhost:5001/api/auth/login,4179,0,1
+1763858693753,343,Get Properties,200,OK,Users 1-151,text,true,,85540,130,67,67,http://localhost:5003/api/properties,342,0,1
+1763858693915,187,Get Properties,200,OK,Users 1-142,text,true,,85540,130,66,66,http://localhost:5003/api/properties,187,0,1
+1763858693755,355,Get Properties,200,OK,Users 1-140,text,true,,85540,130,65,65,http://localhost:5003/api/properties,354,0,0
+1763858693753,366,Get Properties,200,OK,Users 1-139,text,true,,85540,130,64,64,http://localhost:5003/api/properties,365,0,0
+1763858693754,372,Get Properties,200,OK,Users 1-144,text,true,,85540,130,63,63,http://localhost:5003/api/properties,371,0,0
+1763858693755,387,Get Properties,200,OK,Users 1-150,text,true,,85540,130,62,62,http://localhost:5003/api/properties,385,0,0
+1763858693754,397,Get Properties,200,OK,Users 1-136,text,true,,85540,130,61,61,http://localhost:5003/api/properties,396,0,0
+1763858693754,408,Get Properties,200,OK,Users 1-135,text,true,,85540,130,61,61,http://localhost:5003/api/properties,406,0,1
+1763858690485,4453,Login,200,OK,Users 1-152,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,4453,0,0
+1763858690556,4383,Login,200,OK,Users 1-153,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,4383,0,2
+1763858694941,378,Get Properties,200,OK,Users 1-153,text,true,,85540,130,75,75,http://localhost:5003/api/properties,377,0,0
+1763858694939,398,Get Properties,200,OK,Users 1-152,text,true,,85540,130,74,74,http://localhost:5003/api/properties,394,0,1
+1763858689358,6136,Login,200,OK,Users 1-137,text,true,,946,237,75,75,http://localhost:5001/api/auth/login,6136,0,1
+1763858689433,6062,Login,200,OK,Users 1-138,text,true,,942,237,75,75,http://localhost:5001/api/auth/login,6062,0,2
+1763858690184,5312,Login,200,OK,Users 1-148,text,true,,942,237,75,75,http://localhost:5001/api/auth/login,5312,0,0
+1763858690111,5385,Login,200,OK,Users 1-147,text,true,,942,237,75,75,http://localhost:5001/api/auth/login,5385,0,1
+1763858685758,9740,Login,200,OK,Users 1-89,text,true,,944,237,75,75,http://localhost:5001/api/auth/login,9740,0,1
+1763858690035,5463,Login,200,OK,Users 1-146,text,true,,944,237,75,75,http://localhost:5001/api/auth/login,5463,0,1
+1763858690855,4818,Login,200,OK,Users 1-157,text,true,,946,237,78,78,http://localhost:5001/api/auth/login,4818,0,1
+1763858691010,4664,Login,200,OK,Users 1-159,text,true,,944,237,78,78,http://localhost:5001/api/auth/login,4663,0,2
+1763858695496,201,Get Properties,200,OK,Users 1-137,text,true,,85540,130,78,78,http://localhost:5003/api/properties,200,0,1
+1763858695496,261,Get Properties,200,OK,Users 1-138,text,true,,85540,130,78,78,http://localhost:5003/api/properties,258,0,1
+1763858695676,112,Get Properties,200,OK,Users 1-159,text,true,,85540,130,77,77,http://localhost:5003/api/properties,111,0,0
+1763858695498,337,Get Properties,200,OK,Users 1-147,text,true,,85540,130,77,77,http://localhost:5003/api/properties,334,0,1
+1763858695497,347,Get Properties,200,OK,Users 1-148,text,true,,85540,130,76,76,http://localhost:5003/api/properties,345,0,1
+1763858695499,357,Get Properties,200,OK,Users 1-146,text,true,,85540,130,75,75,http://localhost:5003/api/properties,355,0,1
+1763858695499,367,Get Properties,200,OK,Users 1-89,text,true,,85540,130,74,74,http://localhost:5003/api/properties,367,0,1
+1763858695676,441,Get Properties,200,OK,Users 1-157,text,true,,85540,130,77,77,http://localhost:5003/api/properties,435,0,1
+1763858691533,5635,Login,200,OK,Users 1-166,text,true,,944,237,90,90,http://localhost:5001/api/auth/login,5635,0,1
+1763858691382,5788,Login,200,OK,Users 1-164,text,true,,944,237,90,90,http://localhost:5001/api/auth/login,5788,0,0
+1763858691459,5714,Login,200,OK,Users 1-165,text,true,,946,237,90,90,http://localhost:5001/api/auth/login,5714,0,1
+1763858691160,6013,Login,200,OK,Users 1-161,text,true,,948,237,90,90,http://localhost:5001/api/auth/login,6013,0,1
+1763858690782,6391,Login,200,OK,Users 1-156,text,true,,946,237,90,90,http://localhost:5001/api/auth/login,6391,0,1
+1763858691606,5569,Login,200,OK,Users 1-167,text,true,,946,237,90,90,http://localhost:5001/api/auth/login,5569,0,1
+1763858690630,6550,Login,200,OK,Users 1-154,text,true,,948,237,90,90,http://localhost:5001/api/auth/login,6550,0,1
+1763858691306,5875,Login,200,OK,Users 1-163,text,true,,948,237,90,90,http://localhost:5001/api/auth/login,5875,0,1
+1763858697171,379,Get Properties,200,OK,Users 1-164,text,true,,85540,130,95,95,http://localhost:5003/api/properties,375,0,1
+1763858697177,400,Get Properties,200,OK,Users 1-167,text,true,,85540,130,94,94,http://localhost:5003/api/properties,399,0,0
+1763858697182,442,Get Properties,200,OK,Users 1-163,text,true,,85540,130,94,94,http://localhost:5003/api/properties,439,0,1
+1763858697174,471,Get Properties,200,OK,Users 1-165,text,true,,85540,130,93,93,http://localhost:5003/api/properties,469,0,1
+1763858697181,485,Get Properties,200,OK,Users 1-154,text,true,,85540,130,92,92,http://localhost:5003/api/properties,483,0,2
+1763858697174,504,Get Properties,200,OK,Users 1-161,text,true,,85540,130,91,91,http://localhost:5003/api/properties,503,0,1
+1763858697170,520,Get Properties,200,OK,Users 1-166,text,true,,85540,130,91,91,http://localhost:5003/api/properties,518,0,0
+1763858697175,525,Get Properties,200,OK,Users 1-156,text,true,,85540,130,90,90,http://localhost:5003/api/properties,523,0,0
+1763858692132,5866,Login,200,OK,Users 1-174,text,true,,944,237,93,93,http://localhost:5001/api/auth/login,5865,0,0
+1763858692206,5792,Login,200,OK,Users 1-175,text,true,,942,237,93,93,http://localhost:5001/api/auth/login,5792,0,0
+1763858697999,291,Get Properties,200,OK,Users 1-174,text,true,,85540,130,97,97,http://localhost:5003/api/properties,291,0,1
+1763858698000,303,Get Properties,200,OK,Users 1-175,text,true,,85540,130,96,96,http://localhost:5003/api/properties,302,0,0
+1763858691684,7461,Login,200,OK,Users 1-168,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,7461,0,1
+1763858687032,12116,Login,200,OK,Users 1-106,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,12116,0,1
+1763858693187,5966,Login,200,OK,Users 1-188,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,5966,0,0
+1763858693106,6050,Login,200,OK,Users 1-187,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,6050,0,1
+1763858693032,6126,Login,200,OK,Users 1-186,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,6126,0,1
+1763858692961,6198,Login,200,OK,Users 1-185,text,true,,946,237,106,106,http://localhost:5001/api/auth/login,6198,0,1
+1763858687108,12054,Login,200,OK,Users 1-107,text,true,,948,237,106,106,http://localhost:5001/api/auth/login,12054,0,1
+1763858692061,7101,Login,200,OK,Users 1-173,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,7101,0,1
+1763858691234,7945,Login,200,OK,Users 1-162,text,true,,946,237,106,106,http://localhost:5001/api/auth/login,7945,0,1
+1763858691085,8095,Login,200,OK,Users 1-160,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,8095,0,1
+1763858690706,8476,Login,200,OK,Users 1-155,text,true,,946,237,107,107,http://localhost:5001/api/auth/login,8476,0,2
+1763858691986,7196,Login,200,OK,Users 1-172,text,true,,944,237,107,107,http://localhost:5001/api/auth/login,7196,0,2
+1763858690932,8333,Login,200,OK,Users 1-158,text,true,,944,237,108,108,http://localhost:5001/api/auth/login,8333,0,1
+1763858691910,7357,Login,200,OK,Users 1-171,text,true,,942,237,108,108,http://localhost:5001/api/auth/login,7357,0,1
+1763858693260,6100,Login,200,OK,Users 1-189,text,true,,946,237,109,109,http://localhost:5001/api/auth/login,6100,0,1
+1763858692581,6780,Login,200,OK,Users 1-180,text,true,,946,237,109,109,http://localhost:5001/api/auth/login,6780,0,1
+1763858692510,6853,Login,200,OK,Users 1-179,text,true,,944,237,109,109,http://localhost:5001/api/auth/login,6853,0,1
+1763858692886,6482,Login,200,OK,Users 1-184,text,true,,944,237,109,109,http://localhost:5001/api/auth/login,6482,0,1
+1763858699181,352,Get Properties,200,OK,Users 1-160,text,true,,85540,130,111,111,http://localhost:5003/api/properties,350,0,1
+1763858699164,395,Get Properties,200,OK,Users 1-173,text,true,,85540,130,111,111,http://localhost:5003/api/properties,393,0,0
+1763858699157,420,Get Properties,200,OK,Users 1-187,text,true,,85540,130,110,110,http://localhost:5003/api/properties,419,0,0
+1763858699161,435,Get Properties,200,OK,Users 1-185,text,true,,85540,130,109,109,http://localhost:5003/api/properties,434,0,0
+1763858699159,451,Get Properties,200,OK,Users 1-186,text,true,,85540,130,108,108,http://localhost:5003/api/properties,450,0,1
+1763858699150,480,Get Properties,200,OK,Users 1-106,text,true,,85540,130,107,107,http://localhost:5003/api/properties,479,0,1
+1763858699155,490,Get Properties,200,OK,Users 1-188,text,true,,85540,130,107,107,http://localhost:5003/api/properties,488,0,0
+1763858699183,477,Get Properties,200,OK,Users 1-172,text,true,,85540,130,106,106,http://localhost:5003/api/properties,473,0,1
+1763858699147,526,Get Properties,200,OK,Users 1-168,text,true,,85540,130,105,105,http://localhost:5003/api/properties,521,0,1
+1763858699268,417,Get Properties,200,OK,Users 1-171,text,true,,85540,130,104,104,http://localhost:5003/api/properties,412,0,0
+1763858699181,515,Get Properties,200,OK,Users 1-162,text,true,,85540,130,103,103,http://localhost:5003/api/properties,514,0,1
+1763858699266,461,Get Properties,200,OK,Users 1-158,text,true,,85540,130,103,103,http://localhost:5003/api/properties,454,0,0
+1763858699163,582,Get Properties,200,OK,Users 1-107,text,true,,85540,130,102,102,http://localhost:5003/api/properties,581,0,0
+1763858699183,572,Get Properties,200,OK,Users 1-155,text,true,,85540,130,101,101,http://localhost:5003/api/properties,570,0,1
+1763858699360,407,Get Properties,200,OK,Users 1-189,text,true,,85540,130,100,100,http://localhost:5003/api/properties,404,0,1
+1763858699368,412,Get Properties,200,OK,Users 1-184,text,true,,85540,130,99,99,http://localhost:5003/api/properties,410,0,1
+1763858699361,1127,Get Properties,200,OK,Users 1-180,text,true,,85540,130,108,108,http://localhost:5003/api/properties,1127,0,1
+1763858699364,1142,Get Properties,200,OK,Users 1-179,text,true,,85540,130,107,107,http://localhost:5003/api/properties,1141,0,1
+1763858693406,7144,Login,200,OK,Users 1-191,text,true,,948,237,107,107,http://localhost:5001/api/auth/login,7144,0,1
+1763858692812,7740,Login,200,OK,Users 1-183,text,true,,946,237,107,107,http://localhost:5001/api/auth/login,7739,0,1
+1763858692433,8124,Login,200,OK,Users 1-178,text,true,,942,237,107,107,http://localhost:5001/api/auth/login,8124,0,0
+1763858700550,116,Get Properties,200,OK,Users 1-191,text,true,,85540,130,108,108,http://localhost:5003/api/properties,112,0,1
+1763858700552,127,Get Properties,200,OK,Users 1-183,text,true,,85540,130,107,107,http://localhost:5003/api/properties,126,0,1
+1763858700558,368,Get Properties,200,OK,Users 1-178,text,true,,85540,130,110,110,http://localhost:5003/api/properties,367,0,0
+1763858693935,7745,Login,200,OK,Users 1-198,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,7745,0,0
+1763858694685,6999,Login,200,OK,Users 1-208,text,true,,946,237,119,119,http://localhost:5001/api/auth/login,6999,0,1
+1763858692736,8949,Login,200,OK,Users 1-182,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,8949,0,0
+1763858694533,7154,Login,200,OK,Users 1-206,text,true,,942,237,119,119,http://localhost:5001/api/auth/login,7154,0,1
+1763858694310,7377,Login,200,OK,Users 1-203,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,7377,0,0
+1763858692657,9032,Login,200,OK,Users 1-181,text,true,,946,237,119,119,http://localhost:5001/api/auth/login,9032,0,1
+1763858694380,7313,Login,200,OK,Users 1-204,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,7313,0,1
+1763858694610,7085,Login,200,OK,Users 1-207,text,true,,942,237,119,119,http://localhost:5001/api/auth/login,7085,0,1
+1763858694460,7235,Login,200,OK,Users 1-205,text,true,,942,237,119,119,http://localhost:5001/api/auth/login,7235,0,1
+1763858694233,7464,Login,200,OK,Users 1-202,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,7464,0,1
+1763858694160,7537,Login,200,OK,Users 1-201,text,true,,942,237,119,119,http://localhost:5001/api/auth/login,7537,0,1
+1763858692282,9415,Login,200,OK,Users 1-176,text,true,,942,237,119,119,http://localhost:5001/api/auth/login,9415,0,1
+1763858694084,7617,Login,200,OK,Users 1-200,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,7617,0,1
+1763858694005,7698,Login,200,OK,Users 1-199,text,true,,944,237,119,119,http://localhost:5001/api/auth/login,7698,0,1
+1763858701681,302,Get Properties,200,OK,Users 1-198,text,true,,85540,130,123,123,http://localhost:5003/api/properties,299,0,1
+1763858701683,386,Get Properties,200,OK,Users 1-208,text,true,,85540,130,123,123,http://localhost:5003/api/properties,385,0,1
+1763858701686,408,Get Properties,200,OK,Users 1-182,text,true,,85540,130,122,122,http://localhost:5003/api/properties,407,0,1
+1763858701686,424,Get Properties,200,OK,Users 1-203,text,true,,85540,130,122,122,http://localhost:5003/api/properties,422,0,1
+1763858701686,486,Get Properties,200,OK,Users 1-206,text,true,,85540,130,121,121,http://localhost:5003/api/properties,457,0,1
+1763858701701,502,Get Properties,200,OK,Users 1-200,text,true,,85540,130,121,121,http://localhost:5003/api/properties,501,0,1
+1763858701698,536,Get Properties,200,OK,Users 1-202,text,true,,85540,130,120,120,http://localhost:5003/api/properties,530,0,1
+1763858701692,558,Get Properties,200,OK,Users 1-204,text,true,,85540,130,119,119,http://localhost:5003/api/properties,554,0,1
+1763858701695,588,Get Properties,200,OK,Users 1-205,text,true,,85540,130,119,119,http://localhost:5003/api/properties,583,0,0
+1763858701698,604,Get Properties,200,OK,Users 1-201,text,true,,85540,130,118,118,http://localhost:5003/api/properties,603,0,1
+1763858701690,648,Get Properties,200,OK,Users 1-181,text,true,,85540,130,118,118,http://localhost:5003/api/properties,646,0,0
+1763858701694,652,Get Properties,200,OK,Users 1-207,text,true,,85540,130,117,117,http://localhost:5003/api/properties,652,0,0
+1763858701698,659,Get Properties,200,OK,Users 1-176,text,true,,85540,130,116,116,http://localhost:5003/api/properties,658,0,1
+1763858701703,668,Get Properties,200,OK,Users 1-199,text,true,,85540,130,115,115,http://localhost:5003/api/properties,667,0,1
+1763858693707,9613,Login,200,OK,Users 1-195,text,true,,944,237,127,127,http://localhost:5001/api/auth/login,9613,0,0
+1763858693632,9689,Login,200,OK,Users 1-194,text,true,,944,237,127,127,http://localhost:5001/api/auth/login,9689,0,1
+1763858693485,9839,Login,200,OK,Users 1-192,text,true,,946,237,127,127,http://localhost:5001/api/auth/login,9839,0,1
+1763858693335,9989,Login,200,OK,Users 1-190,text,true,,946,237,127,127,http://localhost:5001/api/auth/login,9989,0,1
+1763858692360,10965,Login,200,OK,Users 1-177,text,true,,944,237,127,127,http://localhost:5001/api/auth/login,10965,0,1
+1763858693557,9769,Login,200,OK,Users 1-193,text,true,,942,237,127,127,http://localhost:5001/api/auth/login,9769,0,1
+1763858694907,8421,Login,200,OK,Users 1-211,text,true,,942,237,127,127,http://localhost:5001/api/auth/login,8421,0,0
+1763858695212,8116,Login,200,OK,Users 1-215,text,true,,944,237,127,127,http://localhost:5001/api/auth/login,8116,0,1
+1763858695056,8273,Login,200,OK,Users 1-213,text,true,,946,237,127,127,http://localhost:5001/api/auth/login,8273,0,1
+1763858695134,8196,Login,200,OK,Users 1-214,text,true,,946,237,127,127,http://localhost:5001/api/auth/login,8196,0,2
+1763858703320,313,Get Properties,200,OK,Users 1-195,text,true,,85540,130,131,131,http://localhost:5003/api/properties,313,0,1
+1763858703328,319,Get Properties,200,OK,Users 1-215,text,true,,85540,130,130,130,http://localhost:5003/api/properties,318,0,0
+1763858703327,331,Get Properties,200,OK,Users 1-211,text,true,,85540,130,129,129,http://localhost:5003/api/properties,330,0,0
+1763858703326,345,Get Properties,200,OK,Users 1-193,text,true,,85540,130,128,128,http://localhost:5003/api/properties,344,0,1
+1763858703321,362,Get Properties,200,OK,Users 1-194,text,true,,85540,130,127,127,http://localhost:5003/api/properties,360,0,0
+1763858703326,369,Get Properties,200,OK,Users 1-177,text,true,,85540,130,127,127,http://localhost:5003/api/properties,368,0,0
+1763858703328,377,Get Properties,200,OK,Users 1-213,text,true,,85540,130,126,126,http://localhost:5003/api/properties,376,0,0
+1763858703324,389,Get Properties,200,OK,Users 1-192,text,true,,85540,130,125,125,http://localhost:5003/api/properties,388,0,1
+1763858703329,396,Get Properties,200,OK,Users 1-214,text,true,,85540,130,124,124,http://localhost:5003/api/properties,396,0,0
+1763858703325,407,Get Properties,200,OK,Users 1-190,text,true,,85540,130,123,123,http://localhost:5003/api/properties,405,0,0
+1763858693856,9988,Login,200,OK,Users 1-197,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,9988,0,1
+1763858693782,10074,Login,200,OK,Users 1-196,text,true,,946,237,124,124,http://localhost:5001/api/auth/login,10074,0,1
+1763858703845,212,Get Properties,200,OK,Users 1-197,text,true,,85540,130,126,126,http://localhost:5003/api/properties,211,0,1
+1763858703857,293,Get Properties,200,OK,Users 1-196,text,true,,85540,130,127,127,http://localhost:5003/api/properties,292,0,1
+1763858690257,14452,Login,200,OK,Users 1-149,text,true,,944,237,133,133,http://localhost:5001/api/auth/login,14452,0,1
+1763858689663,15047,Login,200,OK,Users 1-141,text,true,,946,237,133,133,http://localhost:5001/api/auth/login,15047,0,1
+1763858704710,282,Get Properties,200,OK,Users 1-149,text,true,,85540,130,137,137,http://localhost:5003/api/properties,281,0,0
+1763858704710,291,Get Properties,200,OK,Users 1-141,text,true,,85540,130,136,136,http://localhost:5003/api/properties,290,0,1
+1763858695512,9628,Login,200,OK,Users 1-219,text,true,,946,237,137,137,http://localhost:5001/api/auth/login,9628,0,0
+1763858696034,9110,Login,200,OK,Users 1-226,text,true,,948,237,137,137,http://localhost:5001/api/auth/login,9110,0,2
+1763858696109,9037,Login,200,OK,Users 1-227,text,true,,946,237,137,137,http://localhost:5001/api/auth/login,9037,0,1
+1763858696334,8813,Login,200,OK,Users 1-230,text,true,,944,237,137,137,http://localhost:5001/api/auth/login,8813,0,1
+1763858696415,8733,Login,200,OK,Users 1-231,text,true,,944,237,137,137,http://localhost:5001/api/auth/login,8733,0,2
+1763858696557,8592,Login,200,OK,Users 1-233,text,true,,946,237,137,137,http://localhost:5001/api/auth/login,8592,0,1
+1763858696482,8667,Login,200,OK,Users 1-232,text,true,,948,237,137,137,http://localhost:5001/api/auth/login,8667,0,3
+1763858696634,8517,Login,200,OK,Users 1-234,text,true,,942,237,137,137,http://localhost:5001/api/auth/login,8517,0,1
+1763858696708,8445,Login,200,OK,Users 1-235,text,true,,944,237,137,137,http://localhost:5001/api/auth/login,8445,0,0
+1763858696783,8372,Login,200,OK,Users 1-236,text,true,,944,237,137,137,http://localhost:5001/api/auth/login,8372,0,1
+1763858705140,116,Get Properties,200,OK,Users 1-219,text,true,,85540,130,138,138,http://localhost:5003/api/properties,113,0,0
+1763858705144,127,Get Properties,200,OK,Users 1-226,text,true,,85540,130,138,138,http://localhost:5003/api/properties,125,0,1
+1763858705146,281,Get Properties,200,OK,Users 1-227,text,true,,85540,130,139,139,http://localhost:5003/api/properties,280,0,0
+1763858705146,294,Get Properties,200,OK,Users 1-230,text,true,,85540,130,138,138,http://localhost:5003/api/properties,292,0,0
+1763858705148,300,Get Properties,200,OK,Users 1-233,text,true,,85540,130,137,137,http://localhost:5003/api/properties,299,0,1
+1763858705155,308,Get Properties,200,OK,Users 1-236,text,true,,85540,130,136,136,http://localhost:5003/api/properties,307,0,0
+1763858705150,321,Get Properties,200,OK,Users 1-234,text,true,,85540,130,135,135,http://localhost:5003/api/properties,319,0,1
+1763858705152,329,Get Properties,200,OK,Users 1-235,text,true,,85540,130,135,135,http://localhost:5003/api/properties,327,0,0
+1763858705148,342,Get Properties,200,OK,Users 1-232,text,true,,85540,130,134,134,http://localhost:5003/api/properties,341,0,1
+1763858705147,351,Get Properties,200,OK,Users 1-231,text,true,,85540,130,133,133,http://localhost:5003/api/properties,349,0,1
+1763858695583,10073,Login,200,OK,Users 1-220,text,true,,942,237,134,134,http://localhost:5001/api/auth/login,10073,0,1
+1763858695964,9692,Login,200,OK,Users 1-225,text,true,,946,237,134,134,http://localhost:5001/api/auth/login,9692,0,7
+1763858694758,10902,Login,200,OK,Users 1-209,text,true,,946,237,134,134,http://localhost:5001/api/auth/login,10902,0,1
+1763858694835,10827,Login,200,OK,Users 1-210,text,true,,944,237,134,134,http://localhost:5001/api/auth/login,10827,0,1
+1763858694983,10680,Login,200,OK,Users 1-212,text,true,,944,237,134,134,http://localhost:5001/api/auth/login,10680,0,1
+1763858695280,10383,Login,200,OK,Users 1-216,text,true,,944,237,134,134,http://localhost:5001/api/auth/login,10383,0,1
+1763858705656,178,Get Properties,200,OK,Users 1-225,text,true,,85540,130,136,136,http://localhost:5003/api/properties,178,0,0
+1763858705655,189,Get Properties,200,OK,Users 1-220,text,true,,85540,130,135,135,http://localhost:5003/api/properties,188,0,1
+1763858705660,190,Get Properties,200,OK,Users 1-209,text,true,,85540,130,134,134,http://localhost:5003/api/properties,189,0,1
+1763858705661,208,Get Properties,200,OK,Users 1-210,text,true,,85540,130,134,134,http://localhost:5003/api/properties,206,0,1
+1763858705662,222,Get Properties,200,OK,Users 1-216,text,true,,85540,130,133,133,http://localhost:5003/api/properties,221,0,1
+1763858705662,235,Get Properties,200,OK,Users 1-212,text,true,,85540,130,132,132,http://localhost:5003/api/properties,234,0,1
+1763858695659,10729,Login,200,OK,Users 1-221,text,true,,946,237,138,138,http://localhost:5001/api/auth/login,10729,0,1
+1763858695810,10579,Login,200,OK,Users 1-223,text,true,,944,237,138,138,http://localhost:5001/api/auth/login,10579,0,0
+1763858706387,380,Get Properties,200,OK,Users 1-221,text,true,,85540,130,143,143,http://localhost:5003/api/properties,379,0,1
+1763858706389,391,Get Properties,200,OK,Users 1-223,text,true,,85540,130,142,142,http://localhost:5003/api/properties,388,0,0
+1763858696188,10631,Login,200,OK,Users 1-228,text,true,,944,237,141,141,http://localhost:5001/api/auth/login,10631,0,0
+1763858696270,10552,Login,200,OK,Users 1-229,text,true,,946,237,141,141,http://localhost:5001/api/auth/login,10552,0,8
+1763858695734,11089,Login,200,OK,Users 1-222,text,true,,942,237,141,141,http://localhost:5001/api/auth/login,11089,0,1
+1763858695883,10941,Login,200,OK,Users 1-224,text,true,,944,237,141,141,http://localhost:5001/api/auth/login,10941,0,0
+1763858697163,9662,Login,200,OK,Users 1-241,text,true,,946,237,141,141,http://localhost:5001/api/auth/login,9662,0,1
+1763858697233,9593,Login,200,OK,Users 1-242,text,true,,942,237,141,141,http://localhost:5001/api/auth/login,9593,0,2
+1763858697312,9516,Login,200,OK,Users 1-243,text,true,,948,237,141,141,http://localhost:5001/api/auth/login,9516,0,5
+1763858697382,9449,Login,200,OK,Users 1-244,text,true,,944,237,141,141,http://localhost:5001/api/auth/login,9449,0,1
+1763858697457,9377,Login,200,OK,Users 1-245,text,true,,942,237,142,142,http://localhost:5001/api/auth/login,9377,0,1
+1763858697536,9299,Login,200,OK,Users 1-246,text,true,,946,237,142,142,http://localhost:5001/api/auth/login,9299,0,1
+1763858706819,190,Get Properties,200,OK,Users 1-228,text,true,,85540,130,144,144,http://localhost:5003/api/properties,184,0,0
+1763858706821,204,Get Properties,200,OK,Users 1-229,text,true,,85540,130,143,143,http://localhost:5003/api/properties,203,0,1
+1763858706830,289,Get Properties,200,OK,Users 1-244,text,true,,85540,130,143,143,http://localhost:5003/api/properties,285,0,1
+1763858706826,305,Get Properties,200,OK,Users 1-242,text,true,,85540,130,143,143,http://localhost:5003/api/properties,302,0,0
+1763858706822,324,Get Properties,200,OK,Users 1-222,text,true,,85540,130,142,142,http://localhost:5003/api/properties,317,0,1
+1763858706823,337,Get Properties,200,OK,Users 1-224,text,true,,85540,130,141,141,http://localhost:5003/api/properties,334,0,1
+1763858706825,359,Get Properties,200,OK,Users 1-241,text,true,,85540,130,140,140,http://localhost:5003/api/properties,357,0,0
+1763858706834,363,Get Properties,200,OK,Users 1-246,text,true,,85540,130,139,139,http://localhost:5003/api/properties,362,0,1
+1763858706827,378,Get Properties,200,OK,Users 1-243,text,true,,85540,130,138,138,http://localhost:5003/api/properties,377,0,0
+1763858706833,381,Get Properties,200,OK,Users 1-245,text,true,,85540,130,138,138,http://localhost:5003/api/properties,378,0,1
+1763858698058,10268,Login,200,OK,Users 1-253,text,true,,944,237,151,151,http://localhost:5001/api/auth/login,10268,0,1
+1763858696858,11469,Login,200,OK,Users 1-237,text,true,,946,237,151,151,http://localhost:5001/api/auth/login,11469,0,2
+1763858708325,311,Get Properties,200,OK,Users 1-253,text,true,,85540,130,156,156,http://localhost:5003/api/properties,308,0,1
+1763858708326,319,Get Properties,200,OK,Users 1-237,text,true,,85540,130,155,155,http://localhost:5003/api/properties,319,0,1
+1763858696933,11793,Login,200,OK,Users 1-238,text,true,,942,237,155,155,http://localhost:5001/api/auth/login,11793,0,1
+1763858697008,11719,Login,200,OK,Users 1-239,text,true,,942,237,155,155,http://localhost:5001/api/auth/login,11719,0,1
+1763858697087,11643,Login,200,OK,Users 1-240,text,true,,946,237,155,155,http://localhost:5001/api/auth/login,11643,0,0
+1763858698138,10592,Login,200,OK,Users 1-254,text,true,,946,237,155,155,http://localhost:5001/api/auth/login,10592,0,0
+1763858698213,10518,Login,200,OK,Users 1-255,text,true,,942,237,155,155,http://localhost:5001/api/auth/login,10518,0,1
+1763858698282,10449,Login,200,OK,Users 1-256,text,true,,944,237,155,155,http://localhost:5001/api/auth/login,10449,0,1
+1763858698359,10373,Login,200,OK,Users 1-257,text,true,,942,237,155,155,http://localhost:5001/api/auth/login,10373,0,0
+1763858698432,10301,Login,200,OK,Users 1-258,text,true,,948,237,155,155,http://localhost:5001/api/auth/login,10301,0,1
+1763858698733,10001,Login,200,OK,Users 1-262,text,true,,942,237,155,155,http://localhost:5001/api/auth/login,10001,0,1
+1763858698658,10077,Login,200,OK,Users 1-261,text,true,,942,237,155,155,http://localhost:5001/api/auth/login,10077,0,1
+1763858708728,151,Get Properties,200,OK,Users 1-239,text,true,,85540,130,157,157,http://localhost:5003/api/properties,150,0,0
+1763858708725,239,Get Properties,200,OK,Users 1-238,text,true,,85540,130,157,157,http://localhost:5003/api/properties,238,0,1
+1763858708734,311,Get Properties,200,OK,Users 1-261,text,true,,85540,130,157,157,http://localhost:5003/api/properties,310,0,0
+1763858708731,339,Get Properties,200,OK,Users 1-255,text,true,,85540,130,156,156,http://localhost:5003/api/properties,338,0,1
+1763858708731,352,Get Properties,200,OK,Users 1-256,text,true,,85540,130,156,156,http://localhost:5003/api/properties,349,0,1
+1763858708731,366,Get Properties,200,OK,Users 1-257,text,true,,85540,130,155,155,http://localhost:5003/api/properties,363,0,1
+1763858708733,390,Get Properties,200,OK,Users 1-258,text,true,,85540,130,154,154,http://localhost:5003/api/properties,381,0,0
+1763858708734,417,Get Properties,200,OK,Users 1-262,text,true,,85540,130,153,153,http://localhost:5003/api/properties,411,0,0
+1763858708729,445,Get Properties,200,OK,Users 1-254,text,true,,85540,130,152,152,http://localhost:5003/api/properties,440,0,1
+1763858708729,464,Get Properties,200,OK,Users 1-240,text,true,,85540,130,151,151,http://localhost:5003/api/properties,463,0,1
+1763858697683,11607,Login,200,OK,Users 1-248,text,true,,942,237,150,150,http://localhost:5001/api/auth/login,11607,0,1
+1763858697607,11683,Login,200,OK,Users 1-247,text,true,,946,237,150,150,http://localhost:5001/api/auth/login,11683,0,1
+1763858697757,11533,Login,200,OK,Users 1-249,text,true,,944,237,150,150,http://localhost:5001/api/auth/login,11533,0,1
+1763858697832,11460,Login,200,OK,Users 1-250,text,true,,944,237,150,150,http://localhost:5001/api/auth/login,11460,0,2
+1763858697906,11388,Login,200,OK,Users 1-251,text,true,,944,237,150,150,http://localhost:5001/api/auth/login,11388,0,1
+1763858697987,11308,Login,200,OK,Users 1-252,text,true,,944,237,150,150,http://localhost:5001/api/auth/login,11308,0,1
+1763858709295,200,Get Properties,200,OK,Users 1-252,text,true,,85540,130,150,150,http://localhost:5003/api/properties,196,0,0
+1763858709291,220,Get Properties,200,OK,Users 1-248,text,true,,85540,130,149,149,http://localhost:5003/api/properties,218,0,0
+1763858709291,336,Get Properties,200,OK,Users 1-249,text,true,,85540,130,148,148,http://localhost:5003/api/properties,332,0,2
+1763858709294,371,Get Properties,200,OK,Users 1-251,text,true,,85540,130,147,147,http://localhost:5003/api/properties,365,0,0
+1763858709291,381,Get Properties,200,OK,Users 1-247,text,true,,85540,130,146,146,http://localhost:5003/api/properties,371,0,2
+1763858709293,412,Get Properties,200,OK,Users 1-250,text,true,,85540,130,145,145,http://localhost:5003/api/properties,407,0,1
+1763858698809,11715,Login,200,OK,Users 1-263,text,true,,946,237,144,144,http://localhost:5001/api/auth/login,11715,0,1
+1763858691758,18765,Login,200,OK,Users 1-169,text,true,,944,237,144,144,http://localhost:5001/api/auth/login,18765,0,0
+1763858710525,387,Get Properties,200,OK,Users 1-169,text,true,,85540,130,144,144,http://localhost:5003/api/properties,384,0,2
+1763858710525,416,Get Properties,200,OK,Users 1-263,text,true,,85540,130,143,143,http://localhost:5003/api/properties,412,0,1
+1763858691835,19191,Login,200,OK,Users 1-170,text,true,,948,237,142,142,http://localhost:5001/api/auth/login,19191,0,1
+1763858699110,11920,Login,200,OK,Users 1-267,text,true,,942,237,142,142,http://localhost:5001/api/auth/login,11920,0,2
+1763858699034,11996,Login,200,OK,Users 1-266,text,true,,944,237,142,142,http://localhost:5001/api/auth/login,11996,0,1
+1763858699182,11848,Login,200,OK,Users 1-268,text,true,,944,237,142,142,http://localhost:5001/api/auth/login,11848,0,1
+1763858699256,11779,Login,200,OK,Users 1-269,text,true,,946,237,142,142,http://localhost:5001/api/auth/login,11779,0,0
+1763858699413,11623,Login,200,OK,Users 1-271,text,true,,942,237,142,142,http://localhost:5001/api/auth/login,11623,0,0
+1763858699334,11702,Login,200,OK,Users 1-270,text,true,,944,237,142,142,http://localhost:5001/api/auth/login,11702,0,1
+1763858698512,12526,Login,200,OK,Users 1-259,text,true,,944,237,142,142,http://localhost:5001/api/auth/login,12526,0,1
+1763858698586,12453,Login,200,OK,Users 1-260,text,true,,946,237,142,142,http://localhost:5001/api/auth/login,12453,0,2
+1763858699488,11551,Login,200,OK,Users 1-272,text,true,,946,237,142,142,http://localhost:5001/api/auth/login,11551,0,1
+1763858711029,259,Get Properties,200,OK,Users 1-170,text,true,,85540,130,142,142,http://localhost:5003/api/properties,257,0,0
+1763858711031,320,Get Properties,200,OK,Users 1-267,text,true,,85540,130,141,141,http://localhost:5003/api/properties,315,0,0
+1763858711031,426,Get Properties,200,OK,Users 1-268,text,true,,85540,130,140,140,http://localhost:5003/api/properties,405,0,1
+1763858711040,428,Get Properties,200,OK,Users 1-260,text,true,,85540,130,139,139,http://localhost:5003/api/properties,419,0,0
+1763858711036,457,Get Properties,200,OK,Users 1-269,text,true,,85540,130,138,138,http://localhost:5003/api/properties,453,0,1
+1763858711037,466,Get Properties,200,OK,Users 1-271,text,true,,85540,130,137,137,http://localhost:5003/api/properties,456,0,0
+1763858711039,479,Get Properties,200,OK,Users 1-259,text,true,,85540,130,136,136,http://localhost:5003/api/properties,478,0,0
+1763858711031,519,Get Properties,200,OK,Users 1-266,text,true,,85540,130,135,135,http://localhost:5003/api/properties,508,0,0
+1763858711041,537,Get Properties,200,OK,Users 1-272,text,true,,85540,130,134,134,http://localhost:5003/api/properties,533,0,0
+1763858711037,565,Get Properties,200,OK,Users 1-270,text,true,,85540,130,133,133,http://localhost:5003/api/properties,563,0,1
+1763858699554,12146,Login,200,OK,Users 1-273,text,true,,944,237,132,132,http://localhost:5001/api/auth/login,12146,0,1
+1763858699709,11996,Login,200,OK,Users 1-275,text,true,,946,237,132,132,http://localhost:5001/api/auth/login,11996,0,1
+1763858699633,12072,Login,200,OK,Users 1-274,text,true,,944,237,132,132,http://localhost:5001/api/auth/login,12072,0,2
+1763858699782,11934,Login,200,OK,Users 1-276,text,true,,942,237,132,132,http://localhost:5001/api/auth/login,11934,0,1
+1763858699856,11864,Login,200,OK,Users 1-277,text,true,,946,237,132,132,http://localhost:5001/api/auth/login,11864,0,1
+1763858699932,11788,Login,200,OK,Users 1-278,text,true,,946,237,132,132,http://localhost:5001/api/auth/login,11788,0,1
+1763858711707,387,Get Properties,200,OK,Users 1-274,text,true,,85540,130,132,132,http://localhost:5003/api/properties,385,0,1
+1763858711722,395,Get Properties,200,OK,Users 1-277,text,true,,85540,130,131,131,http://localhost:5003/api/properties,394,0,1
+1763858711707,433,Get Properties,200,OK,Users 1-275,text,true,,85540,130,130,130,http://localhost:5003/api/properties,431,0,1
+1763858711702,466,Get Properties,200,OK,Users 1-273,text,true,,85540,130,129,129,http://localhost:5003/api/properties,462,0,1
+1763858711722,494,Get Properties,200,OK,Users 1-278,text,true,,85540,130,128,128,http://localhost:5003/api/properties,469,0,1
+1763858711718,509,Get Properties,200,OK,Users 1-276,text,true,,85540,130,127,127,http://localhost:5003/api/properties,498,0,0
+1763858700006,13391,Login,200,OK,Users 1-279,text,true,,946,237,126,126,http://localhost:5001/api/auth/login,13391,0,1
+1763858700084,13313,Login,200,OK,Users 1-280,text,true,,942,237,126,126,http://localhost:5001/api/auth/login,13313,0,1
+1763858713399,379,Get Properties,200,OK,Users 1-279,text,true,,85540,130,126,126,http://localhost:5003/api/properties,378,0,1
+1763858713399,410,Get Properties,200,OK,Users 1-280,text,true,,85540,130,125,125,http://localhost:5003/api/properties,408,0,1
+1763858700158,13756,Login,200,OK,Users 1-281,text,true,,942,237,124,124,http://localhost:5001/api/auth/login,13756,0,1
+1763858700756,13164,Login,200,OK,Users 1-289,text,true,,946,237,124,124,http://localhost:5001/api/auth/login,13164,0,0
+1763858700382,13539,Login,200,OK,Users 1-284,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,13539,0,2
+1763858700232,13689,Login,200,OK,Users 1-282,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,13689,0,1
+1763858700308,13613,Login,200,OK,Users 1-283,text,true,,946,237,124,124,http://localhost:5001/api/auth/login,13613,0,2
+1763858700531,13391,Login,200,OK,Users 1-286,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,13391,0,1
+1763858700456,13466,Login,200,OK,Users 1-285,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,13466,0,1
+1763858700905,13017,Login,200,OK,Users 1-291,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,13017,0,1
+1763858700684,13245,Login,200,OK,Users 1-288,text,true,,944,237,124,124,http://localhost:5001/api/auth/login,13245,0,0
+1763858700606,13323,Login,200,OK,Users 1-287,text,true,,942,237,124,124,http://localhost:5001/api/auth/login,13323,0,1
+1763858713923,338,Get Properties,200,OK,Users 1-291,text,true,,85540,130,124,124,http://localhost:5003/api/properties,335,0,1
+1763858713923,418,Get Properties,200,OK,Users 1-285,text,true,,85540,130,123,123,http://localhost:5003/api/properties,416,0,1
+1763858713931,474,Get Properties,200,OK,Users 1-288,text,true,,85540,130,122,122,http://localhost:5003/api/properties,456,0,0
+1763858713923,505,Get Properties,200,OK,Users 1-286,text,true,,85540,130,121,121,http://localhost:5003/api/properties,498,0,0
+1763858713931,535,Get Properties,200,OK,Users 1-287,text,true,,85540,130,120,120,http://localhost:5003/api/properties,530,0,0
+1763858713922,598,Get Properties,200,OK,Users 1-289,text,true,,85540,130,119,119,http://localhost:5003/api/properties,581,0,1
+1763858700836,13720,Login,200,OK,Users 1-290,text,true,,946,237,118,118,http://localhost:5001/api/auth/login,13720,0,0
+1763858700983,13577,Login,200,OK,Users 1-292,text,true,,946,237,118,118,http://localhost:5001/api/auth/login,13577,0,0
+1763858701281,13285,Login,200,OK,Users 1-296,text,true,,944,237,118,118,http://localhost:5001/api/auth/login,13285,0,1
+1763858701357,13212,Login,200,OK,Users 1-297,text,true,,942,237,118,118,http://localhost:5001/api/auth/login,13212,0,2
+1763858701435,13138,Login,200,OK,Users 1-298,text,true,,942,237,118,118,http://localhost:5001/api/auth/login,13138,0,1
+1763858701586,12989,Login,200,OK,Users 1-300,text,true,,944,237,118,118,http://localhost:5001/api/auth/login,12989,0,1
+1763858713922,666,Get Properties,200,OK,Users 1-282,text,true,,85540,130,118,118,http://localhost:5003/api/properties,663,0,2
+1763858713922,699,Get Properties,200,OK,Users 1-284,text,true,,85540,130,117,117,http://localhost:5003/api/properties,694,0,0
+1763858713916,775,Get Properties,200,OK,Users 1-281,text,true,,85540,130,116,116,http://localhost:5003/api/properties,766,0,0
+1763858713923,789,Get Properties,200,OK,Users 1-283,text,true,,85540,130,115,115,http://localhost:5003/api/properties,784,0,0
+1763858714557,359,Get Properties,200,OK,Users 1-290,text,true,,85540,130,114,114,http://localhost:5003/api/properties,356,0,3
+1763858714570,382,Get Properties,200,OK,Users 1-297,text,true,,85540,130,113,113,http://localhost:5003/api/properties,379,0,1
+1763858714574,437,Get Properties,200,OK,Users 1-298,text,true,,85540,130,112,112,http://localhost:5003/api/properties,424,0,2
+1763858714561,484,Get Properties,200,OK,Users 1-292,text,true,,85540,130,111,111,http://localhost:5003/api/properties,478,0,1
+1763858714567,526,Get Properties,200,OK,Users 1-296,text,true,,85540,130,110,110,http://localhost:5003/api/properties,522,0,1
+1763858714576,518,Get Properties,200,OK,Users 1-300,text,true,,85540,130,110,110,http://localhost:5003/api/properties,513,0,1
+1763858701656,14816,Login,200,OK,Users 1-301,text,true,,946,237,108,108,http://localhost:5001/api/auth/login,14816,0,2
+1763858701732,14744,Login,200,OK,Users 1-302,text,true,,946,237,108,108,http://localhost:5001/api/auth/login,14744,0,0
+1763858716479,477,Get Properties,200,OK,Users 1-301,text,true,,85540,130,108,108,http://localhost:5003/api/properties,465,0,2
+1763858716479,499,Get Properties,200,OK,Users 1-302,text,true,,85540,130,107,107,http://localhost:5003/api/properties,480,0,2
+1763858701807,15195,Login,200,OK,Users 1-303,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,15195,0,1
+1763858701880,15123,Login,200,OK,Users 1-304,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,15123,0,1
+1763858701956,15048,Login,200,OK,Users 1-305,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,15048,0,1
+1763858702107,14899,Login,200,OK,Users 1-307,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,14899,0,1
+1763858702033,14973,Login,200,OK,Users 1-306,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,14973,0,1
+1763858702182,14830,Login,200,OK,Users 1-308,text,true,,946,237,106,106,http://localhost:5001/api/auth/login,14830,0,1
+1763858701136,15879,Login,200,OK,Users 1-294,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,15879,0,1
+1763858701210,15809,Login,200,OK,Users 1-295,text,true,,948,237,106,106,http://localhost:5001/api/auth/login,15809,0,1
+1763858701509,15512,Login,200,OK,Users 1-299,text,true,,944,237,106,106,http://localhost:5001/api/auth/login,15512,0,1
+1763858702255,14767,Login,200,OK,Users 1-309,text,true,,942,237,106,106,http://localhost:5001/api/auth/login,14767,0,1
+1763858717003,216,Get Properties,200,OK,Users 1-303,text,true,,85540,130,106,106,http://localhost:5003/api/properties,201,0,1
+1763858717007,357,Get Properties,200,OK,Users 1-306,text,true,,85540,130,105,105,http://localhost:5003/api/properties,356,0,0
+1763858717006,489,Get Properties,200,OK,Users 1-307,text,true,,85540,130,104,104,http://localhost:5003/api/properties,468,0,1
+1763858717004,507,Get Properties,200,OK,Users 1-304,text,true,,85540,130,103,103,http://localhost:5003/api/properties,506,0,2
+1763858717013,541,Get Properties,200,OK,Users 1-308,text,true,,85540,130,102,102,http://localhost:5003/api/properties,539,0,0
+1763858717022,592,Get Properties,200,OK,Users 1-299,text,true,,85540,130,101,101,http://localhost:5003/api/properties,590,0,1
+1763858702330,15323,Login,200,OK,Users 1-310,text,true,,942,237,100,100,http://localhost:5001/api/auth/login,15323,0,1
+1763858703161,14494,Login,200,OK,Users 1-321,text,true,,942,237,100,100,http://localhost:5001/api/auth/login,14494,0,1
+1763858717019,641,Get Properties,200,OK,Users 1-295,text,true,,85540,130,100,100,http://localhost:5003/api/properties,636,0,0
+1763858703532,14129,Login,200,OK,Users 1-326,text,true,,944,237,99,99,http://localhost:5001/api/auth/login,14129,0,1
+1763858702482,15179,Login,200,OK,Users 1-312,text,true,,944,237,99,99,http://localhost:5001/api/auth/login,15179,0,1
+1763858701057,16606,Login,200,OK,Users 1-293,text,true,,946,237,99,99,http://localhost:5001/api/auth/login,16606,0,1
+1763858702405,15258,Login,200,OK,Users 1-311,text,true,,942,237,99,99,http://localhost:5001/api/auth/login,15258,0,1
+1763858717022,682,Get Properties,200,OK,Users 1-309,text,true,,85540,130,99,99,http://localhost:5003/api/properties,678,0,1
+1763858717005,704,Get Properties,200,OK,Users 1-305,text,true,,85540,130,98,98,http://localhost:5003/api/properties,701,0,1
+1763858717015,737,Get Properties,200,OK,Users 1-294,text,true,,85540,130,97,97,http://localhost:5003/api/properties,734,0,1
+1763858717654,305,Get Properties,200,OK,Users 1-310,text,true,,85540,130,96,96,http://localhost:5003/api/properties,303,0,1
+1763858717661,339,Get Properties,200,OK,Users 1-312,text,true,,85540,130,95,95,http://localhost:5003/api/properties,333,0,1
+1763858717661,368,Get Properties,200,OK,Users 1-326,text,true,,85540,130,94,94,http://localhost:5003/api/properties,366,0,1
+1763858717656,405,Get Properties,200,OK,Users 1-321,text,true,,85540,130,93,93,http://localhost:5003/api/properties,404,0,1
+1763858717664,418,Get Properties,200,OK,Users 1-293,text,true,,85540,130,92,92,http://localhost:5003/api/properties,417,0,0
+1763858717664,497,Get Properties,200,OK,Users 1-311,text,true,,85540,130,91,91,http://localhost:5003/api/properties,479,0,0
+1763858702561,17506,Login,200,OK,Users 1-313,text,true,,946,237,90,90,http://localhost:5001/api/auth/login,17506,0,1
+1763858702632,17457,Login,200,OK,Users 1-314,text,true,,944,237,90,90,http://localhost:5001/api/auth/login,17457,0,1
+1763858720074,515,Get Properties,200,OK,Users 1-313,text,true,,85540,130,90,90,http://localhost:5003/api/properties,496,0,3
+1763858702711,17921,Login,200,OK,Users 1-315,text,true,,950,237,89,89,http://localhost:5001/api/auth/login,17921,0,1
+1763858702781,17854,Login,200,OK,Users 1-316,text,true,,944,237,89,89,http://localhost:5001/api/auth/login,17854,0,1
+1763858703007,17633,Login,200,OK,Users 1-319,text,true,,942,237,89,89,http://localhost:5001/api/auth/login,17633,0,2
+1763858703081,17559,Login,200,OK,Users 1-320,text,true,,946,237,89,89,http://localhost:5001/api/auth/login,17559,0,6
+1763858703232,17412,Login,200,OK,Users 1-322,text,true,,942,237,89,89,http://localhost:5001/api/auth/login,17412,0,1
+1763858703320,17326,Login,200,OK,Users 1-323,text,true,,948,237,89,89,http://localhost:5001/api/auth/login,17326,0,1
+1763858703381,17267,Login,200,OK,Users 1-324,text,true,,942,237,89,89,http://localhost:5001/api/auth/login,17267,0,1
+1763858703459,17199,Login,200,OK,Users 1-325,text,true,,942,237,89,89,http://localhost:5001/api/auth/login,17199,0,1
+1763858720090,577,Get Properties,200,OK,Users 1-314,text,true,,85540,130,89,89,http://localhost:5003/api/properties,569,0,0
+1763858703606,17062,Login,200,OK,Users 1-327,text,true,,942,237,88,88,http://localhost:5001/api/auth/login,17062,0,0
+1763858703684,16985,Login,200,OK,Users 1-328,text,true,,944,237,88,88,http://localhost:5001/api/auth/login,16985,0,1
+1763858720641,364,Get Properties,200,OK,Users 1-320,text,true,,85540,130,88,88,http://localhost:5003/api/properties,357,0,0
+1763858720640,397,Get Properties,200,OK,Users 1-319,text,true,,85540,130,87,87,http://localhost:5003/api/properties,395,0,1
+1763858720634,464,Get Properties,200,OK,Users 1-315,text,true,,85540,130,86,86,http://localhost:5003/api/properties,461,0,0
+1763858720668,481,Get Properties,200,OK,Users 1-327,text,true,,85540,130,85,85,http://localhost:5003/api/properties,473,0,1
+1763858720637,560,Get Properties,200,OK,Users 1-316,text,true,,85540,130,84,84,http://localhost:5003/api/properties,534,0,1
+1763858720647,561,Get Properties,200,OK,Users 1-323,text,true,,85540,130,83,83,http://localhost:5003/api/properties,544,0,0
+1763858720658,563,Get Properties,200,OK,Users 1-325,text,true,,85540,130,82,82,http://localhost:5003/api/properties,553,0,1
+1763858703760,17544,Login,200,OK,Users 1-329,text,true,,942,237,81,81,http://localhost:5001/api/auth/login,17544,0,1
+1763858704658,16647,Login,200,OK,Users 1-341,text,true,,944,237,81,81,http://localhost:5001/api/auth/login,16647,0,1
+1763858720644,662,Get Properties,200,OK,Users 1-322,text,true,,85540,130,81,81,http://localhost:5003/api/properties,653,0,1
+1763858705032,16293,Login,200,OK,Users 1-346,text,true,,944,237,80,80,http://localhost:5001/api/auth/login,16293,0,1
+1763858703834,17495,Login,200,OK,Users 1-330,text,true,,942,237,80,80,http://localhost:5001/api/auth/login,17495,0,1
+1763858702934,18395,Login,200,OK,Users 1-318,text,true,,946,237,80,80,http://localhost:5001/api/auth/login,18395,0,1
+1763858702858,18474,Login,200,OK,Users 1-317,text,true,,942,237,80,80,http://localhost:5001/api/auth/login,18474,0,1
+1763858720649,685,Get Properties,200,OK,Users 1-324,text,true,,85540,130,80,80,http://localhost:5003/api/properties,682,0,1
+1763858720670,692,Get Properties,200,OK,Users 1-328,text,true,,85540,130,79,79,http://localhost:5003/api/properties,689,0,0
+1763858721332,329,Get Properties,200,OK,Users 1-317,text,true,,85540,130,78,78,http://localhost:5003/api/properties,328,0,1
+1763858721326,378,Get Properties,200,OK,Users 1-346,text,true,,85540,130,77,77,http://localhost:5003/api/properties,377,0,1
+1763858721329,502,Get Properties,200,OK,Users 1-330,text,true,,85540,130,76,76,http://localhost:5003/api/properties,499,0,1
+1763858721305,627,Get Properties,200,OK,Users 1-329,text,true,,85540,130,75,75,http://localhost:5003/api/properties,617,0,0
+1763858721330,622,Get Properties,200,OK,Users 1-318,text,true,,85540,130,74,74,http://localhost:5003/api/properties,619,0,0
+1763858721305,684,Get Properties,200,OK,Users 1-341,text,true,,85540,130,73,73,http://localhost:5003/api/properties,681,0,1
+1763858703906,20380,Login,200,OK,Users 1-331,text,true,,946,237,72,72,http://localhost:5001/api/auth/login,20380,0,1
+1763858703982,20307,Login,200,OK,Users 1-332,text,true,,944,237,72,72,http://localhost:5001/api/auth/login,20307,0,1
+1763858724292,492,Get Properties,200,OK,Users 1-332,text,true,,85540,130,72,72,http://localhost:5003/api/properties,481,0,2
+1763858724292,523,Get Properties,200,OK,Users 1-331,text,true,,85540,130,71,71,http://localhost:5003/api/properties,510,0,2
+1763858704057,20769,Login,200,OK,Users 1-333,text,true,,942,237,70,70,http://localhost:5001/api/auth/login,20769,0,1
+1763858704284,20544,Login,200,OK,Users 1-336,text,true,,946,237,70,70,http://localhost:5001/api/auth/login,20544,0,1
+1763858704137,20692,Login,200,OK,Users 1-334,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,20692,0,1
+1763858704356,20473,Login,200,OK,Users 1-337,text,true,,942,237,70,70,http://localhost:5001/api/auth/login,20473,0,1
+1763858704207,20623,Login,200,OK,Users 1-335,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,20623,0,1
+1763858704511,20319,Login,200,OK,Users 1-339,text,true,,950,237,70,70,http://localhost:5001/api/auth/login,20319,0,1
+1763858704580,20252,Login,200,OK,Users 1-340,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,20252,0,1
+1763858704730,20108,Login,200,OK,Users 1-342,text,true,,946,237,70,70,http://localhost:5001/api/auth/login,20108,0,2
+1763858704883,19955,Login,200,OK,Users 1-344,text,true,,942,237,70,70,http://localhost:5001/api/auth/login,19955,0,1
+1763858704805,20036,Login,200,OK,Users 1-343,text,true,,946,237,70,70,http://localhost:5001/api/auth/login,20036,0,1
+1763858704955,19985,Login,200,OK,Users 1-345,text,true,,948,237,70,70,http://localhost:5001/api/auth/login,19985,0,0
+1763858705329,19614,Login,200,OK,Users 1-350,text,true,,946,237,70,70,http://localhost:5001/api/auth/login,19614,0,1
+1763858705257,19687,Login,200,OK,Users 1-349,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,19687,0,1
+1763858705181,19764,Login,200,OK,Users 1-348,text,true,,942,237,70,70,http://localhost:5001/api/auth/login,19764,0,1
+1763858704434,20512,Login,200,OK,Users 1-338,text,true,,944,237,70,70,http://localhost:5001/api/auth/login,20512,0,1
+1763858705107,19839,Login,200,OK,Users 1-347,text,true,,942,237,70,70,http://localhost:5001/api/auth/login,19839,0,1
+1763858695432,29631,Login,200,OK,Users 1-218,text,true,,950,237,70,70,http://localhost:5001/api/auth/login,29631,0,1
+1763858724832,324,Get Properties,200,OK,Users 1-339,text,true,,85540,130,70,70,http://localhost:5003/api/properties,310,0,0
+1763858695357,29819,Login,200,OK,Users 1-217,text,true,,944,237,69,69,http://localhost:5001/api/auth/login,29819,0,1
+1763858724828,424,Get Properties,200,OK,Users 1-333,text,true,,85540,130,69,69,http://localhost:5003/api/properties,406,0,1
+1763858724832,425,Get Properties,200,OK,Users 1-335,text,true,,85540,130,68,68,http://localhost:5003/api/properties,414,0,0
+1763858724840,434,Get Properties,200,OK,Users 1-344,text,true,,85540,130,67,67,http://localhost:5003/api/properties,432,0,0
+1763858724840,491,Get Properties,200,OK,Users 1-342,text,true,,85540,130,66,66,http://localhost:5003/api/properties,488,0,0
+1763858724830,540,Get Properties,200,OK,Users 1-336,text,true,,85540,130,65,65,http://localhost:5003/api/properties,538,0,1
+1763858724830,569,Get Properties,200,OK,Users 1-337,text,true,,85540,130,64,64,http://localhost:5003/api/properties,565,0,1
+1763858724830,633,Get Properties,200,OK,Users 1-334,text,true,,85540,130,63,63,http://localhost:5003/api/properties,633,0,1
+1763858724947,551,Get Properties,200,OK,Users 1-338,text,true,,85540,130,62,62,http://localhost:5003/api/properties,529,0,1
+1763858724945,557,Get Properties,200,OK,Users 1-349,text,true,,85540,130,61,61,http://localhost:5003/api/properties,547,0,1
+1763858724945,586,Get Properties,200,OK,Users 1-350,text,true,,85540,130,60,60,http://localhost:5003/api/properties,583,0,1
+1763858724942,615,Get Properties,200,OK,Users 1-345,text,true,,85540,130,59,59,http://localhost:5003/api/properties,611,0,1
+1763858724833,732,Get Properties,200,OK,Users 1-340,text,true,,85540,130,58,58,http://localhost:5003/api/properties,730,0,1
+1763858724842,785,Get Properties,200,OK,Users 1-343,text,true,,85540,130,57,57,http://localhost:5003/api/properties,782,0,0
+1763858724947,735,Get Properties,200,OK,Users 1-348,text,true,,85540,130,56,56,http://localhost:5003/api/properties,730,0,1
+1763858724948,750,Get Properties,200,OK,Users 1-347,text,true,,85540,130,55,55,http://localhost:5003/api/properties,747,0,0
+1763858725064,1010,Get Properties,200,OK,Users 1-218,text,true,,85540,130,54,54,http://localhost:5003/api/properties,1007,0,1
+1763858725177,941,Get Properties,200,OK,Users 1-217,text,true,,85540,130,53,53,http://localhost:5003/api/properties,939,0,0
+1763858705557,21134,Login,200,OK,Users 1-353,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,21134,0,2
+1763858705638,21063,Login,200,OK,Users 1-354,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,21063,0,3
+1763858706084,20625,Login,200,OK,Users 1-360,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,20625,0,1
+1763858706156,20558,Login,200,OK,Users 1-361,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20558,0,1
+1763858706238,20484,Login,200,OK,Users 1-362,text,true,,942,237,52,52,http://localhost:5001/api/auth/login,20484,0,1
+1763858706310,20412,Login,200,OK,Users 1-363,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,20412,0,2
+1763858707584,19141,Login,200,OK,Users 1-380,text,true,,942,237,52,52,http://localhost:5001/api/auth/login,19141,0,1
+1763858706535,20190,Login,200,OK,Users 1-366,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20190,0,0
+1763858707668,19058,Login,200,OK,Users 1-381,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,19058,0,4
+1763858706459,20267,Login,200,OK,Users 1-365,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20267,0,1
+1763858706605,20122,Login,200,OK,Users 1-367,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20122,0,4
+1763858706382,20346,Login,200,OK,Users 1-364,text,true,,942,237,52,52,http://localhost:5001/api/auth/login,20346,0,1
+1763858707130,19601,Login,200,OK,Users 1-374,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,19601,0,1
+1763858706906,19831,Login,200,OK,Users 1-371,text,true,,942,237,52,52,http://localhost:5001/api/auth/login,19831,0,0
+1763858706833,19913,Login,200,OK,Users 1-370,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,19913,0,1
+1763858706007,20774,Login,200,OK,Users 1-359,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20774,0,1
+1763858705936,20853,Login,200,OK,Users 1-358,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,20853,0,1
+1763858705858,20932,Login,200,OK,Users 1-357,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,20932,0,1
+1763858705780,21011,Login,200,OK,Users 1-356,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,21011,0,1
+1763858705705,21086,Login,200,OK,Users 1-355,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,21086,0,1
+1763858707808,19375,Login,200,OK,Users 1-383,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,19375,0,0
+1763858707883,19306,Login,200,OK,Users 1-384,text,true,,942,237,52,52,http://localhost:5001/api/auth/login,19306,0,1
+1763858707957,19232,Login,200,OK,Users 1-385,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,19232,0,1
+1763858708485,18707,Login,200,OK,Users 1-392,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,18707,0,1
+1763858708031,19161,Login,200,OK,Users 1-386,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,19161,0,1
+1763858708556,18637,Login,200,OK,Users 1-393,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,18637,0,1
+1763858708332,18861,Login,200,OK,Users 1-390,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,18861,0,0
+1763858707737,19456,Login,200,OK,Users 1-382,text,true,,950,237,52,52,http://localhost:5001/api/auth/login,19456,0,8
+1763858708407,18786,Login,200,OK,Users 1-391,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,18786,0,1
+1763858708183,19011,Login,200,OK,Users 1-388,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,19011,0,1
+1763858708256,18938,Login,200,OK,Users 1-389,text,true,,946,237,52,52,http://localhost:5001/api/auth/login,18938,0,1
+1763858707509,19686,Login,200,OK,Users 1-379,text,true,,942,237,52,52,http://localhost:5001/api/auth/login,19686,0,1
+1763858707431,19765,Login,200,OK,Users 1-378,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,19765,0,1
+1763858707363,19834,Login,200,OK,Users 1-377,text,true,,948,237,52,52,http://localhost:5001/api/auth/login,19834,0,1
+1763858707281,19918,Login,200,OK,Users 1-376,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,19918,0,0
+1763858707209,19991,Login,200,OK,Users 1-375,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,19991,0,1
+1763858707057,20146,Login,200,OK,Users 1-373,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20146,0,0
+1763858706984,20222,Login,200,OK,Users 1-372,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20222,0,1
+1763858706757,20450,Login,200,OK,Users 1-369,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20450,0,1
+1763858706684,20523,Login,200,OK,Users 1-368,text,true,,944,237,52,52,http://localhost:5001/api/auth/login,20523,0,1
+1763858726696,545,Get Properties,200,OK,Users 1-353,text,true,,85540,130,52,52,http://localhost:5003/api/properties,534,0,3
+1763858726703,599,Get Properties,200,OK,Users 1-354,text,true,,85540,130,51,51,http://localhost:5003/api/properties,597,0,0
+1763858708859,18511,Login,200,OK,Users 1-397,text,true,,948,237,50,50,http://localhost:5001/api/auth/login,18511,0,1
+1763858726715,657,Get Properties,200,OK,Users 1-361,text,true,,85540,130,50,50,http://localhost:5003/api/properties,652,0,1
+1763858708932,18441,Login,200,OK,Users 1-398,text,true,,942,237,49,49,http://localhost:5001/api/auth/login,18441,0,1
+1763858709081,18292,Login,200,OK,Users 1-400,text,true,,946,237,49,49,http://localhost:5001/api/auth/login,18292,0,0
+1763858709006,18367,Login,200,OK,Users 1-399,text,true,,944,237,49,49,http://localhost:5001/api/auth/login,18367,0,1
+1763858698957,28457,Login,200,OK,Users 1-265,text,true,,944,237,49,49,http://localhost:5001/api/auth/login,28457,0,0
+1763858708106,19308,Login,200,OK,Users 1-387,text,true,,944,237,49,49,http://localhost:5001/api/auth/login,19308,0,0
+1763858708632,18786,Login,200,OK,Users 1-394,text,true,,942,237,49,49,http://localhost:5001/api/auth/login,18786,0,1
+1763858726711,732,Get Properties,200,OK,Users 1-360,text,true,,85540,130,49,49,http://localhost:5003/api/properties,727,0,1
+1763858708790,18663,Login,200,OK,Users 1-396,text,true,,944,237,48,48,http://localhost:5001/api/auth/login,18663,0,1
+1763858708711,18751,Login,200,OK,Users 1-395,text,true,,944,237,48,48,http://localhost:5001/api/auth/login,18751,0,1
+1763858698882,28582,Login,200,OK,Users 1-264,text,true,,942,237,48,48,http://localhost:5001/api/auth/login,28582,0,0
+1763858726726,755,Get Properties,200,OK,Users 1-380,text,true,,85540,130,48,48,http://localhost:5003/api/properties,751,0,2
+1763858726728,839,Get Properties,200,OK,Users 1-365,text,true,,85540,130,47,47,http://localhost:5003/api/properties,830,0,0
+1763858726729,920,Get Properties,200,OK,Users 1-367,text,true,,85540,130,46,46,http://localhost:5003/api/properties,916,0,0
+1763858726726,948,Get Properties,200,OK,Users 1-366,text,true,,85540,130,45,45,http://localhost:5003/api/properties,936,0,2
+1763858726723,974,Get Properties,200,OK,Users 1-363,text,true,,85540,130,44,44,http://localhost:5003/api/properties,961,0,1
+1763858726723,1018,Get Properties,200,OK,Users 1-362,text,true,,85540,130,43,43,http://localhost:5003/api/properties,996,0,1
+1763858726729,1022,Get Properties,200,OK,Users 1-364,text,true,,85540,130,42,42,http://localhost:5003/api/properties,1009,0,1
+1763858726728,1024,Get Properties,200,OK,Users 1-381,text,true,,85540,130,41,41,http://localhost:5003/api/properties,1021,0,0
+1763858705408,22349,Login,200,OK,Users 1-351,text,true,,944,237,40,40,http://localhost:5001/api/auth/login,22348,0,1
+1763858705481,22293,Login,200,OK,Users 1-352,text,true,,944,237,40,40,http://localhost:5001/api/auth/login,22293,0,1
+1763858726733,1044,Get Properties,200,OK,Users 1-374,text,true,,85540,130,40,40,http://localhost:5003/api/properties,1042,0,0
+1763858726739,1075,Get Properties,200,OK,Users 1-371,text,true,,85540,130,39,39,http://localhost:5003/api/properties,1069,0,1
+1763858726792,1034,Get Properties,200,OK,Users 1-355,text,true,,85540,130,38,38,http://localhost:5003/api/properties,1032,0,1
+1763858726748,1147,Get Properties,200,OK,Users 1-370,text,true,,85540,130,37,37,http://localhost:5003/api/properties,1133,0,1
+1763858726791,1116,Get Properties,200,OK,Users 1-357,text,true,,85540,130,36,36,http://localhost:5003/api/properties,1102,0,0
+1763858726783,1157,Get Properties,200,OK,Users 1-359,text,true,,85540,130,35,35,http://localhost:5003/api/properties,1140,0,0
+1763858727195,1105,Get Properties,200,OK,Users 1-393,text,true,,85540,130,34,34,http://localhost:5003/api/properties,1103,0,1
+1763858727195,1155,Get Properties,200,OK,Users 1-391,text,true,,85540,130,33,33,http://localhost:5003/api/properties,1153,0,1
+1763858727201,1192,Get Properties,200,OK,Users 1-375,text,true,,85540,130,32,32,http://localhost:5003/api/properties,1174,0,1
+1763858727191,1208,Get Properties,200,OK,Users 1-384,text,true,,85540,130,31,31,http://localhost:5003/api/properties,1202,0,3
+1763858727200,1245,Get Properties,200,OK,Users 1-376,text,true,,85540,130,30,30,http://localhost:5003/api/properties,1223,0,0
+1763858727191,1306,Get Properties,200,OK,Users 1-385,text,true,,85540,130,29,29,http://localhost:5003/api/properties,1288,0,3
+1763858727195,1309,Get Properties,200,OK,Users 1-389,text,true,,85540,130,28,28,http://localhost:5003/api/properties,1305,0,1
+1763858727207,1314,Get Properties,200,OK,Users 1-372,text,true,,85540,130,27,27,http://localhost:5003/api/properties,1310,0,1
+1763858727197,1392,Get Properties,200,OK,Users 1-378,text,true,,85540,130,26,26,http://localhost:5003/api/properties,1390,0,1
+1763858727195,1417,Get Properties,200,OK,Users 1-388,text,true,,85540,130,25,25,http://localhost:5003/api/properties,1408,0,1
+1763858727196,1452,Get Properties,200,OK,Users 1-379,text,true,,85540,130,24,24,http://localhost:5003/api/properties,1438,0,1
+1763858727199,1481,Get Properties,200,OK,Users 1-377,text,true,,85540,130,23,23,http://localhost:5003/api/properties,1476,0,1
+1763858727195,1501,Get Properties,200,OK,Users 1-392,text,true,,85540,130,22,22,http://localhost:5003/api/properties,1497,0,1
+1763858727185,1545,Get Properties,200,OK,Users 1-383,text,true,,85540,130,21,21,http://localhost:5003/api/properties,1531,0,1
+1763858727195,1559,Get Properties,200,OK,Users 1-386,text,true,,85540,130,20,20,http://localhost:5003/api/properties,1554,0,1
+1763858727195,1601,Get Properties,200,OK,Users 1-390,text,true,,85540,130,19,19,http://localhost:5003/api/properties,1594,0,1
+1763858727195,1612,Get Properties,200,OK,Users 1-382,text,true,,85540,130,18,18,http://localhost:5003/api/properties,1607,0,1
+1763858727204,1756,Get Properties,200,OK,Users 1-373,text,true,,85540,130,17,17,http://localhost:5003/api/properties,1753,0,1
+1763858727208,1797,Get Properties,200,OK,Users 1-369,text,true,,85540,130,16,16,http://localhost:5003/api/properties,1794,0,0
+1763858727208,1798,Get Properties,200,OK,Users 1-368,text,true,,85540,130,15,15,http://localhost:5003/api/properties,1796,0,1
+1763858727372,1659,Get Properties,200,OK,Users 1-397,text,true,,85540,130,14,14,http://localhost:5003/api/properties,1657,0,0
+1763858727374,1689,Get Properties,200,OK,Users 1-398,text,true,,85540,130,13,13,http://localhost:5003/api/properties,1683,0,1
+1763858727374,1700,Get Properties,200,OK,Users 1-400,text,true,,85540,130,12,12,http://localhost:5003/api/properties,1698,0,1
+1763858727375,1737,Get Properties,200,OK,Users 1-399,text,true,,85540,130,11,11,http://localhost:5003/api/properties,1731,0,0
+1763858727415,1838,Get Properties,200,OK,Users 1-265,text,true,,85540,130,10,10,http://localhost:5003/api/properties,1837,0,1
+1763858727415,1906,Get Properties,200,OK,Users 1-387,text,true,,85540,130,9,9,http://localhost:5003/api/properties,1903,0,1
+1763858727758,1604,Get Properties,200,OK,Users 1-351,text,true,,85540,130,8,8,http://localhost:5003/api/properties,1601,0,1
+1763858727775,1650,Get Properties,200,OK,Users 1-352,text,true,,85540,130,7,7,http://localhost:5003/api/properties,1641,0,1
+1763858727463,1988,Get Properties,200,OK,Users 1-395,text,true,,85540,130,6,6,http://localhost:5003/api/properties,1967,0,1
+1763858727455,2010,Get Properties,200,OK,Users 1-396,text,true,,85540,130,5,5,http://localhost:5003/api/properties,1990,0,1
+1763858727419,2112,Get Properties,200,OK,Users 1-394,text,true,,85540,130,4,4,http://localhost:5003/api/properties,2107,0,1
+1763858727464,2107,Get Properties,200,OK,Users 1-264,text,true,,85540,130,3,3,http://localhost:5003/api/properties,2101,0,0
+1763858726790,3294,Get Properties,200,OK,Users 1-358,text,true,,85540,130,2,2,http://localhost:5003/api/properties,3292,0,1
+1763858726792,3320,Get Properties,200,OK,Users 1-356,text,true,,85540,130,1,1,http://localhost:5003/api/properties,3316,0,1

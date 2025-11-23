@@ -1,0 +1,6 @@
+endpoint,avg_response_time,throughput,error_rate
+POST /api/auth/login,128.15,114.73,0.86
+GET /api/properties,59.9,87.24,0.05
+GET /api/properties/:id,71.37,102.44,0.6
+POST /api/bookings,126.47,114.2,0.29
+GET /api/bookings,73.77,84.61,0.57

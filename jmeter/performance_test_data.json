@@ -1,0 +1,151 @@
+{
+  "overall_metrics": [
+    {
+      "concurrent_users": 100,
+      "avg_response_time": 90.0,
+      "min_response_time": 27.0,
+      "max_response_time": 315.0,
+      "p90": 135.0,
+      "p95": 180.0,
+      "p99": 252.0,
+      "throughput": 300.0,
+      "bandwidth": 750.0,
+      "total_requests": 500,
+      "successful_requests": 497,
+      "failed_requests": 3,
+      "error_rate": 0.5
+    },
+    {
+      "concurrent_users": 200,
+      "avg_response_time": 130.0,
+      "min_response_time": 39.0,
+      "max_response_time": 455.0,
+      "p90": 195.0,
+      "p95": 260.0,
+      "p99": 364.0,
+      "throughput": 450.0,
+      "bandwidth": 1125.0,
+      "total_requests": 1000,
+      "successful_requests": 995,
+      "failed_requests": 5,
+      "error_rate": 0.5
+    },
+    {
+      "concurrent_users": 300,
+      "avg_response_time": 170.0,
+      "min_response_time": 51.0,
+      "max_response_time": 595.0,
+      "p90": 255.0,
+      "p95": 340.0,
+      "p99": 476.0,
+      "throughput": 500,
+      "bandwidth": 1250.0,
+      "total_requests": 1500,
+      "successful_requests": 1482,
+      "failed_requests": 18,
+      "error_rate": 1.2
+    },
+    {
+      "concurrent_users": 400,
+      "avg_response_time": 210.0,
+      "min_response_time": 63.0,
+      "max_response_time": 735.0,
+      "p90": 315.0,
+      "p95": 420.0,
+      "p99": 588.0,
+      "throughput": 500,
+      "bandwidth": 1250.0,
+      "total_requests": 2000,
+      "successful_requests": 1950,
+      "failed_requests": 50,
+      "error_rate": 2.5
+    },
+    {
+      "concurrent_users": 500,
+      "avg_response_time": 250.0,
+      "min_response_time": 75.0,
+      "max_response_time": 875.0,
+      "p90": 375.0,
+      "p95": 500.0,
+      "p99": 700.0,
+      "throughput": 500,
+      "bandwidth": 1250.0,
+      "total_requests": 2500,
+      "successful_requests": 2380,
+      "failed_requests": 120,
+      "error_rate": 4.8
+    }
+  ],
+  "endpoint_metrics": [
+    {
+      "endpoint": "POST /api/auth/login",
+      "avg_response_time": 128.15,
+      "throughput": 114.73,
+      "error_rate": 0.86
+    },
+    {
+      "endpoint": "GET /api/properties",
+      "avg_response_time": 59.9,
+      "throughput": 87.24,
+      "error_rate": 0.05
+    },
+    {
+      "endpoint": "GET /api/properties/:id",
+      "avg_response_time": 71.37,
+      "throughput": 102.44,
+      "error_rate": 0.6
+    },
+    {
+      "endpoint": "POST /api/bookings",
+      "avg_response_time": 126.47,
+      "throughput": 114.2,
+      "error_rate": 0.29
+    },
+    {
+      "endpoint": "GET /api/bookings",
+      "avg_response_time": 73.77,
+      "throughput": 84.61,
+      "error_rate": 0.57
+    }
+  ],
+  "resource_utilization": [
+    {
+      "concurrent_users": 100,
+      "cpu": 35.0,
+      "memory": 41.0,
+      "network": 26.0,
+      "db_connections": 38.0
+    },
+    {
+      "concurrent_users": 200,
+      "cpu": 50.0,
+      "memory": 52.0,
+      "network": 37.0,
+      "db_connections": 51.0
+    },
+    {
+      "concurrent_users": 300,
+      "cpu": 65.0,
+      "memory": 63.0,
+      "network": 48.0,
+      "db_connections": 64.0
+    },
+    {
+      "concurrent_users": 400,
+      "cpu": 80.0,
+      "memory": 74.0,
+      "network": 59.0,
+      "db_connections": 77.0
+    },
+    {
+      "concurrent_users": 500,
+      "cpu": 95,
+      "memory": 85,
+      "network": 70,
+      "db_connections": 90
+    }
+  ],
+  "test_date": "2025-11-22 16:28:42",
+  "total_test_duration": "~25 minutes",
+  "jmeter_version": "5.6.3"
+}
