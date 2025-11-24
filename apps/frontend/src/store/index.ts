@@ -21,7 +21,12 @@ export const store = configureStore({
         ignoredPaths: ['bookings.checkInDate', 'bookings.checkOutDate'],
       },
     }),
+  devTools: import.meta.env.DEV, // Explicitly enable Redux DevTools in development
 });
+
+// Log initial state for debugging
+console.log('🔴 Redux Store Initialized');
+console.log('📦 Initial State:', store.getState());
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

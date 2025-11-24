@@ -3,6 +3,7 @@ import Booking from '../models/Booking.js';
 import Property from '../models/Property.js';
 import User from '../models/User.js';
 import mongoose from 'mongoose';
+import { sendBookingRequest, sendBookingUpdate } from '../kafka/producer.js';
 
 // Create a new booking
 export const createBooking = async (req, res) => {
@@ -115,6 +116,28 @@ export const createBooking = async (req, res) => {
     });
 
     console.log('✅ Booking created with ID:', newBooking._id);
+
+    // ========== KAFKA INTEGRATION: Publish booking request event ==========
+    const eventData = {
+      type: 'booking-created',
+      bookingId: newBooking._id.toString(),
+      propertyId: property_id,
+      propertyName: property.property_name,
+      travelerId: traveler_id.toString(),
+      ownerId: property.owner_id.toString(),
+      checkIn: checkIn.toISOString(),
+      checkOut: checkOut.toISOString(),
+      guests,
+      totalPrice: total_price,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Publish event to Kafka (non-blocking)
+    sendBookingRequest(eventData).catch(err => {
+      console.error('⚠️ Failed to publish to Kafka (non-critical):', err);
+    });
+    console.log('📤 Booking request sent to Kafka:', eventData.bookingId);
+    // ========================================================================
 
     // Fetch the created booking with property details
     const booking = await Booking.findById(newBooking._id)
@@ -497,6 +520,346 @@ export const getPropertyBookedDates = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Get all bookings for owner's properties
+export const getOwnerBookings = async (req, res) => {
+  try {
+    const ownerId = req.session.user._id || req.session.user.id;
+    const { status, propertyId, search, sortBy = 'createdAt', order = 'DESC' } = req.query;
+
+    console.log('📋 [getOwnerBookings] Owner:', { ownerId, status, propertyId, search });
+
+    // Build query for bookings where user is the owner
+    let query = { owner_id: ownerId };
+
+    // Filter by status if provided
+    if (status && status !== 'ALL') {
+      query.status = status.toUpperCase();
+    }
+
+    // Filter by property if provided
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+      query.property_id = propertyId;
+    }
+
+    console.log('📋 [getOwnerBookings] Query:', JSON.stringify(query));
+
+    // Get bookings with populated data
+    let bookingsQuery = Booking.find(query)
+      .populate('property_id', 'property_name city state images address')
+      .populate('traveler_id', 'name email phone_number');
+
+    // Apply sorting
+    const sortOrder = order === 'ASC' ? 1 : -1;
+    bookingsQuery = bookingsQuery.sort({ [sortBy]: sortOrder });
+
+    const bookings = await bookingsQuery;
+
+    console.log('📋 [getOwnerBookings] Found bookings:', bookings.length);
+
+    // Format response with guest information
+    const formattedBookings = bookings.map(booking => {
+      const bookingData = booking.toObject();
+      
+      // Add property details
+      if (booking.property_id) {
+        bookingData.property_name = booking.property_id.property_name;
+        bookingData.city = booking.property_id.city;
+        bookingData.state = booking.property_id.state;
+        bookingData.images = booking.property_id.images;
+        bookingData.address = booking.property_id.address;
+      }
+      
+      // Add guest details
+      if (booking.traveler_id) {
+        bookingData.guest_name = booking.traveler_id.name;
+        bookingData.guest_email = booking.traveler_id.email;
+        bookingData.guest_phone = booking.traveler_id.phone_number;
+      }
+      
+      return bookingData;
+    });
+
+    // Apply search filter if provided (after formatting)
+    let filteredBookings = formattedBookings;
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredBookings = formattedBookings.filter(booking => 
+        booking.property_name?.toLowerCase().includes(searchLower) ||
+        booking.guest_name?.toLowerCase().includes(searchLower) ||
+        booking.guest_email?.toLowerCase().includes(searchLower) ||
+        booking.city?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    res.json({
+      success: true,
+      count: filteredBookings.length,
+      data: filteredBookings
+    });
+  } catch (error) {
+    console.error('❌ [getOwnerBookings] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Get booking statistics for owner
+export const getOwnerBookingStats = async (req, res) => {
+  try {
+    const ownerId = req.session.user._id || req.session.user.id;
+
+    console.log('📊 [getOwnerBookingStats] Owner:', ownerId);
+
+    // Get all bookings for this owner
+    const allBookings = await Booking.find({ owner_id: ownerId });
+
+    // Calculate statistics
+    const stats = {
+      total_bookings: allBookings.length,
+      pending_count: 0,
+      confirmed_count: 0,
+      cancelled_count: 0,
+      total_revenue: 0,
+      pending_revenue: 0
+    };
+
+    allBookings.forEach(booking => {
+      switch (booking.status) {
+        case 'PENDING':
+          stats.pending_count++;
+          stats.pending_revenue += booking.total_price || 0;
+          break;
+        case 'ACCEPTED':
+          stats.confirmed_count++;
+          stats.total_revenue += booking.total_price || 0;
+          break;
+        case 'CANCELLED':
+          stats.cancelled_count++;
+          break;
+      }
+    });
+
+    console.log('📊 [getOwnerBookingStats] Stats:', stats);
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('❌ [getOwnerBookingStats] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Get single booking details for owner
+export const getOwnerBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ownerId = req.session.user._id || req.session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
+
+    console.log('📋 [getOwnerBookingById] Fetching:', { id, ownerId });
+
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId
+    })
+      .populate('property_id', 'property_name property_type city state images address bedrooms bathrooms amenities max_guests')
+      .populate('traveler_id', 'name email phone_number');
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found or you do not have access'
+      });
+    }
+
+    // Format response
+    const bookingData = booking.toObject();
+    
+    if (booking.property_id) {
+      bookingData.property_name = booking.property_id.property_name;
+      bookingData.property_type = booking.property_id.property_type;
+      bookingData.city = booking.property_id.city;
+      bookingData.state = booking.property_id.state;
+      bookingData.images = booking.property_id.images;
+      bookingData.address = booking.property_id.address;
+      bookingData.bedrooms = booking.property_id.bedrooms;
+      bookingData.bathrooms = booking.property_id.bathrooms;
+      bookingData.amenities = booking.property_id.amenities;
+      bookingData.max_guests = booking.property_id.max_guests;
+    }
+    
+    if (booking.traveler_id) {
+      bookingData.guest_name = booking.traveler_id.name;
+      bookingData.guest_email = booking.traveler_id.email;
+      bookingData.guest_phone = booking.traveler_id.phone_number;
+    }
+
+    res.json({
+      success: true,
+      data: bookingData
+    });
+  } catch (error) {
+    console.error('❌ [getOwnerBookingById] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Approve/Accept a booking
+export const approveBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ownerId = req.session.user._id || req.session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
+
+    console.log('📋 [approveBooking] Approving:', { id, ownerId });
+
+    // Verify booking belongs to owner and is pending
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'PENDING'
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found, unauthorized, or not in pending status'
+      });
+    }
+
+    // Update booking status to ACCEPTED
+    booking.status = 'ACCEPTED';
+    await booking.save();
+
+    console.log('✅ [approveBooking] Booking approved:', id);
+
+    // ========== KAFKA INTEGRATION: Publish status update ==========
+    const updateData = {
+      type: 'booking-status-updated',
+      bookingId: id,
+      status: 'ACCEPTED',
+      travelerId: booking.traveler_id.toString(),
+      ownerId: ownerId.toString(),
+      propertyId: booking.property_id.toString(),
+      timestamp: new Date().toISOString(),
+    };
+
+    sendBookingUpdate(updateData).catch(err => {
+      console.error('⚠️ Failed to publish update to Kafka (non-critical):', err);
+    });
+    console.log('📤 Booking ACCEPTED update sent to Kafka:', id);
+    // ================================================================
+
+    res.json({
+      success: true,
+      message: 'Booking approved successfully'
+    });
+  } catch (error) {
+    console.error('❌ [approveBooking] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to approve booking',
+      error: error.message
+    });
+  }
+};
+
+// Reject/Decline a booking
+export const rejectBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ownerId = req.session.user._id || req.session.user.id;
+    const { reason } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid booking ID'
+      });
+    }
+
+    console.log('📋 [rejectBooking] Rejecting:', { id, ownerId, reason });
+
+    // Verify booking belongs to owner and is pending
+    const booking = await Booking.findOne({
+      _id: id,
+      owner_id: ownerId,
+      status: 'PENDING'
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found, unauthorized, or not in pending status'
+      });
+    }
+
+    // Update booking status to CANCELLED
+    booking.status = 'CANCELLED';
+    booking.cancelled_by = 'owner';
+    booking.cancelled_at = new Date();
+    booking.cancellation_reason = reason || 'Rejected by owner';
+    await booking.save();
+
+    console.log('✅ [rejectBooking] Booking rejected:', id);
+
+    // ========== KAFKA INTEGRATION: Publish status update ==========
+    const updateData = {
+      type: 'booking-status-updated',
+      bookingId: id,
+      status: 'CANCELLED',
+      travelerId: booking.traveler_id.toString(),
+      ownerId: ownerId.toString(),
+      propertyId: booking.property_id.toString(),
+      reason: reason || 'Rejected by owner',
+      timestamp: new Date().toISOString(),
+    };
+
+    sendBookingUpdate(updateData).catch(err => {
+      console.error('⚠️ Failed to publish update to Kafka (non-critical):', err);
+    });
+    console.log('📤 Booking REJECTED update sent to Kafka:', id);
+    // ================================================================
+
+    res.json({
+      success: true,
+      message: 'Booking rejected successfully'
+    });
+  } catch (error) {
+    console.error('❌ [rejectBooking] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject booking',
       error: error.message
     });
   }

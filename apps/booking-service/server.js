@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import { connectDB } from './src/config/db.js';
 import bookingRoutes from './src/routes/bookingRoutes.js';
 import ownerBookingRoutes from './src/routes/ownerBookingRoutes.js';
+import { connectProducer, disconnectProducer } from './src/kafka/producer.js';
+import { connectBookingUpdateConsumer, disconnectConsumer } from './src/kafka/consumer.js';
 
 dotenv.config();
 
@@ -102,9 +104,28 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
+    
+    // Initialize Kafka connections
+    await connectProducer();
+    await connectBookingUpdateConsumer(async (updateData) => {
+      console.log('📥 Received booking update from Kafka:', updateData);
+      // Handle booking status updates from owner-service
+      // This could trigger notifications, emails, etc.
+    });
+    
     app.listen(PORT, () => {
       console.log(`🚀 Booking Service running on http://localhost:${PORT}`);
       console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log('📤 Kafka Producer: Ready to publish booking requests');
+      console.log('📥 Kafka Consumer: Listening for booking updates');
+    });
+    
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, shutting down gracefully...');
+      await disconnectProducer();
+      await disconnectConsumer();
+      process.exit(0);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

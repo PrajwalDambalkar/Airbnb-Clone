@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MessageCircle } from 'lucide-react';
-import { propertyService } from '../services/propertyService';
 import { useDarkMode } from '../App';
 import type { Property } from '../types/property';
 import { getFirstImage } from '../utils/imageUtils';
-import { useAppSelector } from '../store/hooks';
-import { selectUser } from '../store/slices/authSlice';
 import AIAgentSidebar from '../components/AIAgentSidebar';
 import bookingService, { type Booking } from '../services/bookingService';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProperties as fetchPropertiesThunk, applyFilters } from '../store/slices/propertiesSlice';
+import type { AppDispatch, RootState } from '../store';
 
 export default function Home() {
-    const [properties, setProperties] = useState<Property[]>([]);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch<AppDispatch>();
+    const { properties, loading } = useSelector((state: RootState) => state.properties);
+    const user = useSelector((state: RootState) => state.auth.user);
     const [guests, setGuests] = useState<string>('');
     const [checkInDate, setCheckInDate] = useState<string>('');
     const [checkOutDate, setCheckOutDate] = useState<string>('');
@@ -24,7 +25,6 @@ export default function Home() {
     const [hoveredDate, setHoveredDate] = useState<string | null>(null);
     const [allProperties, setAllProperties] = useState<Property[]>([]);
     const { isDark } = useDarkMode();
-    const user = useAppSelector(selectUser);
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const laCarouselRef = useRef<HTMLDivElement>(null);
     const sdCarouselRef = useRef<HTMLDivElement>(null);
@@ -118,8 +118,8 @@ export default function Home() {
     ];
 
     useEffect(() => {
-        fetchProperties();
-    }, []);
+        fetchPropertiesData();
+    }, [dispatch]);
 
     // Load user-specific favorites and migrate old global favorites
     useEffect(() => {
@@ -207,19 +207,17 @@ export default function Home() {
         fetchBookings();
     }, [user]);
 
-    const fetchProperties = async () => {
+    const fetchPropertiesData = async () => {
         try {
-            setLoading(true);
-            const response = await propertyService.getAllProperties();
-            console.log('🔍 API Response:', response);
-            console.log('🖼️ First property images:', response.data?.[0]?.images);
-            console.log('🖼️ Images type:', typeof response.data?.[0]?.images);
-            setProperties(response.data || []);
-            setAllProperties(response.data || []);
+            console.log('🔄 Fetching properties via Redux thunk...');
+            const resultAction = await dispatch(fetchPropertiesThunk());
+            if (fetchPropertiesThunk.fulfilled.match(resultAction)) {
+                console.log('✅ Properties loaded successfully via Redux');
+                console.log('🖼️ First property images:', resultAction.payload?.[0]?.images);
+                setAllProperties(resultAction.payload || []);
+            }
         } catch (error) {
-            console.error('Error fetching properties:', error);
-        } finally {
-            setLoading(false);
+            console.error('❌ Error fetching properties:', error);
         }
     };
 
@@ -228,6 +226,14 @@ export default function Home() {
         setShowDestinations(false);
         
         console.log('🔍 Search triggered with:', { destination, checkInDate, checkOutDate, guests });
+        
+        // Dispatch filter changes to Redux
+        dispatch(applyFilters({
+            destination: destination || undefined,
+            guests: guests ? parseInt(guests) : undefined,
+            checkIn: checkInDate || undefined,
+            checkOut: checkOutDate || undefined
+        }));
         
         let filtered = [...allProperties];
 
@@ -253,7 +259,7 @@ export default function Home() {
         }
 
         console.log('✅ Filtered results:', filtered.length, 'properties');
-        setProperties(filtered);
+        // Redux handles the filtering, no need to manually set properties
     };
 
     const handleDestinationSelect = (dest: string) => {
@@ -267,7 +273,8 @@ export default function Home() {
         setCheckOutDate('');
         setDestination('');
         setShowDestinations(false);
-        fetchProperties();
+        dispatch(applyFilters({})); // Reset Redux filters
+        fetchPropertiesData();
     };
 
     const scrollCarousel = (ref: any, direction: 'left' | 'right') => {
