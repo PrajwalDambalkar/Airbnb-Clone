@@ -1,0 +1,201 @@
+version: "3.9"
+
+# Optimized for AWS EC2 t2.micro (1GB RAM)
+# This is a lightweight version that excludes heavy services like Ollama
+
+services:
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    image: backend:latest
+    container_name: backend
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      CORS_ORIGIN: "*"
+      SESSION_SECRET: ${SESSION_SECRET:-aws-deployment-secret-change-this}
+      MONGODB_URI: ${MONGODB_URI}
+      AGENT_SERVICE_URL: http://agent-service:8000
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.3
+
+  traveler-service:
+    build:
+      context: ./apps/traveler-service
+      dockerfile: Dockerfile
+    image: traveler-service:latest
+    container_name: traveler-service
+    depends_on:
+      - kafka
+    environment:
+      NODE_ENV: production
+      PORT: 5005
+      CORS_ORIGIN: "*"
+      SESSION_SECRET: ${SESSION_SECRET:-aws-deployment-secret-change-this}
+      MONGODB_URI: ${TRAVELER_MONGODB_URI}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_REQUEST_TOPIC: booking-requests
+      KAFKA_RESPONSE_TOPIC: booking-updates
+    ports:
+      - "5005:5005"
+    restart: unless-stopped
+    mem_limit: 200m
+    cpus: 0.2
+
+  owner-service:
+    build:
+      context: ./apps/owner-service
+      dockerfile: Dockerfile
+    image: owner-service:latest
+    container_name: owner-service
+    depends_on:
+      - kafka
+    environment:
+      NODE_ENV: production
+      PORT: 5002
+      CORS_ORIGIN: "*"
+      SESSION_SECRET: ${SESSION_SECRET:-aws-deployment-secret-change-this}
+      MONGODB_URI: ${OWNER_MONGODB_URI}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_REQUEST_TOPIC: booking-requests
+      KAFKA_RESPONSE_TOPIC: booking-updates
+    ports:
+      - "5002:5002"
+    restart: unless-stopped
+    mem_limit: 200m
+    cpus: 0.2
+
+  property-service:
+    build:
+      context: ./apps/property-service
+      dockerfile: Dockerfile
+    image: property-service:latest
+    container_name: property-service
+    environment:
+      NODE_ENV: production
+      PORT: 5003
+      CORS_ORIGIN: "*"
+      SESSION_SECRET: ${SESSION_SECRET:-aws-deployment-secret-change-this}
+      MONGODB_URI: ${PROPERTY_MONGODB_URI}
+    ports:
+      - "5003:5003"
+    restart: unless-stopped
+    mem_limit: 200m
+    cpus: 0.2
+
+  booking-service:
+    build:
+      context: ./apps/booking-service
+      dockerfile: Dockerfile
+    image: booking-service:latest
+    container_name: booking-service
+    depends_on:
+      - kafka
+    environment:
+      NODE_ENV: production
+      PORT: 5004
+      CORS_ORIGIN: "*"
+      SESSION_SECRET: ${SESSION_SECRET:-aws-deployment-secret-change-this}
+      MONGODB_URI: ${BOOKING_MONGODB_URI}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_REQUEST_TOPIC: booking-requests
+      KAFKA_RESPONSE_TOPIC: booking-updates
+    ports:
+      - "5004:5004"
+    restart: unless-stopped
+    mem_limit: 200m
+    cpus: 0.2
+
+  # Lightweight Kafka setup for AWS
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+    mem_limit: 200m
+    cpus: 0.2
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms128M"
+    restart: unless-stopped
+    mem_limit: 300m
+    cpus: 0.3
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: airbnb-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    restart: unless-stopped
+    mem_limit: 150m
+    cpus: 0.2
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    image: frontend:latest
+    container_name: frontend
+    ports:
+      - "5173:5173"
+      - "80:5173"  # Also expose on port 80 for easy access
+    environment:
+      # IMPORTANT: Replace <EC2-PUBLIC-IP> with your actual EC2 public IP
+      - VITE_BACKEND_URL=http://<EC2-PUBLIC-IP>:5001
+      - VITE_OWNER_SERVICE_URL=http://<EC2-PUBLIC-IP>:5002
+      - VITE_PROPERTY_SERVICE_URL=http://<EC2-PUBLIC-IP>:5003
+      - VITE_BOOKING_SERVICE_URL=http://<EC2-PUBLIC-IP>:5004
+      - VITE_TRAVELER_SERVICE_URL=http://<EC2-PUBLIC-IP>:5005
+    restart: unless-stopped
+    mem_limit: 200m
+    cpus: 0.2
+
+# Note: Ollama and agent-service are excluded to save memory on t2.micro
+# Total estimated memory usage: ~1.8GB (with overhead)
+# This will work on t2.micro with some swapping
+
+networks:
+  default:
+    driver: bridge
+
+# No volumes defined - ephemeral data is fine for demo/screenshot purposes
+# This also helps stay within free tier limits

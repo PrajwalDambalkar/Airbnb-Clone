@@ -2,7 +2,23 @@
 
 A microservices-based Airbnb clone featuring AI-powered travel planning.
 
-## 🚀 Quick Start (Recommended)
+## 🎯 AWS Deployment (For Lab 2 Report)
+
+**Need to run this on AWS for screenshots?** 
+
+📖 **Start here:** [`START_HERE_AWS.md`](START_HERE_AWS.md) - Simple 3-step guide
+- Cost: **$0** (AWS Free Tier)
+- Time: **2 hours**
+- Gets you all screenshots needed for report
+
+**Other AWS Guides:**
+- [`AWS_VISUAL_GUIDE.md`](AWS_VISUAL_GUIDE.md) - Visual flowcharts and diagrams
+- [`AWS_FREE_TIER_DEPLOYMENT.md`](AWS_FREE_TIER_DEPLOYMENT.md) - Detailed deployment guide
+- [`AWS_QUICK_REFERENCE.md`](AWS_QUICK_REFERENCE.md) - Quick commands reference
+
+---
+
+## 🚀 Quick Start (Local Development)
 
 Follow these steps to run the entire project locally.
 

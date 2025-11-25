@@ -19,7 +19,9 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   // These are user-uploaded images
   if (imagePath.startsWith('/uploads/')) {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    return `${apiUrl}${imagePath}`;
+    // Add timestamp to prevent browser caching
+    const timestamp = new Date().getTime();
+    return `${apiUrl}${imagePath}?t=${timestamp}`;
   }
 
   // Fallback: prepend API URL for any other relative paths

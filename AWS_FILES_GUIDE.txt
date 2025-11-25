@@ -1,0 +1,55 @@
+════════════════════════════════════════════════════════════════════
+           AWS DEPLOYMENT - WHICH FILE SHOULD I READ?
+════════════════════════════════════════════════════════════════════
+
+🎯 JUST GETTING STARTED?
+   ► START_HERE_AWS.md
+   Simple 3-step guide. Read this first!
+   Time: 5 min read, 2 hours to complete
+
+📊 WANT TO SEE DIAGRAMS?
+   ► AWS_VISUAL_GUIDE.md
+   Flowcharts and visual explanations
+   Time: 3 min read
+
+⚡ NEED QUICK COMMANDS?
+   ► AWS_CHEAT_SHEET.md
+   Copy-paste commands only
+   Time: 1 min read
+
+📖 WANT DETAILED EXPLANATION?
+   ► AWS_FREE_TIER_DEPLOYMENT.md
+   Complete guide with troubleshooting
+   Time: 10 min read
+
+📋 NEED COMMAND REFERENCE?
+   ► AWS_QUICK_REFERENCE.md
+   Commands, troubleshooting, checklist
+   Time: 5 min read
+
+📝 NEED FULL OVERVIEW?
+   ► AWS_DEPLOYMENT_SUMMARY.md
+   Everything in one place
+   Time: 15 min read
+
+════════════════════════════════════════════════════════════════════
+
+RECOMMENDED ORDER:
+
+1. Read: START_HERE_AWS.md (5 min)
+2. Do: Follow the 3 steps (2 hours)
+3. Reference: AWS_CHEAT_SHEET.md (when needed)
+4. Help: AWS_QUICK_REFERENCE.md (if stuck)
+
+════════════════════════════════════════════════════════════════════
+
+TL;DR - THE 3 STEPS:
+
+1. Launch EC2 (t2.micro) on AWS Console
+2. SSH to EC2, run deploy.sh, then docker-compose up
+3. Take screenshots, then stop EC2
+
+Cost: $0
+Time: 2 hours
+
+════════════════════════════════════════════════════════════════════

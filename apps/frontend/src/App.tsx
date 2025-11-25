@@ -18,6 +18,7 @@ import AddProperty from './pages/AddProperty';
 import EditProperty from './pages/EditProperty';
 import EditProfile from './pages/EditProfile';
 import { Moon, Sun, Heart, Home as HomeIcon, Calendar, Settings, LogOut, ChevronDown, Menu, X } from 'lucide-react';
+import { getImageUrl } from './utils/imageUtils';
 
 // Dark Mode Context
 interface DarkModeContextType {
@@ -152,7 +153,7 @@ function Header() {
             >
               {user.profile_picture ? (
                 <img 
-                  src={`http://localhost:5001${user.profile_picture}`} 
+                  src={getImageUrl(user.profile_picture)} 
                   alt={user.name}
                   className="w-8 h-8 rounded-full object-cover"
                 />

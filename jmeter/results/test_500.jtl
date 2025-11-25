@@ -1,0 +1,21 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1763993069229,288,Login,200,OK,Users 1-1,text,true,,944,237,1,1,http://localhost:5001/api/auth/login,286,0,9
+1763993069518,262,Get Properties,200,OK,Users 1-1,text,true,,85540,130,1,1,http://localhost:5003/api/properties,262,0,1
+1763993070203,247,Login,200,OK,Users 1-2,text,true,,946,237,1,1,http://localhost:5001/api/auth/login,247,0,2
+1763993070452,241,Get Properties,200,OK,Users 1-2,text,true,,85540,130,1,1,http://localhost:5003/api/properties,240,0,0
+1763993071203,240,Login,200,OK,Users 1-3,text,true,,944,237,1,1,http://localhost:5001/api/auth/login,240,0,2
+1763993071445,260,Get Properties,200,OK,Users 1-3,text,true,,85540,130,1,1,http://localhost:5003/api/properties,259,0,1
+1763993072201,210,Login,200,OK,Users 1-4,text,true,,942,237,1,1,http://localhost:5001/api/auth/login,210,0,2
+1763993072413,233,Get Properties,200,OK,Users 1-4,text,true,,85540,130,1,1,http://localhost:5003/api/properties,233,0,1
+1763993073203,236,Login,200,OK,Users 1-5,text,true,,942,237,1,1,http://localhost:5001/api/auth/login,236,0,2
+1763993073440,247,Get Properties,200,OK,Users 1-5,text,true,,85540,130,1,1,http://localhost:5003/api/properties,247,0,1
+1763993074204,232,Login,200,OK,Users 1-6,text,true,,942,237,1,1,http://localhost:5001/api/auth/login,232,0,1
+1763993074436,241,Get Properties,200,OK,Users 1-6,text,true,,85540,130,1,1,http://localhost:5003/api/properties,240,0,1
+1763993075200,237,Login,200,OK,Users 1-7,text,true,,942,237,1,1,http://localhost:5001/api/auth/login,237,0,2
+1763993075440,252,Get Properties,200,OK,Users 1-7,text,true,,85540,130,1,1,http://localhost:5003/api/properties,252,0,1
+1763993076198,232,Login,200,OK,Users 1-8,text,true,,946,237,1,1,http://localhost:5001/api/auth/login,232,0,0
+1763993076431,245,Get Properties,200,OK,Users 1-8,text,true,,85540,130,1,1,http://localhost:5003/api/properties,244,0,0
+1763993077204,245,Login,200,OK,Users 1-9,text,true,,946,237,1,1,http://localhost:5001/api/auth/login,245,0,1
+1763993077451,239,Get Properties,200,OK,Users 1-9,text,true,,85540,130,1,1,http://localhost:5003/api/properties,239,0,2
+1763993078199,240,Login,200,OK,Users 1-10,text,true,,944,237,1,1,http://localhost:5001/api/auth/login,240,0,2
+1763993078440,232,Get Properties,200,OK,Users 1-10,text,true,,85540,130,1,1,http://localhost:5003/api/properties,231,0,1
