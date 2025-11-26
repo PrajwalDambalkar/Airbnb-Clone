@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-service
+  labels:
+    app: agent-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-service
+  template:
+    metadata:
+      labels:
+        app: agent-service
+    spec:
+      containers:
+      - name: agent-service
+        image: agent-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AGENT_MONGODB_URI
+        - name: MONGODB_DB_NAME
+          value: "airbnb_db"
+        - name: AGENT_SERVICE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AGENT_SERVICE_SECRET
+        - name: OLLAMA_BASE_URL
+          value: "http://ollama:11434"
+        - name: OLLAMA_MODEL
+          value: "llama3.2:1b"
+        - name: TAVILY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: TAVILY_API_KEY
+              optional: true
+        - name: ALLOWED_ORIGINS
+          value: "http://localhost:5173,http://localhost:5001"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 90
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 5
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-service
+  labels:
+    app: agent-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: agent-service

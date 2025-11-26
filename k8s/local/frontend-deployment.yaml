@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5173
+          name: http
+        env:
+        - name: VITE_BACKEND_URL
+          value: "http://localhost:5001"
+        - name: VITE_OWNER_SERVICE_URL
+          value: "http://localhost:5002"
+        - name: VITE_PROPERTY_SERVICE_URL
+          value: "http://localhost:5003"
+        - name: VITE_BOOKING_SERVICE_URL
+          value: "http://localhost:5004"
+        - name: VITE_TRAVELER_SERVICE_URL
+          value: "http://localhost:5005"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5173
+    targetPort: 5173
+    protocol: TCP
+    name: http
+  selector:
+    app: frontend

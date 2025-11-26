@@ -20,6 +20,7 @@ I've set up everything you need to deploy your Airbnb application to AWS Free Ti
 ### **Single EC2 Instance Approach** (Recommended)
 
 Instead of expensive AWS services:
+
 - ❌ **EKS** ($73/month) → ✅ **Local Kubernetes** + Documentation
 - ❌ **MSK** ($150/month) → ✅ **Self-hosted Kafka** on EC2
 - ❌ **DocumentDB** ($50/month) → ✅ **MongoDB Atlas** (Free)
@@ -27,6 +28,7 @@ Instead of expensive AWS services:
 **Result: $0/month instead of $273/month** 💰
 
 ### Architecture
+
 ```
 ┌─────────────────────────────────────────┐
 │  AWS EC2 t2.micro (Free Tier)          │
@@ -58,8 +60,8 @@ Instead of expensive AWS services:
    - **Type:** t2.micro (1 vCPU, 1GB RAM)
    - **Storage:** 30GB gp3
    - **Key Pair:** Create new or select existing
-   
 3. Security Group - Add these inbound rules:
+
    ```
    Type        Port    Source      Description
    SSH         22      Your IP     SSH access
@@ -115,6 +117,7 @@ docker ps
 ## 📸 Required Screenshots for Report
 
 ### AWS Console (5 screenshots)
+
 1. ✅ EC2 Dashboard - showing t2.micro instance running
 2. ✅ Instance Details - AMI, type, security groups
 3. ✅ Security Group Rules - all ports configured
@@ -122,6 +125,7 @@ docker ps
 5. ✅ Billing Dashboard - showing $0.00 cost
 
 ### Application (6 screenshots)
+
 1. ✅ Frontend homepage on EC2
 2. ✅ Backend API health check response
 3. ✅ Property listings page
@@ -130,12 +134,14 @@ docker ps
 6. ✅ Docker stats showing resource usage
 
 ### Kafka (4 screenshots)
+
 1. ✅ Kafka UI - Topics list
 2. ✅ Kafka UI - Messages in booking-requests topic
 3. ✅ Service logs showing Kafka producer
 4. ✅ Service logs showing Kafka consumer
 
 ### Redux (4 screenshots)
+
 1. ✅ Redux DevTools - State tree (auth, properties, bookings)
 2. ✅ Redux DevTools - Action history
 3. ✅ Redux DevTools - State diff on action
@@ -147,14 +153,14 @@ docker ps
 
 ## 💰 Cost Breakdown
 
-| Service | AWS Option | Cost/mo | Our Choice | Cost/mo |
-|---------|-----------|---------|------------|---------|
-| Compute | EKS | $73 | EC2 t2.micro | **$0** |
-| Messaging | MSK | $150 | Self-hosted Kafka | **$0** |
-| Database | DocumentDB | $50 | MongoDB Atlas | **$0** |
-| Storage | EBS | $5 | 30GB gp3 (Free) | **$0** |
-| Load Balancer | ALB | $16 | Not needed | **$0** |
-| **TOTAL** | | **$294** | | **$0** ✅ |
+| Service       | AWS Option | Cost/mo  | Our Choice        | Cost/mo   |
+| ------------- | ---------- | -------- | ----------------- | --------- |
+| Compute       | EKS        | $73      | EC2 t2.micro      | **$0**    |
+| Messaging     | MSK        | $150     | Self-hosted Kafka | **$0**    |
+| Database      | DocumentDB | $50      | MongoDB Atlas     | **$0**    |
+| Storage       | EBS        | $5       | 30GB gp3 (Free)   | **$0**    |
+| Load Balancer | ALB        | $16      | Not needed        | **$0**    |
+| **TOTAL**     |            | **$294** |                   | **$0** ✅ |
 
 **Savings: $294/month = $3,528/year** 🎉
 
@@ -163,13 +169,16 @@ docker ps
 ## 🎓 What to Include in Your Report
 
 ### 1. Architecture Section
+
 ```markdown
 ## System Architecture
 
 ### Deployment Architecture
+
 [Insert diagram showing EC2 → Services → MongoDB]
 
 ### Technology Stack
+
 - **Cloud Provider:** AWS (Free Tier)
 - **Compute:** EC2 t2.micro (1 vCPU, 1GB RAM)
 - **Container:** Docker + Docker Compose
@@ -179,6 +188,7 @@ docker ps
 - **Backend:** Node.js microservices
 
 ### Services Deployed
+
 1. Frontend (Port 5173) - React + Vite + Redux
 2. Backend API (Port 5001) - Main API Gateway
 3. Property Service (Port 5003) - Property management
@@ -189,6 +199,7 @@ docker ps
 8. Kafka UI (Port 8080) - Kafka monitoring
 
 ### AWS Infrastructure
+
 - **Instance Type:** t2.micro (Free tier eligible)
 - **OS:** Amazon Linux 2023
 - **Storage:** 30GB gp3 (Free tier: 30GB)
@@ -197,43 +208,51 @@ docker ps
 ```
 
 ### 2. Cost Optimization Section
+
 ```markdown
 ## Cost Optimization Strategy
 
 ### Free Tier Utilization
+
 - **EC2:** 750 hours/month → Running 1 t2.micro 24/7 = 720 hours ✅
 - **Storage:** 30GB free → Using ~20GB ✅
 - **Data Transfer:** 15GB/month → Minimal usage ✅
 - **MongoDB Atlas:** 512MB free forever ✅
 
 ### Cost Avoidance Decisions
+
 1. **Kubernetes:** Used local minikube instead of EKS ($73/mo saved)
 2. **Kafka:** Self-hosted instead of MSK ($150/mo saved)
 3. **Database:** MongoDB Atlas instead of DocumentDB ($50/mo saved)
 
 ### Actual Spending
+
 - Development: $0.00
 - Testing: $0.00
 - Deployment: $0.00
 - **Total: $0.00** ✅
 
 ### Billing Protection
+
 - Set up AWS billing alarms at $1, $5, $10
 - Daily usage monitoring
 - Auto-stop after report completion
 ```
 
 ### 3. Deployment Process Section
+
 ```markdown
 ## Deployment Process
 
 ### Preparation
+
 1. Containerized all 5 microservices using Docker
 2. Created optimized docker-compose.aws.yml for EC2
 3. Configured environment variables for production
 4. Set up MongoDB Atlas connection strings
 
 ### Deployment Steps
+
 1. Launched EC2 t2.micro instance
 2. Configured security groups for required ports
 3. Installed Docker and Docker Compose
@@ -242,6 +261,7 @@ docker ps
 6. Verified all services running
 
 ### Challenges & Solutions
+
 - **Challenge:** Limited memory (1GB) for 9 containers
   - **Solution:** Added memory limits, optimized Kafka heap size
 - **Challenge:** Kafka crash looping after laptop restart
@@ -251,16 +271,19 @@ docker ps
 ```
 
 ### 4. Kafka Implementation Section
+
 ```markdown
 ## Kafka Message Queue Implementation
 
 ### Architecture
 ```
+
 Traveler Service → Kafka (booking-requests) → Owner Service
-                         ↓
-                   Booking Service
-                         ↓
-                Kafka (booking-updates) → Frontend
+↓
+Booking Service
+↓
+Kafka (booking-updates) → Frontend
+
 ```
 
 ### Topics
@@ -283,10 +306,12 @@ Traveler Service → Kafka (booking-requests) → Owner Service
 ```
 
 ### 5. Redux Implementation Section
-```markdown
+
+````markdown
 ## Redux State Management
 
 ### Store Structure
+
 ```javascript
 store/
   ├── auth/          // User authentication
@@ -294,23 +319,28 @@ store/
   ├── bookings/      // Booking management
   └── ui/           // UI state (loading, errors)
 ```
+````
 
 ### Key Features
+
 - Centralized state management
 - Predictable state updates
 - Time-travel debugging with Redux DevTools
 - Async actions with Redux Thunk
 
 ### Actions Implemented
+
 - LOGIN, LOGOUT, REFRESH_TOKEN
 - FETCH_PROPERTIES, FILTER_PROPERTIES
 - CREATE_BOOKING, UPDATE_BOOKING, FETCH_BOOKINGS
 
 ### DevTools Integration
+
 - State inspection
 - Action history
 - State diff visualization
-```
+
+````
 
 ---
 
@@ -344,13 +374,14 @@ docker system prune -af --volumes
 # Stop or Terminate EC2 instance
 # Delete Security Groups (optional)
 # Release Elastic IP (if created)
-```
+````
 
 ---
 
 ## 🐛 Troubleshooting Guide
 
 ### Services Won't Start
+
 ```bash
 # Check memory
 free -m
@@ -363,6 +394,7 @@ docker-compose -f docker-compose.aws.yml logs
 ```
 
 ### Kafka Issues
+
 ```bash
 # Remove volumes and restart
 docker-compose -f docker-compose.aws.yml down -v
@@ -375,6 +407,7 @@ docker-compose -f docker-compose.aws.yml up -d
 ```
 
 ### Can't Access Services
+
 ```bash
 # Check security groups in AWS Console
 # Ensure ports are open to 0.0.0.0/0
@@ -388,6 +421,7 @@ docker logs <container-name>
 ```
 
 ### Frontend Can't Connect
+
 ```bash
 # Verify EC2_PUBLIC_IP in docker-compose.aws.yml
 grep EC2-PUBLIC-IP docker-compose.aws.yml
@@ -405,17 +439,20 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 ## 📊 Expected Performance
 
 ### Resource Usage (t2.micro)
+
 - **CPU:** 30-50% average, 80% during builds
 - **Memory:** ~950MB used, ~50MB free
 - **Disk:** ~15GB used
 - **Network:** Minimal (<1GB/day)
 
 ### Service Response Times
+
 - Frontend load: < 2s
 - API calls: < 500ms
 - Kafka message processing: < 100ms
 
 ### Limitations
+
 - Not production-ready (single instance)
 - No auto-scaling
 - No load balancing
@@ -426,6 +463,7 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 ## 🎯 Success Checklist
 
 ### Pre-Deployment
+
 - [ ] AWS account created
 - [ ] Free Tier eligibility verified
 - [ ] Billing alarms configured
@@ -433,6 +471,7 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 - [ ] MongoDB Atlas configured
 
 ### Deployment
+
 - [ ] EC2 instance launched (t2.micro)
 - [ ] Security groups configured
 - [ ] Docker installed on EC2
@@ -442,12 +481,14 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 - [ ] Services accessible via public IP
 
 ### Screenshots
+
 - [ ] AWS Console (5 screenshots)
 - [ ] Application (6 screenshots)
 - [ ] Kafka (4 screenshots)
 - [ ] Redux (4 screenshots)
 
 ### Documentation
+
 - [ ] Architecture diagram created
 - [ ] Deployment process documented
 - [ ] Cost analysis completed
@@ -455,6 +496,7 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 - [ ] Screenshots annotated
 
 ### Cleanup
+
 - [ ] Logs exported
 - [ ] Services stopped
 - [ ] EC2 instance terminated
@@ -465,19 +507,23 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 ## 📚 Additional Resources
 
 ### AWS Documentation
+
 - [EC2 Free Tier](https://aws.amazon.com/free/)
 - [EC2 Instance Types](https://aws.amazon.com/ec2/instance-types/)
 - [Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html)
 
 ### Docker Documentation
+
 - [Docker Compose](https://docs.docker.com/compose/)
 - [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
 
 ### Kafka Documentation
+
 - [Apache Kafka](https://kafka.apache.org/documentation/)
 - [Kafka on Docker](https://developer.confluent.io/quickstart/kafka-docker/)
 
 ### Redux Documentation
+
 - [Redux Toolkit](https://redux-toolkit.js.org/)
 - [Redux DevTools](https://github.com/reduxjs/redux-devtools)
 
@@ -486,30 +532,35 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 ## 🎓 Report Grading Alignment
 
 ### Docker & Kubernetes (15 points)
+
 ✅ All services containerized
 ✅ Docker Compose configuration
 ✅ Local Kubernetes (minikube) + documentation
 ✅ Production-ready Dockerfiles
 
 ### Kafka (10 points)
+
 ✅ Kafka broker running
 ✅ Producer implementation (Booking Service)
 ✅ Consumer implementation (Owner/Traveler Services)
 ✅ Message flow demonstration
 
 ### MongoDB (5 points)
+
 ✅ MongoDB Atlas integration
 ✅ Connection string configuration
 ✅ Data persistence
 ✅ Multiple databases
 
 ### Redux (5 points)
+
 ✅ Redux store setup
 ✅ State management (auth, properties, bookings)
 ✅ Redux DevTools integration
 ✅ Action/Reducer patterns
 
 ### JMeter (5 points)
+
 ✅ Performance test plans
 ✅ Load testing (100-500 users)
 ✅ Results analysis

@@ -4,14 +4,16 @@ A microservices-based Airbnb clone featuring AI-powered travel planning.
 
 ## 🎯 AWS Deployment (For Lab 2 Report)
 
-**Need to run this on AWS for screenshots?** 
+**Need to run this on AWS for screenshots?**
 
 📖 **Start here:** [`START_HERE_AWS.md`](START_HERE_AWS.md) - Simple 3-step guide
+
 - Cost: **$0** (AWS Free Tier)
 - Time: **2 hours**
 - Gets you all screenshots needed for report
 
 **Other AWS Guides:**
+
 - [`AWS_VISUAL_GUIDE.md`](AWS_VISUAL_GUIDE.md) - Visual flowcharts and diagrams
 - [`AWS_FREE_TIER_DEPLOYMENT.md`](AWS_FREE_TIER_DEPLOYMENT.md) - Detailed deployment guide
 - [`AWS_QUICK_REFERENCE.md`](AWS_QUICK_REFERENCE.md) - Quick commands reference
@@ -23,25 +25,31 @@ A microservices-based Airbnb clone featuring AI-powered travel planning.
 Follow these steps to run the entire project locally.
 
 ### Prerequisites
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
-*   [Node.js](https://nodejs.org/) (v18+) installed (for running the frontend).
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+- [Node.js](https://nodejs.org/) (v18+) installed (for running the frontend).
 
 ### 1. Setup Environment Variables
 
 **Root Directory**:
 Copy the example environment file in the root directory:
+
 ```bash
 cp env.example .env
 ```
-*No changes needed for a quick start, but feel free to review `MONGODB_URI` if you want to use a local DB instead of the provided Atlas fallback.*
+
+_No changes needed for a quick start, but feel free to review `MONGODB_URI` if you want to use a local DB instead of the provided Atlas fallback._
 
 **Frontend Directory**:
 Navigate to the frontend app and set up its environment:
+
 ```bash
 cd apps/frontend
 cp env.example .env
 ```
+
 **IMPORTANT**: Open `apps/frontend/.env` and update the `VITE_API_URL` to match the Docker backend port:
+
 ```env
 VITE_API_URL=http://localhost:5001
 ```
@@ -55,10 +63,11 @@ docker-compose up -d --build
 ```
 
 This will start:
-*   **Backend API Gateway**: `http://localhost:5001`
-*   **Microservices**: Traveler, Owner, Property, Booking services.
-*   **AI Agent Service**: `http://localhost:8000`
-*   **Ollama**: (AI Model Provider)
+
+- **Backend API Gateway**: `http://localhost:5001`
+- **Microservices**: Traveler, Owner, Property, Booking services.
+- **AI Agent Service**: `http://localhost:8000`
+- **Ollama**: (AI Model Provider)
 
 ### 3. Initialize AI Model (One-time setup)
 
@@ -67,7 +76,8 @@ The AI agent depends on the Llama 3 model. You need to pull it into the running 
 ```bash
 docker exec -it ollama ollama pull llama3
 ```
-*Note: This may take a few minutes depending on your internet speed (approx 4GB).*
+
+_Note: This may take a few minutes depending on your internet speed (approx 4GB)._
 
 ### 4. Start Frontend
 
@@ -85,28 +95,32 @@ Access the application at: **[http://localhost:5173](http://localhost:5173)**
 
 ## 🏗️ Architecture Overview
 
-*   **Frontend**: React + Vite + Tailwind CSS (`http://localhost:5173`)
-*   **Backend**: Node.js + Express (`http://localhost:5001`)
-*   **AI Agent**: Python + FastAPI + LangChain (`http://localhost:8000`)
-*   **Database**: MongoDB (Atlas by default, configurable to local)
-*   **AI Engine**: Ollama (running Llama 3)
+- **Frontend**: React + Vite + Tailwind CSS (`http://localhost:5173`)
+- **Backend**: Node.js + Express (`http://localhost:5001`)
+- **AI Agent**: Python + FastAPI + LangChain (`http://localhost:8000`)
+- **Database**: MongoDB (Atlas by default, configurable to local)
+- **AI Engine**: Ollama (running Llama 3)
 
 ## 🛠️ Troubleshooting
 
 ### Frontend can't connect to Backend?
-*   Ensure `apps/frontend/.env` has `VITE_API_URL=http://localhost:5001`.
-*   Check if the backend is running: `docker ps`.
+
+- Ensure `apps/frontend/.env` has `VITE_API_URL=http://localhost:5001`.
+- Check if the backend is running: `docker ps`.
 
 ### AI Agent is not replying?
-*   Ensure you ran `docker exec -it ollama ollama pull llama3`.
-*   Check agent logs: `docker logs agent-service`.
+
+- Ensure you ran `docker exec -it ollama ollama pull llama3`.
+- Check agent logs: `docker logs agent-service`.
 
 ### Database connection errors?
-*   The project uses a shared MongoDB Atlas instance by default. If this is restricted, install MongoDB locally and update `MONGODB_URI` in `.env` files to point to `mongodb://host.docker.internal:27017/...`.
+
+- The project uses a shared MongoDB Atlas instance by default. If this is restricted, install MongoDB locally and update `MONGODB_URI` in `.env` files to point to `mongodb://host.docker.internal:27017/...`.
 
 ### Port Conflicts?
-*   **5001**: Backend API
-*   **8000**: AI Agent
-*   **11434**: Ollama
-*   **5173**: Frontend
-*   Ensure these ports are free before starting.
+
+- **5001**: Backend API
+- **8000**: AI Agent
+- **11434**: Ollama
+- **5173**: Frontend
+- Ensure these ports are free before starting.

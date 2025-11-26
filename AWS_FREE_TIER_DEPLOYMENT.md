@@ -1,6 +1,7 @@
 # AWS Free Tier Deployment Guide (Cost: $0)
 
 ## 🎯 Goal
+
 Deploy minimal services to AWS Free Tier to get screenshots for your report without spending money.
 
 ## 📊 Architecture
@@ -22,12 +23,12 @@ Deploy minimal services to AWS Free Tier to get screenshots for your report with
 
 ## 🆓 Services Used
 
-| Service | Cost | What For |
-|---------|------|----------|
-| EC2 t2.micro | **FREE** (750hrs/month) | Run all containers |
-| MongoDB Atlas | **FREE** (512MB) | Database |
-| Elastic IP | **FREE** (when attached) | Static IP for access |
-| Security Groups | **FREE** | Firewall rules |
+| Service         | Cost                     | What For             |
+| --------------- | ------------------------ | -------------------- |
+| EC2 t2.micro    | **FREE** (750hrs/month)  | Run all containers   |
+| MongoDB Atlas   | **FREE** (512MB)         | Database             |
+| Elastic IP      | **FREE** (when attached) | Static IP for access |
+| Security Groups | **FREE**                 | Firewall rules       |
 
 **Total Monthly Cost: $0** ✅
 
@@ -38,10 +39,12 @@ Deploy minimal services to AWS Free Tier to get screenshots for your report with
 ### Step 1: Launch EC2 Instance
 
 1. **Login to AWS Console**
+
    - Go to EC2 Dashboard
    - Click "Launch Instance"
 
 2. **Instance Configuration**
+
    ```
    Name: airbnb-clone-lab2
    AMI: Amazon Linux 2023 (Free tier eligible)
@@ -51,6 +54,7 @@ Deploy minimal services to AWS Free Tier to get screenshots for your report with
    ```
 
 3. **Security Group Rules**
+
    ```
    Type            Port    Source          Description
    SSH             22      Your IP         SSH access
@@ -104,6 +108,7 @@ exit
 ### Step 4: Transfer Your Project
 
 **Option A: Using Git (Recommended)**
+
 ```bash
 # On EC2
 sudo yum install git -y
@@ -113,6 +118,7 @@ git checkout feature/Jmeter
 ```
 
 **Option B: Using SCP**
+
 ```bash
 # On your local machine
 cd /Users/spartan/Desktop/Projects/AirBNB-PK
@@ -263,6 +269,7 @@ Kafka UI: http://<EC2-PUBLIC-IP>:8080
 ## 📸 Screenshots Needed for Report
 
 ### 1. AWS Console Screenshots
+
 - ✅ EC2 Instance running (Dashboard)
 - ✅ Instance details (showing t2.micro, free tier)
 - ✅ Security Group rules
@@ -270,17 +277,20 @@ Kafka UI: http://<EC2-PUBLIC-IP>:8080
 - ✅ Cost Explorer showing $0.00
 
 ### 2. Application Screenshots
+
 - ✅ Frontend running on EC2
 - ✅ Backend API health check: `http://<EC2-IP>:5001/health`
 - ✅ Kafka UI showing topics: `http://<EC2-IP>:8080`
 - ✅ Docker containers running: `docker ps`
 
 ### 3. Redux DevTools
+
 - ✅ State tree showing auth, properties, bookings
 - ✅ Action logs showing state changes
 - ✅ Time-travel debugging
 
 ### 4. Kafka Message Flow
+
 - ✅ Kafka UI showing topics: booking-requests, booking-updates
 - ✅ Message producer/consumer logs
 - ✅ Backend logs showing message processing
@@ -338,13 +348,17 @@ docker system prune -af
 ## 🔧 Troubleshooting
 
 ### Issue: Out of Memory
+
 **Solution:** Disable Ollama (AI service) - not needed for screenshots
+
 ```bash
 # Remove agent-service and ollama from docker-compose.aws.yml
 ```
 
 ### Issue: Docker build fails
+
 **Solution:** Build locally and push to Docker Hub
+
 ```bash
 # Local machine
 docker tag backend:latest yourusername/airbnb-backend:latest
@@ -355,14 +369,18 @@ docker push yourusername/airbnb-backend:latest
 ```
 
 ### Issue: Kafka not starting
+
 **Solution:** Increase memory allocation
+
 ```bash
 # Add to kafka environment:
 KAFKA_HEAP_OPTS: "-Xmx256M -Xms256M"
 ```
 
 ### Issue: Services can't connect
+
 **Solution:** Use internal Docker network names
+
 ```bash
 # Services should reference: kafka:29092, not localhost:9092
 # Frontend is exception: use EC2 public IP for external access
@@ -375,6 +393,7 @@ KAFKA_HEAP_OPTS: "-Xmx256M -Xms256M"
 If t2.micro struggles with all services:
 
 ### Ultra-Minimal Setup (Just for Screenshots)
+
 ```yaml
 services:
   backend:
@@ -394,6 +413,7 @@ services:
 ## 🎓 What to Document in Report
 
 ### AWS Deployment Section
+
 ```
 1. Architecture Diagram (EC2 → Services → MongoDB)
 2. EC2 Instance Configuration (t2.micro specs)
@@ -405,6 +425,7 @@ services:
 ```
 
 ### Why This Approach?
+
 ```
 ✅ Demonstrates AWS knowledge
 ✅ Uses Docker in production environment
@@ -422,6 +443,7 @@ services:
 ## AWS Deployment
 
 ### Infrastructure Setup
+
 - **Provider:** Amazon Web Services (AWS)
 - **Instance Type:** EC2 t2.micro (1 vCPU, 1GB RAM)
 - **OS:** Amazon Linux 2023
@@ -429,6 +451,7 @@ services:
 - **Database:** MongoDB Atlas (External, Free Tier)
 
 ### Services Deployed
+
 1. Frontend (React + Vite) - Port 5173
 2. Backend API - Port 5001
 3. Property Service - Port 5003
@@ -437,12 +460,14 @@ services:
 6. Kafka UI - Port 8080
 
 ### Cost Optimization
+
 - Utilized AWS Free Tier: $0/month
 - Alternative to EKS ($73/month): Local K8s + Documentation
 - Alternative to MSK ($150/month): Self-hosted Kafka
 - **Total Savings:** $223/month
 
 ### Screenshots
+
 [Insert EC2 Dashboard]
 [Insert Running Containers]
 [Insert Application UI]
@@ -492,13 +517,13 @@ docker-compose -f docker-compose.aws.yml logs
 
 ## ⚠️ Free Tier Limits to Watch
 
-| Resource | Free Tier Limit | Usage Strategy |
-|----------|----------------|----------------|
-| EC2 Hours | 750 hrs/month | 1 instance 24/7 = 720 hrs ✅ |
-| Storage | 30 GB | Use 20GB max ✅ |
-| Data Transfer | 15 GB/month | Minimal for testing ✅ |
-| Snapshots | 1 GB | Don't create snapshots |
-| Elastic IP | Free when attached | Keep attached to instance |
+| Resource      | Free Tier Limit    | Usage Strategy               |
+| ------------- | ------------------ | ---------------------------- |
+| EC2 Hours     | 750 hrs/month      | 1 instance 24/7 = 720 hrs ✅ |
+| Storage       | 30 GB              | Use 20GB max ✅              |
+| Data Transfer | 15 GB/month        | Minimal for testing ✅       |
+| Snapshots     | 1 GB               | Don't create snapshots       |
+| Elastic IP    | Free when attached | Keep attached to instance    |
 
 ---
 

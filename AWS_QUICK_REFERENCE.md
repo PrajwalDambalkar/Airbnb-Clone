@@ -3,6 +3,7 @@
 ## 🚀 5-Minute Setup
 
 ### 1. Launch EC2 Instance
+
 ```
 AMI: Amazon Linux 2023 (Free tier eligible)
 Type: t2.micro
@@ -11,6 +12,7 @@ Security Group: Open ports 22, 80, 5001-5005, 8080
 ```
 
 ### 2. Connect & Deploy
+
 ```bash
 # SSH to EC2
 ssh -i your-key.pem ec2-user@<EC2-IP>
@@ -30,6 +32,7 @@ docker-compose -f docker-compose.aws.yml --env-file .env.aws up -d --build
 ```
 
 ### 3. Access Application
+
 ```
 Frontend:    http://<EC2-IP>:5173
 Backend:     http://<EC2-IP>:5001
@@ -41,6 +44,7 @@ Kafka UI:    http://<EC2-IP>:8080
 ## 🎯 Essential Commands
 
 ### Service Management
+
 ```bash
 # Start all services
 docker-compose -f docker-compose.aws.yml up -d
@@ -60,6 +64,7 @@ docker logs kafka
 ```
 
 ### Monitoring
+
 ```bash
 # Check running containers
 docker ps
@@ -78,6 +83,7 @@ top
 ```
 
 ### Troubleshooting
+
 ```bash
 # If out of memory
 docker-compose -f docker-compose.aws.yml down
@@ -99,6 +105,7 @@ docker exec kafka kafka-topics --list --bootstrap-server localhost:9092
 ## 📸 Screenshots Checklist
 
 ### AWS Console
+
 - [ ] EC2 Dashboard showing t2.micro instance running
 - [ ] Instance details (AMI, type, security groups)
 - [ ] Security group rules (all ports configured)
@@ -106,6 +113,7 @@ docker exec kafka kafka-topics --list --bootstrap-server localhost:9092
 - [ ] Billing dashboard showing $0.00
 
 ### Application
+
 - [ ] Frontend UI (homepage, search, properties)
 - [ ] Backend API health check response
 - [ ] Kafka UI showing topics
@@ -113,6 +121,7 @@ docker exec kafka kafka-topics --list --bootstrap-server localhost:9092
 - [ ] Redux DevTools (state tree, actions)
 
 ### Testing
+
 - [ ] User authentication flow
 - [ ] Property search results
 - [ ] Booking creation
@@ -123,12 +132,12 @@ docker exec kafka kafka-topics --list --bootstrap-server localhost:9092
 
 ## 💰 Free Tier Limits
 
-| Resource | Limit | Your Usage |
-|----------|-------|------------|
-| EC2 Hours | 750 hrs/month | 1 instance 24/7 ✅ |
-| Storage | 30 GB | ~20 GB ✅ |
-| Data Transfer | 15 GB out | Minimal ✅ |
-| MongoDB Atlas | 512 MB | Free forever ✅ |
+| Resource      | Limit         | Your Usage         |
+| ------------- | ------------- | ------------------ |
+| EC2 Hours     | 750 hrs/month | 1 instance 24/7 ✅ |
+| Storage       | 30 GB         | ~20 GB ✅          |
+| Data Transfer | 15 GB out     | Minimal ✅         |
+| MongoDB Atlas | 512 MB        | Free forever ✅    |
 
 **Cost: $0/month** ✅
 
@@ -137,6 +146,7 @@ docker exec kafka kafka-topics --list --bootstrap-server localhost:9092
 ## ⚠️ Before You Stop
 
 ### Cleanup Commands
+
 ```bash
 # Save logs for report
 docker-compose -f docker-compose.aws.yml logs > deployment-logs.txt
@@ -153,6 +163,7 @@ docker system prune -af --volumes
 ```
 
 ### Billing Alarms
+
 1. Go to AWS CloudWatch
 2. Create alarms:
    - $1 warning
@@ -164,6 +175,7 @@ docker system prune -af --volumes
 ## 🐛 Common Issues & Solutions
 
 ### Issue: Services won't start
+
 ```bash
 # Check memory
 free -m
@@ -177,6 +189,7 @@ docker-compose -f docker-compose.aws.yml up -d
 ```
 
 ### Issue: Kafka crash looping
+
 ```bash
 # Stop everything
 docker-compose -f docker-compose.aws.yml down
@@ -197,6 +210,7 @@ docker-compose -f docker-compose.aws.yml up -d
 ```
 
 ### Issue: Frontend can't connect to backend
+
 ```bash
 # Check if EC2_PUBLIC_IP is set correctly in docker-compose.aws.yml
 grep EC2-PUBLIC-IP docker-compose.aws.yml
@@ -210,6 +224,7 @@ docker-compose -f docker-compose.aws.yml up -d --build frontend
 ```
 
 ### Issue: Port not accessible
+
 ```bash
 # Check security group on AWS Console
 # Ensure ports 5001-5005, 8080, 5173 are open
@@ -224,6 +239,7 @@ docker logs backend
 ## 📊 Performance Tips
 
 ### Optimize Memory
+
 ```yaml
 # In docker-compose.aws.yml, set memory limits:
 mem_limit: 256m  # for backend
@@ -231,6 +247,7 @@ mem_limit: 200m  # for other services
 ```
 
 ### Reduce Services
+
 ```
 Priority 1 (Must Run): backend, frontend, kafka, zookeeper
 Priority 2 (Optional): kafka-ui, property-service
@@ -238,6 +255,7 @@ Priority 3 (Skip): agent-service, ollama
 ```
 
 ### Build Optimization
+
 ```bash
 # Build images locally first (faster)
 docker-compose build
@@ -251,6 +269,7 @@ docker pull yourusername/airbnb-backend:latest
 ## 🎓 Report Documentation
 
 ### Architecture Diagram
+
 ```
 ┌──────────────┐
 │  User/Client │
@@ -275,14 +294,16 @@ docker pull yourusername/airbnb-backend:latest
 ```
 
 ### Cost Analysis Table
-| Service | AWS Option | Cost | Our Choice | Savings |
-|---------|-----------|------|------------|---------|
-| Compute | EKS | $73/mo | EC2 t2.micro | $73/mo |
-| Messaging | MSK | $150/mo | Self-hosted Kafka | $150/mo |
-| Database | DocumentDB | $50/mo | MongoDB Atlas | $50/mo |
-| **Total** | | **$273/mo** | **$0/mo** | **$273/mo** |
+
+| Service   | AWS Option | Cost        | Our Choice        | Savings     |
+| --------- | ---------- | ----------- | ----------------- | ----------- |
+| Compute   | EKS        | $73/mo      | EC2 t2.micro      | $73/mo      |
+| Messaging | MSK        | $150/mo     | Self-hosted Kafka | $150/mo     |
+| Database  | DocumentDB | $50/mo      | MongoDB Atlas     | $50/mo      |
+| **Total** |            | **$273/mo** | **$0/mo**         | **$273/mo** |
 
 ### Key Points to Highlight
+
 - ✅ Successfully deployed to AWS Free Tier
 - ✅ All 5 microservices running
 - ✅ Kafka message queue operational
@@ -296,6 +317,7 @@ docker pull yourusername/airbnb-backend:latest
 ## 📞 Quick Help
 
 ### Check Service Status
+
 ```bash
 # All services
 docker-compose -f docker-compose.aws.yml ps
@@ -309,6 +331,7 @@ curl http://localhost:5003/api/properties
 ```
 
 ### Get EC2 Public IP
+
 ```bash
 # On EC2 instance
 curl http://169.254.169.254/latest/meta-data/public-ipv4
@@ -318,6 +341,7 @@ curl http://169.254.169.254/latest/meta-data/public-ipv4
 ```
 
 ### Access Kafka
+
 ```bash
 # List topics
 docker exec kafka kafka-topics --list --bootstrap-server localhost:9092

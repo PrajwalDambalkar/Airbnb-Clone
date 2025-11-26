@@ -77,8 +77,24 @@ const propertiesSlice = createSlice({
     setGuests: (state, action: PayloadAction<string>) => {
       state.filters.guests = action.payload;
     },
-    // Apply filters to properties
-    applyFilters: (state) => {
+    // Apply filters to properties with optional payload
+    applyFilters: (state, action: PayloadAction<Partial<{ destination?: string; checkIn?: string; checkOut?: string; guests?: number }> | undefined>) => {
+      // Update filters if payload provided
+      if (action.payload) {
+        if (action.payload.destination !== undefined) {
+          state.filters.destination = action.payload.destination;
+        }
+        if (action.payload.checkIn !== undefined) {
+          state.filters.checkInDate = action.payload.checkIn;
+        }
+        if (action.payload.checkOut !== undefined) {
+          state.filters.checkOutDate = action.payload.checkOut;
+        }
+        if (action.payload.guests !== undefined) {
+          state.filters.guests = action.payload.guests.toString();
+        }
+      }
+
       let filtered = [...state.allProperties];
 
       // Filter by destination

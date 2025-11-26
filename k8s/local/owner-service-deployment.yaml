@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: owner-service
+  labels:
+    app: owner-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: owner-service
+  template:
+    metadata:
+      labels:
+        app: owner-service
+    spec:
+      containers:
+      - name: owner-service
+        image: owner-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5002
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: PORT
+          value: "5002"
+        - name: CORS_ORIGIN
+          value: "http://localhost:5173"
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: SESSION_SECRET
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: OWNER_MONGODB_URI
+        - name: KAFKA_BROKERS
+          value: "kafka-service:29092"
+        - name: KAFKA_REQUEST_TOPIC
+          value: "booking-requests"
+        - name: KAFKA_RESPONSE_TOPIC
+          value: "booking-updates"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5002
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5002
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: owner-service
+  labels:
+    app: owner-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5002
+    targetPort: 5002
+    protocol: TCP
+    name: http
+  selector:
+    app: owner-service

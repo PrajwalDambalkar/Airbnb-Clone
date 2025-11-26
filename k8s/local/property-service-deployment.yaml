@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: property-service
+  labels:
+    app: property-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: property-service
+  template:
+    metadata:
+      labels:
+        app: property-service
+    spec:
+      containers:
+      - name: property-service
+        image: property-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5003
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: PORT
+          value: "5003"
+        - name: CORS_ORIGIN
+          value: "http://localhost:5173"
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: SESSION_SECRET
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: PROPERTY_MONGODB_URI
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5003
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5003
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: property-service
+  labels:
+    app: property-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5003
+    targetPort: 5003
+    protocol: TCP
+    name: http
+  selector:
+    app: property-service

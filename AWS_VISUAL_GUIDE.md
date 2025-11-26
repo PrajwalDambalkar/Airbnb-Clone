@@ -95,10 +95,10 @@ Your Terminal
 EC2 Terminal
     │
     ├─► docker-compose -f docker-compose.aws.yml --env-file .env.aws up -d --build
-    │   
+    │
     │   🔨 Building images...
     │   ⏱️ Wait 10-15 minutes (first time is slow)
-    │   
+    │
     │   Output shows:
     │   ✅ Building backend... done
     │   ✅ Building frontend... done
@@ -107,7 +107,7 @@ EC2 Terminal
     │   ✅ Starting containers...
     │
     ├─► docker ps
-    │   
+    │
     │   Should show 9 containers:
     │   • backend
     │   • frontend
@@ -271,6 +271,7 @@ Port 2181 → Zookeeper
 ## 🚦 Status Indicators
 
 ### ✅ Everything Working
+
 ```
 $ docker ps
 Shows 9 containers, all with "Up" status
@@ -283,6 +284,7 @@ Shows: Frontend loads correctly
 ```
 
 ### ⚠️ Something Wrong
+
 ```
 $ docker ps
 Shows fewer than 9 containers OR containers restarting
@@ -301,16 +303,19 @@ Common fixes:
 ## 💾 Save Points
 
 **After EC2 Launch:**
+
 - ✅ Save .pem key file
 - ✅ Note down EC2 public IP
 - ✅ Screenshot EC2 dashboard
 
 **After Services Running:**
+
 - ✅ Export logs: `docker-compose logs > logs.txt`
 - ✅ Take all screenshots
 - ✅ Save to organized folders
 
 **Before Stopping:**
+
 - ✅ Verify you have all screenshots
 - ✅ Export any data needed
 - ✅ Document any issues for report

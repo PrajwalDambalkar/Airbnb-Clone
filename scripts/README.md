@@ -9,6 +9,7 @@ This directory contains helper scripts for deploying and managing the Airbnb Clo
 **Purpose:** Automates the entire EC2 setup process including Docker installation, project cloning, and configuration.
 
 **Usage:**
+
 ```bash
 # On EC2 instance after SSH
 curl -o deploy.sh https://raw.githubusercontent.com/PrajwalDambalkar/Airbnb-Clone/feature/Jmeter/scripts/deploy-aws.sh
@@ -17,6 +18,7 @@ chmod +x deploy.sh
 ```
 
 **What it does:**
+
 - Updates system packages
 - Installs Docker and Docker Compose
 - Installs Git
@@ -34,12 +36,14 @@ chmod +x deploy.sh
 **Purpose:** Provides a guided walkthrough for capturing all required screenshots for your report.
 
 **Usage:**
+
 ```bash
 # On EC2 instance, in project directory
 ./scripts/screenshot-helper.sh
 ```
 
 **What it covers:**
+
 - AWS Console screenshots (5)
 - Docker & Services screenshots (6)
 - Kafka screenshots (4)
@@ -56,11 +60,13 @@ chmod +x deploy.sh
 **Purpose:** Verifies that all services are running correctly.
 
 **Usage:**
+
 ```bash
 ./verify_fix.sh
 ```
 
 **What it checks:**
+
 - Service health endpoints
 - Database connectivity
 - Kafka topics
@@ -75,11 +81,13 @@ chmod +x deploy.sh
 1. **Launch EC2 instance** (t2.micro, Amazon Linux 2023)
 
 2. **SSH to EC2:**
+
    ```bash
    ssh -i your-key.pem ec2-user@<EC2-IP>
    ```
 
 3. **Run deployment script:**
+
    ```bash
    curl -o deploy.sh https://raw.githubusercontent.com/PrajwalDambalkar/Airbnb-Clone/feature/Jmeter/scripts/deploy-aws.sh
    chmod +x deploy.sh
@@ -89,6 +97,7 @@ chmod +x deploy.sh
 4. **Logout and login again** (for Docker group changes)
 
 5. **Start services:**
+
    ```bash
    cd Airbnb-Clone
    docker-compose -f docker-compose.aws.yml --env-file .env.aws up -d --build
@@ -137,12 +146,14 @@ Scripts look for or create these files:
 ### Deploy script fails
 
 **Issue:** Permission denied
+
 ```bash
 # Solution
 chmod +x scripts/deploy-aws.sh
 ```
 
 **Issue:** Docker commands don't work after installation
+
 ```bash
 # Solution: Logout and login again
 exit
@@ -152,6 +163,7 @@ ssh -i your-key.pem ec2-user@<EC2-IP>
 ### Screenshot helper shows wrong IP
 
 **Issue:** Can't detect EC2 IP
+
 ```bash
 # Solution: Manually get IP
 curl http://169.254.169.254/latest/meta-data/public-ipv4
@@ -211,7 +223,7 @@ name: Deploy to AWS
 on:
   push:
     branches: [main]
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

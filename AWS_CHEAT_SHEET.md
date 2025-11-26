@@ -11,6 +11,7 @@ Go to: https://console.aws.amazon.com/ec2/
 Click: **"Launch Instance"**
 
 Fill in:
+
 - Name: `airbnb-lab2`
 - AMI: **Amazon Linux 2023** (Free tier)
 - Type: **t2.micro** (Free tier)
@@ -65,10 +66,12 @@ Should show **9 containers** running ✅
 ## STEP 3: Access & Screenshot
 
 Open in browser:
+
 - Frontend: `http://YOUR-EC2-IP:5173`
 - Kafka UI: `http://YOUR-EC2-IP:8080`
 
 Take screenshots of:
+
 1. AWS EC2 Dashboard
 2. Your instance details
 3. Security groups
@@ -95,11 +98,13 @@ EC2 → Your instance → Stop instance
 ## HELP!
 
 **Can't connect?**
+
 ```bash
 chmod 400 airbnb-lab2-key.pem
 ```
 
 **Services won't start?**
+
 ```bash
 docker-compose -f docker-compose.aws.yml logs
 ```

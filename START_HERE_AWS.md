@@ -10,25 +10,30 @@
 ## Step 1: Create EC2 Instance (15 minutes)
 
 ### 1.1 Go to AWS Console
+
 - Open: https://console.aws.amazon.com/ec2/
 - Click **"Launch Instance"** (big orange button)
 
 ### 1.2 Configure Instance
 
 **Instance name:**
+
 ```
 airbnb-lab2
 ```
 
 **Choose AMI (Operating System):**
+
 - Select: **Amazon Linux 2023 AMI**
 - Make sure it says "Free tier eligible" ✅
 
 **Choose Instance Type:**
+
 - Select: **t2.micro** (should be selected by default)
 - Make sure it says "Free tier eligible" ✅
 
 **Key Pair:**
+
 - Click "Create new key pair"
 - Name: `airbnb-lab2-key`
 - Type: RSA
@@ -36,27 +41,30 @@ airbnb-lab2
 - Click "Create key pair" - **This will download a file. SAVE IT!**
 
 **Network Settings (IMPORTANT!):**
+
 - Click "Edit" next to Network settings
 - Under "Firewall (security groups)", select "Create security group"
 - Security group name: `airbnb-lab2-sg`
 
 Click **"Add security group rule"** multiple times and add these:
 
-| Type | Port | Source | Description |
-|------|------|--------|-------------|
-| SSH | 22 | My IP | SSH access |
-| Custom TCP | 5001 | Anywhere (0.0.0.0/0) | Backend |
-| Custom TCP | 5002 | Anywhere | Owner Service |
-| Custom TCP | 5003 | Anywhere | Property Service |
-| Custom TCP | 5004 | Anywhere | Booking Service |
-| Custom TCP | 5005 | Anywhere | Traveler Service |
-| Custom TCP | 5173 | Anywhere | Frontend |
-| Custom TCP | 8080 | Anywhere | Kafka UI |
+| Type       | Port | Source               | Description      |
+| ---------- | ---- | -------------------- | ---------------- |
+| SSH        | 22   | My IP                | SSH access       |
+| Custom TCP | 5001 | Anywhere (0.0.0.0/0) | Backend          |
+| Custom TCP | 5002 | Anywhere             | Owner Service    |
+| Custom TCP | 5003 | Anywhere             | Property Service |
+| Custom TCP | 5004 | Anywhere             | Booking Service  |
+| Custom TCP | 5005 | Anywhere             | Traveler Service |
+| Custom TCP | 5173 | Anywhere             | Frontend         |
+| Custom TCP | 8080 | Anywhere             | Kafka UI         |
 
 **Storage:**
+
 - Keep default: 30 GiB gp3 (This is free tier)
 
 ### 1.3 Launch Instance
+
 - Click **"Launch Instance"** (orange button at bottom)
 - Wait 2-3 minutes for instance to start
 - Click on the instance name to see details
@@ -69,6 +77,7 @@ Click **"Add security group rule"** multiple times and add these:
 ### 2.1 Connect to EC2
 
 **On Mac/Linux:**
+
 ```bash
 # Go to where you downloaded the .pem file
 cd ~/Downloads
@@ -83,6 +92,7 @@ ssh -i airbnb-lab2-key.pem ec2-user@XX.XX.XX.XX
 When asked "Are you sure you want to continue?", type `yes`
 
 You should now see something like:
+
 ```
 [ec2-user@ip-xxx-xx-xx-xx ~]$
 ```
@@ -107,6 +117,7 @@ chmod +x deploy.sh
 The script will install Docker, Git, and set everything up. Just wait for it to complete.
 
 When it's done, you'll see:
+
 ```
 ✓ Installation Complete! 🎉
 ```
@@ -136,6 +147,7 @@ docker-compose -f docker-compose.aws.yml --env-file .env.aws up -d --build
 You'll see Docker building images. This is normal. Just wait...
 
 When done, check if everything is running:
+
 ```bash
 docker ps
 ```
@@ -151,10 +163,12 @@ You should see 9 containers running! ✅
 Replace `XX.XX.XX.XX` with your EC2 public IP:
 
 **In your web browser, open:**
+
 - Frontend: `http://XX.XX.XX.XX:5173`
 - Kafka UI: `http://XX.XX.XX.XX:8080`
 
 **Test backend API (in terminal):**
+
 ```bash
 curl http://localhost:5001/health
 ```
@@ -166,6 +180,7 @@ Should return: `{"status":"healthy"}` or similar ✅
 You need these screenshots for your report:
 
 #### A. AWS Console (take these now while in AWS)
+
 1. Go to EC2 Dashboard - screenshot showing your instance running
 2. Click on your instance - screenshot of instance details
 3. Security tab - screenshot of security group rules
@@ -173,6 +188,7 @@ You need these screenshots for your report:
 5. Billing Dashboard - screenshot showing $0.00
 
 #### B. Application Screenshots
+
 1. Frontend homepage (`http://XX.XX.XX.XX:5173`)
 2. Kafka UI (`http://XX.XX.XX.XX:8080`) - Topics page
 3. Run this in terminal and screenshot:
@@ -185,6 +201,7 @@ You need these screenshots for your report:
    ```
 
 #### C. Redux DevTools (in browser)
+
 1. Open frontend (`http://XX.XX.XX.XX:5173`)
 2. Press F12 (open DevTools)
 3. Click "Redux" tab
@@ -193,6 +210,7 @@ You need these screenshots for your report:
 ### 3.3 Use the Screenshot Helper
 
 For a guided tour of all screenshots:
+
 ```bash
 ./scripts/screenshot-helper.sh
 ```
@@ -204,6 +222,7 @@ This will walk you through everything step by step!
 ## 🎉 You're Done!
 
 You now have:
+
 - ✅ App running on AWS Free Tier
 - ✅ All services working
 - ✅ Screenshots for your report
@@ -214,12 +233,14 @@ You now have:
 ## 🛑 When You're Done (IMPORTANT!)
 
 ### Stop Services
+
 ```bash
 # In EC2 terminal
 docker-compose -f docker-compose.aws.yml down
 ```
 
 ### Stop EC2 Instance
+
 1. Go to AWS Console
 2. EC2 → Instances
 3. Select your instance
@@ -232,6 +253,7 @@ docker-compose -f docker-compose.aws.yml down
 ## 🐛 Troubleshooting
 
 ### Can't connect to EC2
+
 ```bash
 # Make sure .pem file has correct permissions
 chmod 400 airbnb-lab2-key.pem
@@ -241,6 +263,7 @@ chmod 400 airbnb-lab2-key.pem
 ```
 
 ### Docker build fails
+
 ```bash
 # If you run out of memory, try removing some services
 # Edit docker-compose.aws.yml and comment out:
@@ -249,6 +272,7 @@ chmod 400 airbnb-lab2-key.pem
 ```
 
 ### Services won't start
+
 ```bash
 # Check logs
 docker-compose -f docker-compose.aws.yml logs
@@ -258,6 +282,7 @@ docker-compose -f docker-compose.aws.yml restart backend
 ```
 
 ### Can't access frontend in browser
+
 1. Double-check the EC2 public IP address
 2. Make sure security group has port 5173 open
 3. Wait 1-2 minutes after starting - Docker needs time to start services

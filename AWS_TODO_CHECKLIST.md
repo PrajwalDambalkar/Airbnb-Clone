@@ -23,7 +23,7 @@ Print this out and check off as you go! ✅
 - [ ] Selected Type: t2.micro (Free tier)
 - [ ] Created new key pair: `airbnb-lab2-key`
 - [ ] Downloaded .pem file to safe location
-- [ ] Noted down where .pem file is saved: _________________
+- [ ] Noted down where .pem file is saved: ********\_********
 - [ ] Created security group with these ports:
   - [ ] Port 22 (SSH)
   - [ ] Port 5001 (Backend)
@@ -35,7 +35,7 @@ Print this out and check off as you go! ✅
   - [ ] Port 8080 (Kafka UI)
 - [ ] Clicked "Launch Instance"
 - [ ] Waited for instance to be "Running"
-- [ ] Copied Public IP address: _________________
+- [ ] Copied Public IP address: ********\_********
 
 ---
 
@@ -60,7 +60,7 @@ Print this out and check off as you go! ✅
 - [ ] Ran script: `./deploy.sh`
 - [ ] Waited patiently (10 minutes)
 - [ ] Saw "✓ Installation Complete! 🎉"
-- [ ] Noted my EC2 Public IP shown in script: _________________
+- [ ] Noted my EC2 Public IP shown in script: ********\_********
 - [ ] Logged out: `exit`
 - [ ] Logged back in: `ssh -i airbnb-lab2-key.pem ec2-user@MY-EC2-IP`
 - [ ] Changed directory: `cd Airbnb-Clone`
@@ -93,6 +93,7 @@ Print this out and check off as you go! ✅
 ## TAKE SCREENSHOTS (30 min)
 
 ### AWS Console Screenshots
+
 - [ ] Screenshot 1: EC2 Dashboard (showing instance running)
 - [ ] Screenshot 2: Instance details (type, AMI, state)
 - [ ] Screenshot 3: Security groups (showing all ports)
@@ -100,24 +101,28 @@ Print this out and check off as you go! ✅
 - [ ] Screenshot 5: Billing Dashboard (showing $0.00)
 
 ### Application Screenshots
+
 - [ ] Opened in browser: `http://MY-EC2-IP:5173`
 - [ ] Screenshot 6: Frontend homepage
 - [ ] Screenshot 7: Property search page
 - [ ] Screenshot 8: Any other frontend page
 
 ### Kafka Screenshots
+
 - [ ] Opened in browser: `http://MY-EC2-IP:8080`
 - [ ] Screenshot 9: Kafka UI homepage
 - [ ] Screenshot 10: Topics page (showing booking-requests, booking-updates)
 - [ ] Screenshot 11: Messages in a topic
 
 ### Docker Screenshots
+
 - [ ] In EC2 terminal, ran: `docker ps`
 - [ ] Screenshot 12: docker ps output
 - [ ] Ran: `docker stats --no-stream`
 - [ ] Screenshot 13: docker stats output
 
 ### Redux DevTools Screenshots
+
 - [ ] Opened frontend in Chrome: `http://MY-EC2-IP:5173`
 - [ ] Pressed F12 (opened DevTools)
 - [ ] Clicked "Redux" tab
@@ -127,6 +132,7 @@ Print this out and check off as you go! ✅
 - [ ] Screenshot 16: State diff
 
 ### Optional Screenshots
+
 - [ ] Screenshot 17: Backend API health check (Postman/curl)
 - [ ] Screenshot 18: Container logs
 - [ ] Screenshot 19: Architecture diagram (from docs)
@@ -158,10 +164,12 @@ Print this out and check off as you go! ✅
 ## CLEANUP (10 min)
 
 ### Stop Services
+
 - [ ] Stopped containers: `docker-compose -f docker-compose.aws.yml down`
 - [ ] Verified containers stopped: `docker ps`
 
 ### Stop EC2 Instance
+
 - [ ] Went to AWS Console → EC2
 - [ ] Selected my instance
 - [ ] Clicked "Instance State" → "Stop instance"
@@ -169,6 +177,7 @@ Print this out and check off as you go! ✅
 - [ ] Verified billing shows $0.00
 
 ### Optional: Terminate Instance (if completely done)
+
 - [ ] Clicked "Instance State" → "Terminate instance"
 - [ ] Confirmed termination
 - [ ] Deleted security group (optional)
@@ -212,11 +221,11 @@ Print this out and check off as you go! ✅
 
 ## SUCCESS METRICS
 
-✅ Total Time: _______ hours (target: 2-3 hours)
-✅ Total Cost: $_______ (target: $0.00)
-✅ Screenshots: _______ of 19 minimum
-✅ Report Pages: _______ pages
-✅ Containers Running: _______ of 9
+✅ Total Time: **\_\_\_** hours (target: 2-3 hours)
+✅ Total Cost: $**\_\_\_** (target: $0.00)
+✅ Screenshots: **\_\_\_** of 19 minimum
+✅ Report Pages: **\_\_\_** pages
+✅ Containers Running: **\_\_\_** of 9
 
 ---
 
@@ -224,7 +233,7 @@ Print this out and check off as you go! ✅
 
 _Use this space to note any problems you faced and how you solved them:_
 
-Issue 1: 
+Issue 1:
 Solution:
 
 Issue 2:
@@ -238,14 +247,15 @@ Solution:
 ## HELP NEEDED?
 
 If stuck, refer to:
+
 - [ ] START_HERE_AWS.md
 - [ ] AWS_QUICK_REFERENCE.md
 - [ ] AWS_CHEAT_SHEET.md
 
 ---
 
-**Date Started:** _______________
-**Date Completed:** _______________
-**Final Grade:** _______ / 40
+**Date Started:** ******\_\_\_******
+**Date Completed:** ******\_\_\_******
+**Final Grade:** **\_\_\_** / 40
 
 🎉 CONGRATULATIONS! YOU'RE DONE! 🎉
